@@ -49,3 +49,4 @@
 - Các task sẽ được trưởng nhóm phân chia cho từng thành viên. Với mỗi nhánh được tạo ra sẽ được gắn với 1 issue cụ thể. Chỉ merge vào khi task hoàn thành và đã được review. Các lỗi phải được fix trên nhánh trước khi merge vào main.
 - Với mỗi issue được tạo ra cần được sử dụng đủ 3 labels về type, component và priority. Điều này giúp cho việc quản lý và theo dõi tiến độ công việc dễ dàng hơn. Các issue sẽ được sắp xếp theo priority để đảm bảo rằng các task quan trọng được xử lý trước.
 - Khi đã hoàn thành task và pass CI, cần tạo PR và gắn link issue vào PR và sử dụng theo mẫu template đã được tạo sẵn trong `docs/pr_template.md`. PR sẽ được review bởi ít nhất 1 reviewer trước khi merge vào main.
+- Với mỗi PR chỉ cần sử dụng refs đến issues để tránh close khi merge một PR vào main hoặc dev. Chỉ đóng issues khi hoàn thành full task của issues đó thôi.

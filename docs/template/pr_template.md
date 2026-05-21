@@ -4,7 +4,7 @@
 
 ## Related Issues
 <!-- Please link to the issue that is fixed by this PR, if applicable. -->
-Closes # (issue number)
+Refs # (issue number)
 
 ## Changes
 <!-- Please describe the changes made. -->
