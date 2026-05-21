@@ -34,11 +34,17 @@ ticketbox-microservices-workspace/
     ├── admin-app/                        # FE: Ban tổ chức (React)
     ├── mobile-checker/                   # Mobile App: Soát vé offline (Flutter/Dart + SQLite)
     │
-    ├── api-gateway/                      # BE: NestJS - Rate Limit, Verify JWT Token
-    ├── concert-service/                  # BE: NestJS - Đọc PostgreSQL, thao tác Redis (thông tin concert)
+    ├── api-gateway/                      # BE: NestJS - Rate Limit, Verify JWT Token (Routing)
+    ├── auth-service/                     # BE: NestJS - Xử lý Login, SSO, cấp phát JWT, Quản lý RBAC
+    ├── catalog-service/                  # BE: NestJS - Quản lý danh mục, thông tin sự kiện (thay cho concert-service)
     ├── ticketing-service/                # BE: NestJS - Chạy Redis Lua Script giữ chỗ, ném event vào RabbitMQ
-    ├── payment-service/                  # BE: NestJS - Lưu Idempotency Key (Redis), Circuit Breaker (VNPAY)
+    ├── order-service/                    # BE: NestJS - Quản lý vòng đời đơn hàng, lịch sử mua vé, xuất hóa đơn
+    ├── payment-service/                  # BE: NestJS - Lưu Idmepotency Key (Redis), Circuit Breaker (VNPAY)
+    ├── notification-service/             # BE: NestJS - Consumer gửi Email/Zalo/SMS khi có event OrderSuccess
     └── worker-service/                   # BE: NestJS/Python - Consume RabbitMQ, ghi Order xuống Postgres, AI PDF
+│
+├── turbo.json                            # Cấu hình Turborepo (tối ưu build, cache cho CI/CD)
+└── package.json                          # Khai báo NPM/Yarn Workspaces & script chạy chung
 
 ```
 
@@ -73,13 +79,18 @@ ticketbox-monolith-workspace/
         ├── src/
         │   ├── shared/                   # Kết nối PostgreSQL, Redis Client, RabbitMQ Producer
         │   └── modules/                  # Tách biệt nghiệp vụ rạch ròi
-        │       ├── auth/                 # Xử lý JWT, RBAC
-        │       ├── concert/              # Query PostgreSQL lấy dữ liệu, Cache Redis
+        │       ├── auth/                 # Xử lý Login, cấp phát JWT, RBAC
+        │       ├── catalog/              # Query PostgreSQL lấy thông tin sự kiện, Cache Redis
         │       ├── ticketing/            # Lua Script trên Redis, ném message vào Queue
+        │       ├── order/                # Quản lý vòng đời đơn hàng, lịch sử mua vé, xuất hóa đơn
         │       ├── payment/              # Xử lý thanh toán VNPAY
+        │       ├── notification/         # Lắng nghe RabbitMQ, gửi Email/SMS/Zalo
         │       └── background-jobs/      # Lắng nghe RabbitMQ, ghi DB, cronjob quét CSV
         │
         └── Dockerfile                    # Đóng gói toàn bộ backend thành 1 image duy nhất
+│
+├── turbo.json                            # Cấu hình Turborepo (tối ưu build, cache cho CI/CD)
+└── package.json                          # Khai báo NPM/Yarn Workspaces & script chạy chung
 
 ```
 
