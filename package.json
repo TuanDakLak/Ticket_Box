@@ -1,0 +1,7 @@
+{
+    "name": "ticket_box",
+    "private": true,
+    "workspaces": [
+        "apps/*"
+    ]
+}
