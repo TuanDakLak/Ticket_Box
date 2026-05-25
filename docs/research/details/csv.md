@@ -92,8 +92,10 @@ erDiagram
         uuid id PK
         uuid trigger_by_user_id FK
         string job_type "e.g., CSV_SYNC, AI_BIO_GENERATE"
+        uuid target_id FK
         string status "PENDING, PROCESSING, COMPLETED, FAILED"
         int progress_percentage "0 - 100"
+        jsonb payload
         jsonb result_data "Lưu kết quả JSON (ví dụ đoạn text AI tạo ra)"
         text error_message
         datetime created_at
