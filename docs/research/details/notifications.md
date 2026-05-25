@@ -1,13 +1,12 @@
-## 3. THÔNG BÁO (NOTIFICATIONS)
+# 3. THÔNG BÁO (NOTIFICATIONS)
 
 Hệ thống cần gửi email, app notification và mở rộng sang Zalo, SMS trong tương lai.
 
-### Giải pháp kỹ thuật:
+## Giải pháp kỹ thuật:
 
-- **Design Pattern:** Sử dụng **Strategy Pattern** và **Factory Pattern**. Định nghĩa interface `INotificationSender`. Các class thực thi: `EmailSender`, `ZaloSender`, `SMSSender`. Khi cần thêm kênh mới, chỉ cần viết thêm class mà không sửa core logic.
-
-- **Kiến trúc:** Sử dụng **Pub/Sub**. Ticketing Service bắn ra event `OrderSuccess`. Notification Service lắng nghe event này để gửi thông báo.
-- Nhắc nhở tự động 24h: Sử dụng Cronjob (Quartz, Celery) quét database mỗi giờ để tìm concert sắp diễn ra; hoặc dùng tính năng **Delay Message/Dead Letter Queue** của RabbitMQ (hẹn giờ message sau X ngày mới đẩy vào queue).
+* **Design Pattern:** Sử dụng **Strategy Pattern** và **Factory Pattern**. Định nghĩa interface `INotificationSender`. Các class thực thi: `EmailSender`, `ZaloSender`, `SMSSender`. Khi cần thêm kênh mới, chỉ cần viết thêm class mà không sửa core logic.
+* **Kiến trúc:** Sử dụng **Pub/Sub**. Ticketing Service bắn ra event `OrderSuccess`. Notification Service lắng nghe event này để gửi thông báo.
+* **Nhắc nhở tự động 24h:** Sử dụng Cronjob (Quartz, Celery) quét database mỗi giờ để tìm concert sắp diễn ra; hoặc dùng tính năng **Delay Message/Dead Letter Queue** của RabbitMQ (hẹn giờ message sau X ngày mới đẩy vào queue).
 
 ---
 
@@ -27,20 +26,18 @@ Nếu developer code theo kiểu "cứng" (Hardcode) với các câu lệnh `if/
 
 Sử dụng Strategy Pattern và Factory Pattern là phương án hoàn hảo để giải quyết bài toán này ở tầng ứng dụng.
 
-- **Cơ chế hoạt động:**
-- Định nghĩa interface `INotificationSender`. Các class thực thi: `EmailSender`, `ZaloSender`, `SMSSender`.
+* **Cơ chế hoạt động:**
+* Định nghĩa interface `INotificationSender`. Các class thực thi: `EmailSender`, `ZaloSender`, `SMSSender`.
+* Tạo một `NotificationFactory` để quyết định xem sự kiện này nên khởi tạo class nào dựa vào cấu hình của User hoặc Ban tổ chức.
 
-- Tạo một `NotificationFactory` để quyết định xem sự kiện này nên khởi tạo class nào dựa vào cấu hình của User hoặc Ban tổ chức.
-
-- **Điểm ưu việt:** Khi cần thêm kênh mới, chỉ cần viết thêm class mà không sửa core logic. Hệ thống hoàn toàn decoupling (giảm độ kết dính).
+* **Điểm ưu việt:** Khi cần thêm kênh mới, chỉ cần viết thêm class mà không sửa core logic. Hệ thống hoàn toàn decoupling (giảm độ kết dính).
 
 ### 3. Kiến trúc hệ thống: Mô hình Pub/Sub (Publish/Subscribe)
 
 Không được phép gọi hàm `SendEmail()` trực tiếp trong API Thanh toán. Gửi email mất từ 1-3 giây, nếu 80.000 người mua vé cùng lúc sẽ làm sập API.
 
-- **Cách giải quyết:** Ticketing Service bắn ra event `OrderSuccess`. Lúc này luồng mua vé kết thúc ngay lập tức và trả kết quả về cho user (tốc độ mili-giây).
-
-- Notification Service lắng nghe event này để gửi thông báo. Dịch vụ này chạy độc lập, lấy từng event ra xử lý từ từ (tốc độ tùy thuộc vào giới hạn API của bên gửi mail/Zalo).
+* **Cách giải quyết:** Ticketing Service bắn ra event `OrderSuccess`. Lúc này luồng mua vé kết thúc ngay lập tức và trả kết quả về cho user (tốc độ mili-giây).
+* Notification Service lắng nghe event này để gửi thông báo. Dịch vụ này chạy độc lập, lấy từng event ra xử lý từ từ (tốc độ tùy thuộc vào giới hạn API của bên gửi mail/Zalo).
 
 ---
 
@@ -50,21 +47,18 @@ Khi concert sắp diễn ra (trước 24 giờ), hệ thống gửi nhắc nhở
 
 ### Đánh giá phương án & Trade-offs:
 
-- **Phương án 1: Delay Message / Dead Letter Queue (DLQ) của RabbitMQ**
-- _Cách hoạt động:_ Ngay khi user mua vé, ta dùng tính năng Delay Message/Dead Letter Queue của RabbitMQ (hẹn giờ message sau X ngày mới đẩy vào queue). Ví dụ: Concert diễn ra ngày 20/11, user mua vé ngày 01/10. Hệ thống ném 1 message vào queue với TTL là 49 ngày.
+* **Phương án 1: Delay Message / Dead Letter Queue (DLQ) của RabbitMQ**
+* *Cách hoạt động:* Ngay khi user mua vé, ta dùng tính năng Delay Message/Dead Letter Queue của RabbitMQ (hẹn giờ message sau X ngày mới đẩy vào queue). Ví dụ: Concert diễn ra ngày 20/11, user mua vé ngày 01/10. Hệ thống ném 1 message vào queue với TTL là 49 ngày.
+* *Trade-off:* Cách này thuần Event-driven, rất mượt. Nhưng nhược điểm chí mạng là RabbitMQ phải lưu giữ hàng trăm nghìn message rác trên RAM/Disk trong nhiều tháng. Quản lý trạng thái cực kỳ khó (như nếu concert bị dời ngày, ta phải tìm cách hủy toàn bộ message cũ trong queue).
 
-- _Trade-off:_ Cách này thuần Event-driven, rất mượt. Nhưng nhược điểm chí mạng là RabbitMQ phải lưu giữ hàng trăm nghìn message rác trên RAM/Disk trong nhiều tháng. Quản lý trạng thái cực kỳ khó (như nếu concert bị dời ngày, ta phải tìm cách hủy toàn bộ message cũ trong queue).
-
-- **Phương án 2: Cronjob (Quét Database định kỳ) - Đề xuất chọn**
-- _Cách hoạt động:_ Sử dụng Cronjob (Quartz, Celery) quét database mỗi giờ để tìm concert sắp diễn ra.
-
-- _Quy trình tối ưu:_
-
+* **Phương án 2: Cronjob (Quét Database định kỳ) - Đề xuất chọn**
+* *Cách hoạt động:* Sử dụng Cronjob (Quartz, Celery) quét database mỗi giờ để tìm concert sắp diễn ra.
+* *Quy trình tối ưu:*
 1. Cứ mỗi giờ, Cronjob chạy lệnh query `SELECT id FROM CONCERTS WHERE start_time BETWEEN now() + 23h AND now() + 24h`. Việc query bảng Concert cực kỳ nhẹ vì dữ liệu ít.
 2. Nếu tìm thấy Concert, hệ thống lấy danh sách User đã mua vé và đẩy hàng loạt sự kiện `ConcertReminder` vào RabbitMQ.
 3. Các Notification Worker nhặt event và gửi Email/App Notification.
 
-- _Đánh giá:_ Quản lý dễ dàng, có thể dời ngày concert thoải mái trên Database mà không ảnh hưởng tới logic gửi thông báo.
+* *Đánh giá:* Quản lý dễ dàng, có thể dời ngày concert thoải mái trên Database mà không ảnh hưởng tới logic gửi thông báo.
 
 ---
 
@@ -76,8 +70,14 @@ Dịch vụ Notification cần có database riêng (hoặc các bảng riêng tr
 
 ```mermaid
 erDiagram
-    USERS ||--o{ NOTIFICATION_LOGS : receives
-    NOTIFICATION_TEMPLATES ||--o{ NOTIFICATION_LOGS : uses
+    USERS ||--o{ NOTIFICATION_LOGS : "receives"
+    NOTIFICATION_TEMPLATES ||--o{ NOTIFICATION_LOGS : "uses"
+
+    USERS {
+        uuid id PK
+        string email
+        string full_name
+    }
 
     NOTIFICATION_TEMPLATES {
         uuid id PK
@@ -93,7 +93,7 @@ erDiagram
         uuid template_id FK
         string target "Email address, Phone number, or Device Token"
         string status "PENDING, SENT, FAILED"
-        string error_message
+        text error_message
         int retry_count
         datetime created_at
         datetime sent_at
@@ -103,8 +103,8 @@ erDiagram
 
 **Ý đồ thiết kế:**
 
-- **`NOTIFICATION_TEMPLATES`:** Lưu nội dung động. Admin có thể sửa câu chữ email xác nhận vé, thêm logo sự kiện... mà không cần dev phải deploy lại code.
-- **`NOTIFICATION_LOGS`:** Đóng vai trò kiểm toán (Audit) và Retry. Nếu gửi email thất bại do dịch vụ SendGrid/AWS SES bị lỗi, trạng thái sẽ là `FAILED`. Ta có thể viết một worker quét các log `FAILED` có `retry_count < 3` để tiến hành gửi lại.
+* **`NOTIFICATION_TEMPLATES`:** Lưu nội dung động. Admin có thể sửa câu chữ email xác nhận vé, thêm logo sự kiện... mà không cần dev phải deploy lại code.
+* **`NOTIFICATION_LOGS`:** Đóng vai trò kiểm toán (Audit) và Retry. Nếu gửi email thất bại do dịch vụ SendGrid/AWS SES bị lỗi, trạng thái sẽ là `FAILED`. Ta có thể viết một worker quét các log `FAILED` có `retry_count < 3` để tiến hành gửi lại.
 
 ### 2. Sơ đồ luồng hoạt động (Sequence Diagram) - Pub/Sub và Strategy Pattern
 

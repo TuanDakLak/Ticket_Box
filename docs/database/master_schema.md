@@ -1,4 +1,4 @@
-# 🗄️ TÀI LIỆU THIẾT KẾ CƠ SỞ DỮ LIỆU TỔNG THỂ (MASTER DB SCHEMA)
+# TÀI LIỆU THIẾT KẾ CƠ SỞ DỮ LIỆU TỔNG THỂ (MASTER DB SCHEMA - V2)
 
 ## 1. SƠ ĐỒ THỰC THỂ LIÊN KẾT (OVERALL ERD)
 
@@ -20,7 +20,7 @@ erDiagram
     TICKET_CATEGORIES ||--o{ TICKETS : "belongs_to"
 
     %% MODULE: PAYMENTS
-    ORDERS ||--o| PAYMENT_TRANSACTIONS : "paid_via"
+    ORDERS ||--o{ PAYMENT_TRANSACTIONS : "paid_via"
 
     %% MODULE: OFFLINE CHECK-IN & GUEST LIST
     CONCERTS ||--o{ GUEST_LISTS : "has"
@@ -29,7 +29,8 @@ erDiagram
     %% MODULE: BACKGROUND JOBS & NOTIFICATIONS
     USERS ||--o{ NOTIFICATION_LOGS : "receives"
     NOTIFICATION_TEMPLATES ||--o{ NOTIFICATION_LOGS : "uses"
-    CONCERTS ||--o{ BACKGROUND_JOBS : "triggers (AI Bio)"
+    USERS ||--o{ BACKGROUND_JOBS : "triggers"
+    CONCERTS ||--o{ BACKGROUND_JOBS : "related_to"
 
     %% TABLES DEFINITION - AUTH
     USERS {
@@ -38,14 +39,17 @@ erDiagram
         string password_hash
         string full_name
         string status
+        datetime created_at
     }
     ROLES {
         uuid id PK
         string name UK
+        string description
     }
     PERMISSIONS {
         uuid id PK
         string code UK
+        string description
     }
     USER_ROLES {
         uuid user_id PK, FK
@@ -60,8 +64,10 @@ erDiagram
     CONCERTS {
         uuid id PK
         string name
+        string description
+        string location
         text ai_bio
-        timestamp start_time
+        datetime start_time
         string svg_map_url
         string status
     }
@@ -81,7 +87,8 @@ erDiagram
         uuid concert_id FK
         decimal total_amount
         string status
-        timestamp expires_at
+        datetime created_at
+        datetime expires_at
     }
     TICKETS {
         uuid id PK
@@ -89,7 +96,7 @@ erDiagram
         uuid category_id FK
         string qr_code_hash UK
         boolean is_scanned
-        timestamp scanned_at
+        datetime scanned_at
         uuid scanned_by FK
     }
 
@@ -97,11 +104,14 @@ erDiagram
     PAYMENT_TRANSACTIONS {
         uuid id PK
         uuid order_id FK
-        string provider
-        string idempotency_key UK
+        string payment_method
+        string transaction_id_3rd_party
         decimal amount
-        jsonb raw_response
         string status
+        string idempotency_key UK
+        jsonb raw_response
+        datetime created_at
+        datetime updated_at
     }
 
     %% TABLES DEFINITION - OFFLINE CHECK-IN
@@ -110,30 +120,41 @@ erDiagram
         uuid concert_id FK
         string email
         string full_name
+        string ticket_category
         boolean is_scanned
     }
 
     %% TABLES DEFINITION - JOBS & NOTIFICATIONS
     BACKGROUND_JOBS {
         uuid id PK
-        string target_type
-        uuid target_id
+        uuid trigger_by_user_id FK
+        string job_type
+        uuid target_id FK
         string status
+        int progress_percentage
         jsonb payload
-        jsonb result
+        jsonb result_data
+        text error_message
+        datetime created_at
+        datetime completed_at
     }
     NOTIFICATION_TEMPLATES {
         uuid id PK
-        string type
+        string code
         string channel
-        text content_template
+        string subject
+        text content
     }
     NOTIFICATION_LOGS {
         uuid id PK
         uuid user_id FK
         uuid template_id FK
+        string target
         string status
+        text error_message
         int retry_count
+        datetime created_at
+        datetime sent_at
     }
 
 ```
@@ -142,11 +163,9 @@ erDiagram
 
 ## 2. ĐẶC TẢ CHI TIẾT CÁC BẢNG (DATA DICTIONARY)
 
-Hệ thống sử dụng **PostgreSQL**. Tất cả các khóa chính (PK) đều sử dụng kiểu `UUID` để bảo mật và phân tán tốt trong môi trường Microservices.
+Hệ thống sử dụng **PostgreSQL**. Tất cả các khóa chính (PK) đều sử dụng kiểu `UUID` để bảo mật và phân tán tốt trong môi trường Microservices/Modular Monolith.
 
-### 🛡️ Module 1: Auth & RBAC (Quản trị và Phân quyền)
-
-Lưu trữ thông tin người dùng và phân quyền động.
+### Module 1: Auth & RBAC (Quản trị và Phân quyền)
 
 * **`users`**:
 * `id` (UUID, PK)
@@ -154,29 +173,34 @@ Lưu trữ thông tin người dùng và phân quyền động.
 * `password_hash` (VARCHAR)
 * `full_name` (VARCHAR): Họ và tên người dùng.
 * `status` (VARCHAR): `ACTIVE`, `BANNED`.
+* `created_at` (TIMESTAMP)
 
 ---
 
 * **`roles`**: Định nghĩa nhóm quyền.
 * `id` (UUID, PK)
 * `name` (VARCHAR, Unique): Ví dụ `ADMIN`, `ORGANIZER`, `CHECKER`, `AUDIENCE`.
+* `description` (VARCHAR)
 
 ---
 
 * **`permissions`**: Quyền chi tiết (Sẽ được encode vào JWT).
 * `id` (UUID, PK)
-* `code` (VARCHAR, Unique): Ví dụ `CREATE_CONCERT`, `VIEW_STATS`, `SCAN_TICKET`.
+* `code` (VARCHAR, Unique): Ví dụ `CREATE_CONCERT`, `VIEW_REVENUE`, `SCAN_TICKET`.
+* `description` (VARCHAR)
 
 ---
 
 * **`user_roles`**: Bảng trung gian gán Role cho User (Khóa chính kép: `user_id`, `role_id`).
 * **`role_permissions`**: Bảng trung gian gán Permission cho Role (Khóa chính kép: `role_id`, `permission_id`).
 
-### 🎤 Module 2: Catalog (Quản lý Concert)
+### Module 2: Catalog (Quản lý Concert)
 
 * **`concerts`**:
 * `id` (UUID, PK)
 * `name` (VARCHAR)
+* `description` (TEXT)
+* `location` (VARCHAR)
 * `ai_bio` (TEXT): Đoạn text giới thiệu nghệ sĩ do AI tạo ra.
 * `start_time` (TIMESTAMP WITH TIME ZONE): Phục vụ gửi email nhắc nhở 24h.
 * `svg_map_url` (VARCHAR): Link CDN trỏ tới sơ đồ ghế.
@@ -194,7 +218,7 @@ Lưu trữ thông tin người dùng và phân quyền động.
 
 ---
 
-### 🎟️ Module 3: Ticketing & Orders (Đặt vé & E-Ticket)
+### Module 3: Ticketing & Orders (Đặt vé & E-Ticket)
 
 * **`orders`**:
 * `id` (UUID, PK)
@@ -202,6 +226,7 @@ Lưu trữ thông tin người dùng và phân quyền động.
 * `concert_id` (UUID, FK)
 * `total_amount` (DECIMAL)
 * `status` (VARCHAR): `PENDING` (Đang giữ chỗ 10 phút), `PAID` (Thành công), `CANCELLED`.
+* `created_at` (TIMESTAMP)
 * `expires_at` (TIMESTAMP): RabbitMQ dựa vào cột này để release vé nếu user không thanh toán.
 
 ---
@@ -217,48 +242,58 @@ Lưu trữ thông tin người dùng và phân quyền động.
 
 ---
 
-### 💳 Module 4: Payments (Thanh toán)
+### Module 4: Payments (Thanh toán)
 
 * **`payment_transactions`**:
 * `id` (UUID, PK)
 * `order_id` (UUID, FK)
-* `provider` (VARCHAR): `VNPAY`, `MOMO`.
-* `idempotency_key` (VARCHAR, Unique): Mã UUID do Frontend gửi lên để chặn trừ tiền 2 lần.
+* `payment_method` (VARCHAR): `VNPAY`, `MOMO`.
+* `transaction_id_3rd_party` (VARCHAR): Mã giao dịch trả về từ hệ thống đối tác.
 * `amount` (DECIMAL): Số tiền giao dịch.
-* `status` (VARCHAR): `SUCCESS`, `FAILED`.
+* `status` (VARCHAR): `INIT`, `SUCCESS`, `FAILED`.
+* `idempotency_key` (VARCHAR, Unique): Mã UUID do Frontend gửi lên để chặn trừ tiền 2 lần.
 * `raw_response` (JSONB): Chuỗi JSON VNPAY trả về để đối soát.
+* `created_at` (TIMESTAMP)
+* `updated_at` (TIMESTAMP)
 
 ---
 
-### 📥 Module 5: Integrations & Async Tasks
+### Module 5: Integrations & Async Tasks
 
 * **`guest_lists`**: Danh sách VIP từ file CSV.
 * `id` (UUID, PK)
 * `concert_id` (UUID, FK)
 * `email` (VARCHAR)
 * `full_name` (VARCHAR)
-* `is_scanned` (BOOLEAN)
+* `ticket_category` (VARCHAR): Ghi chú loại khách mời (VIP/GUEST).
+* `is_scanned` (BOOLEAN): Thống nhất tên biến với bảng Tickets.
 * **UNIQUE CONSTRAINT** `(concert_id, email)`: Dùng cho truy vấn `UPSERT` khi đọc CSV.
 
 ---
 
 * **`background_jobs`**: Theo dõi tác vụ nền.
 * `id` (UUID, PK)
-* `target_type` (VARCHAR): `AI_PDF_OCR`, `CSV_IMPORT`.
-* `target_id` (UUID): ID của Concert tương ứng.
+* `trigger_by_user_id` (UUID, FK): Ai là người tải file lên để chạy Job.
+* `job_type` (VARCHAR): `AI_PDF_OCR`, `CSV_IMPORT`.
+* `target_id` (UUID, FK): ID của Concert tương ứng.
 * `status` (VARCHAR): `PENDING`, `PROCESSING`, `COMPLETED`, `FAILED`.
+* `progress_percentage` (INT): Phục vụ thanh Loading Bar trên giao diện.
 * `payload` (JSONB): Thông tin cấu hình/đường dẫn file S3.
-* `result` (JSONB): Kết quả đầu ra lưu tạm.
+* `result_data` (JSONB): Kết quả đầu ra (Ví dụ đoạn text AI Bio).
+* `error_message` (TEXT): Log lỗi nếu Job sập.
+* `created_at` (TIMESTAMP)
+* `completed_at` (TIMESTAMP)
 
 ---
 
-### 🔔 Module 6: Notifications (Thông báo tự động)
+### Module 6: Notifications (Thông báo tự động)
 
 * **`notification_templates`**:
 * `id` (UUID, PK)
-* `type` (VARCHAR): `ORDER_SUCCESS`, `CONCERT_REMINDER_24H`.
+* `code` (VARCHAR): `ORDER_SUCCESS`, `CONCERT_REMINDER_24H`.
 * `channel` (VARCHAR): `EMAIL`, `ZALO`, `SMS`.
-* `content_template` (TEXT): Chứa text có biến số (Ví dụ: `Xin chào {{name}}...`).
+* `subject` (VARCHAR)
+* `content` (TEXT): Chứa text có biến số (Ví dụ: `Xin chào {{name}}...`).
 
 ---
 
@@ -266,5 +301,9 @@ Lưu trữ thông tin người dùng và phân quyền động.
 * `id` (UUID, PK)
 * `user_id` (UUID, FK)
 * `template_id` (UUID, FK)
-* `status` (VARCHAR): `SENT`, `FAILED`.
+* `target` (VARCHAR): Đích đến thực tế (Địa chỉ email/Số điện thoại).
+* `status` (VARCHAR): `PENDING`, `SENT`, `FAILED`.
+* `error_message` (TEXT)
 * `retry_count` (INT): Số lần gửi lại nếu API bên thứ 3 lỗi.
+* `created_at` (TIMESTAMP)
+* `sent_at` (TIMESTAMP)
