@@ -9,3 +9,9 @@
 ```bash
 npx prisma migrate dev --name init_schema
 ```
+
+## Database seed (Prisma)
+
+```bash
+npx prisma db seed
+```
