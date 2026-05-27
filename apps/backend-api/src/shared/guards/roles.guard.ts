@@ -30,10 +30,16 @@ export class RolesGuard implements CanActivate {
         ? [user.permission]
         : [];
 
-    const roleOk = requiredRoles && requiredRoles.length > 0 ? requiredRoles.some((r) => userRoles.includes(r)) : true;
+    const normalizedUserRoles = userRoles.map((r: string) => r.toUpperCase());
+    const normalizedUserPermissions = userPermissions.map((p: string) => p.toUpperCase());
+
+    const roleOk =
+      requiredRoles && requiredRoles.length > 0
+        ? requiredRoles.some((r) => normalizedUserRoles.includes(r.toUpperCase()))
+        : true;
     const permissionOk =
       requiredPermissions && requiredPermissions.length > 0
-        ? requiredPermissions.some((p) => userPermissions.includes(p))
+        ? requiredPermissions.some((p) => normalizedUserPermissions.includes(p.toUpperCase()))
         : true;
 
     return roleOk && permissionOk;
