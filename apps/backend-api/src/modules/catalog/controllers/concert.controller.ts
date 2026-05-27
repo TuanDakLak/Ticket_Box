@@ -26,6 +26,7 @@ import { CreateConcertDto } from '../dtos/create-concert.dto';
 import { UpdateConcertDto } from '../dtos/update-concert.dto';
 import { Roles } from '../../../shared/decorators/roles.decorator';
 import { RolesGuard } from '../../../shared/guards/roles.guard';
+import { JwtAuthGuard } from '../../../shared/guards/jwt-auth.guard';
 import { ConcertResponseDto } from '../entities/concert-response.dto';
 import { ConcertListResponseDto } from '../dtos/concert-list-response.dto';
 import { ConcertListQueryDto } from '../dtos/concert-list-query.dto';
@@ -57,7 +58,7 @@ export class ConcertController {
   }
 
   @Post()
-  @UseGuards(RolesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('ADMIN', 'ORGANIZER')
   @Permissions('CREATE_CONCERT')
   @ApiBearerAuth()
@@ -69,7 +70,7 @@ export class ConcertController {
   }
 
   @Patch(':id')
-  @UseGuards(RolesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('ADMIN', 'ORGANIZER')
   @Permissions('UPDATE_CONCERT')
   @ApiBearerAuth()
@@ -82,7 +83,7 @@ export class ConcertController {
   }
 
   @Delete(':id')
-  @UseGuards(RolesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('ADMIN')
   @Permissions('DELETE_CONCERT')
   @ApiBearerAuth()
