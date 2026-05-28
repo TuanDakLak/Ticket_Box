@@ -1,0 +1,13 @@
+node_modules
+dist
+.git
+.github
+docs
+blueprint
+infrastructure
+.vscode
+.env
+.env.*
+npm-debug.log
+coverage
+*.log
