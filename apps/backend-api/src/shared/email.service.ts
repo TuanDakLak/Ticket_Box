@@ -5,8 +5,16 @@ import * as nodemailer from 'nodemailer';
 export class EmailService {
   private readonly logger = new Logger(EmailService.name);
   private transporter: nodemailer.Transporter | null = null;
+  private resendApiKey: string | null = null;
 
   constructor() {
+    this.resendApiKey = process.env.RESEND_API_KEY || null;
+
+    if (this.resendApiKey) {
+      this.logger.log('Resend API integration initialized successfully');
+      return;
+    }
+
     const host = process.env.SMTP_HOST;
     const port = parseInt(process.env.SMTP_PORT || '587', 10);
     const user = process.env.SMTP_USER;
@@ -14,7 +22,7 @@ export class EmailService {
 
     if (!host || !user || !pass || user.includes('your-gmail-here')) {
       this.logger.warn(
-        'SMTP configurations (SMTP_HOST, SMTP_USER, SMTP_PASS) are missing or contain placeholder values. Email service will run in MOCK mode.',
+        'Email service will run in MOCK mode because neither Resend API Key nor SMTP configurations are provided.',
       );
       return;
     }
@@ -36,23 +44,58 @@ export class EmailService {
   }
 
   async sendMail(options: nodemailer.SendMailOptions): Promise<boolean> {
-    const from = process.env.SMTP_FROM || `"TicketBox" <no-reply@ticketbox.local>`;
+    const from = process.env.EMAIL_FROM || process.env.SMTP_FROM || `"TicketBox" <no-reply@ticketbox.local>`;
     const mailOptions = { from, ...options };
 
-    if (!this.transporter) {
-      this.logger.log(`[MOCK EMAIL] To: ${mailOptions.to} | Subject: ${mailOptions.subject}`);
-      this.logger.log(`[MOCK EMAIL] HTML Content:\n${mailOptions.html}`);
-      return true;
+    // 1. Resend API mode
+    if (this.resendApiKey) {
+      try {
+        const to = Array.isArray(mailOptions.to) ? mailOptions.to.join(', ') : mailOptions.to;
+        const response = await (globalThis as any).fetch('https://api.resend.com/emails', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${this.resendApiKey}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            from: mailOptions.from,
+            to,
+            subject: mailOptions.subject,
+            html: mailOptions.html,
+          }),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          this.logger.error('Resend API returned an error:', JSON.stringify(errorData));
+          return false;
+        }
+
+        const data = await response.json().catch(() => ({}));
+        this.logger.log(`Email sent successfully via Resend API to ${to}. ID: ${data?.id}`);
+        return true;
+      } catch (error) {
+        this.logger.error(`Failed to send email via Resend API to ${mailOptions.to}`, error);
+        return false;
+      }
     }
 
-    try {
-      await this.transporter.sendMail(mailOptions);
-      this.logger.log(`Email sent successfully to ${mailOptions.to}`);
-      return true;
-    } catch (error) {
-      this.logger.error(`Failed to send email to ${mailOptions.to}`, error);
-      return false;
+    // 2. SMTP mode
+    if (this.transporter) {
+      try {
+        await this.transporter.sendMail(mailOptions);
+        this.logger.log(`Email sent successfully to ${mailOptions.to}`);
+        return true;
+      } catch (error) {
+        this.logger.error(`Failed to send email to ${mailOptions.to}`, error);
+        return false;
+      }
     }
+
+    // 3. Mock mode
+    this.logger.log(`[MOCK EMAIL] To: ${mailOptions.to} | Subject: ${mailOptions.subject}`);
+    this.logger.log(`[MOCK EMAIL] HTML Content:\n${mailOptions.html}`);
+    return true;
   }
 
   async sendVerificationEmail(toEmail: string, fullName: string, token: string): Promise<boolean> {
