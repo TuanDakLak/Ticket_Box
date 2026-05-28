@@ -6,11 +6,33 @@ import { CreateConcertDto } from '../dtos/create-concert.dto';
 import { UpdateConcertDto } from '../dtos/update-concert.dto';
 import { ConcertListItemDto } from '../dtos/concert-list-item.dto';
 import { ConcertListStatus } from '../dtos/concert-list-query.dto';
-import { Prisma } from '@prisma/client';
+
+type ConcertListRow = {
+  id: string;
+  name: string;
+  description: string | null;
+  location: string;
+  start_time: Date;
+  svg_map_url: string | null;
+  status: string;
+};
+
+type ConcertTicketCategoryRow = {
+  id: string;
+  name: string;
+  price: { toNumber(): number } | number | string;
+  total_quantity: number;
+  max_per_user: number;
+};
+
+type ConcertDetailRow = ConcertListRow & {
+  ai_bio: string | null;
+  ticket_categories: ConcertTicketCategoryRow[];
+};
 
 @Injectable()
 export class ConcertRepository {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) { }
 
   private readonly deletedStatus = 'CANCELLED';
 
@@ -26,18 +48,17 @@ export class ConcertRepository {
     const take = limit;
     const skip = Math.max(0, (page - 1) * limit);
     const trimmedSearch = search?.trim();
-    const where: Prisma.ConcertWhereInput = {
+    const where = {
       status: status ?? { not: this.deletedStatus },
       ...(trimmedSearch
         ? {
-            name: {
-              contains: trimmedSearch,
-              mode: 'insensitive',
-            },
-          }
+          name: {
+            contains: trimmedSearch,
+            mode: 'insensitive' as const,
+          },
+        }
         : {}),
     };
-
     const [items, total] = await this.prisma.$transaction([
       this.prisma.concert.findMany({
         skip,
@@ -57,7 +78,7 @@ export class ConcertRepository {
       this.prisma.concert.count({ where }),
     ]);
 
-    const mapped = items.map((c) => this.mapToListDto(c));
+    const mapped = items.map((c: ConcertListRow) => this.mapToListDto(c));
     return { items: mapped, total, page, limit };
   }
 
@@ -118,7 +139,7 @@ export class ConcertRepository {
     return this.mapToDto(concert);
   }
 
-  async softDelete(id: string): Promise<ConcertResponseDto> {
+  async delete(id: string): Promise<ConcertResponseDto> {
     const concert = await this.prisma.concert.update({
       where: { id },
       data: { status: this.deletedStatus },
@@ -129,13 +150,13 @@ export class ConcertRepository {
   }
 
   private mapToDto(
-    concert: Prisma.ConcertGetPayload<{ include: { ticket_categories: true } }>,
+    concert: ConcertDetailRow,
   ): ConcertResponseDto {
-    const ticketTiers: TicketTierDto[] = (concert.ticket_categories || []).map((tc) =>
+    const ticketTiers: TicketTierDto[] = (concert.ticket_categories || []).map((tc: ConcertTicketCategoryRow) =>
       new TicketTierDto({
         id: tc.id,
         name: tc.name,
-        price: Number(tc.price),
+        price: Number(typeof tc.price === 'object' && tc.price !== null ? tc.price.toNumber() : tc.price),
         total_quantity: tc.total_quantity,
         max_per_user: tc.max_per_user,
       }),
@@ -154,15 +175,7 @@ export class ConcertRepository {
     });
   }
 
-  private mapToListDto(concert: Prisma.ConcertGetPayload<{ select: {
-    id: true;
-    name: true;
-    description: true;
-    location: true;
-    start_time: true;
-    svg_map_url: true;
-    status: true;
-  } }>): ConcertListItemDto {
+  private mapToListDto(concert: ConcertListRow): ConcertListItemDto {
     return new ConcertListItemDto({
       id: concert.id,
       name: concert.name,

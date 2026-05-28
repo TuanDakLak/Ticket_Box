@@ -9,7 +9,7 @@ import { PaginationMetaDto } from '../../../shared/dtos/pagination-meta.dto';
 
 @Injectable()
 export class ConcertService {
-  constructor(private readonly concertRepo: ConcertRepository) {}
+  constructor(private readonly concertRepo: ConcertRepository) { }
 
   async getConcerts(query: ConcertListQueryDto): Promise<ConcertListResponseDto> {
     const page = query.page ?? 1;
@@ -52,6 +52,6 @@ export class ConcertService {
     if (!existing) throw new NotFoundException('Concert not found');
 
     if (existing.status === 'CANCELLED') return existing;
-    return this.concertRepo.softDelete(id);
+    return this.concertRepo.delete(id);
   }
 }

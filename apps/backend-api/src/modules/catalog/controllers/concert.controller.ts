@@ -36,7 +36,7 @@ import { Permissions } from '../../../shared/decorators/permissions.decorator';
 @ApiTags('Catalog - Concerts')
 @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
 export class ConcertController {
-  constructor(private readonly concertService: ConcertService) {}
+  constructor(private readonly concertService: ConcertService) { }
 
   @Get()
   @ApiOperation({ summary: 'Get concerts with pagination' })
@@ -84,7 +84,7 @@ export class ConcertController {
 
   @Delete(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('ADMIN')
+  @Roles('ADMIN', 'ORGANIZER')
   @Permissions('DELETE_CONCERT')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Soft delete concert (Admin)' })
