@@ -24,7 +24,7 @@ export class AuthService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly emailService: EmailService,
-  ) {}
+  ) { }
 
   // ─── HELPER: GENERATE ACCESS & REFRESH TOKENS ────────────────
 
@@ -274,7 +274,7 @@ export class AuthService {
       });
 
       return { message: 'Kích hoạt tài khoản thành công! Bây giờ bạn có thể đăng nhập.' };
-    } catch (err) {
+    } catch {
       throw new BadRequestException('Mã xác thực kích hoạt không hợp lệ hoặc đã hết hạn.');
     }
   }
@@ -381,7 +381,7 @@ export class AuthService {
 
     try {
       jwt.verify(dto.token, secret);
-    } catch (err) {
+    } catch {
       throw new BadRequestException('Mã khôi phục đã hết hạn hoặc không hợp lệ.');
     }
 
@@ -460,7 +460,7 @@ export class AuthService {
           permissions,
         },
       };
-    } catch (err) {
+    } catch {
       throw new UnauthorizedException('Mã Refresh Token đã hết hạn hoặc không hợp lệ.');
     }
   }
