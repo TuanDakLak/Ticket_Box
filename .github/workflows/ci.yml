@@ -3,10 +3,31 @@ name: CI
 on:
   pull_request:
     branches:
+      - develop
       - main
+    paths:
+      - 'apps/backend-api/**'
+      - 'prisma/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'tsconfig.json'
+      - '.github/workflows/ci.yml'
+      - 'Dockerfile'
+      - '.dockerignore'
+      - 'eslint.config.mjs'
   push:
     branches:
-      - main
+      - '**'
+    paths:
+      - 'apps/backend-api/**'
+      - 'prisma/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'tsconfig.json'
+      - '.github/workflows/ci.yml'
+      - 'Dockerfile'
+      - '.dockerignore'
+      - 'eslint.config.mjs'
   workflow_dispatch:
 
 concurrency:
@@ -21,7 +42,7 @@ jobs:
     name: Quality Gate
     runs-on: ubuntu-latest
 
-    timeout-minutes: 15
+    timeout-minutes: 12
 
     env:
       DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/ticketbox
@@ -35,11 +56,22 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
-          cache-dependency-path: package-lock.json
+
+      - name: Cache npm and Prisma engine
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.npm
+            ~/.cache/prisma
+          key: ${{ runner.os }}-npm-prisma-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-npm-prisma-
 
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --prefer-offline --no-audit --fund=false
+
+      - name: Lint sources
+        run: npm run lint
 
       - name: Generate Prisma client
         run: npm run prisma:generate
@@ -57,7 +89,7 @@ jobs:
     name: Database Gate
     runs-on: ubuntu-latest
 
-    timeout-minutes: 20
+    timeout-minutes: 10
 
     services:
       postgres:
@@ -86,11 +118,19 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
-          cache-dependency-path: package-lock.json
+
+      - name: Cache npm and Prisma engine
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.npm
+            ~/.cache/prisma
+          key: ${{ runner.os }}-npm-prisma-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-npm-prisma-
 
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --prefer-offline --no-audit --fund=false
 
       - name: Generate Prisma client
         run: npm run prisma:generate
@@ -100,6 +140,3 @@ jobs:
 
       - name: Apply Prisma migrations
         run: npm run db:migrate:deploy
-
-      - name: Seed database
-        run: npm run db:seed
