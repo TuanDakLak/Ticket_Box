@@ -25,4 +25,4 @@ COPY --from=build /app/prisma ./prisma
 
 EXPOSE 3000
 
-CMD ["node", "apps/backend-api/dist/main.js"]
+CMD ["sh", "-c", "npx prisma migrate deploy && node apps/backend-api/dist/main.js"]
