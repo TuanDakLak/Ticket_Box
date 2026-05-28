@@ -6,7 +6,14 @@
     ],
     "scripts": {
         "db:seed": "prisma db seed",
-        "start:api": "ts-node --project apps/backend-api/tsconfig.json apps/backend-api/src/main.ts"
+        "prisma:generate": "prisma generate",
+        "prisma:validate": "prisma validate",
+        "db:migrate:deploy": "prisma migrate deploy",
+        "typecheck:api": "tsc -p apps/backend-api/tsconfig.json --noEmit",
+        "build:api": "tsc -p apps/backend-api/tsconfig.json",
+        "build": "npm run build:api",
+        "start:api": "ts-node --project apps/backend-api/tsconfig.json apps/backend-api/src/main.ts",
+        "start:api:prod": "node apps/backend-api/dist/main.js"
     },
     "devDependencies": {
         "@faker-js/faker": "^10.4.0",
