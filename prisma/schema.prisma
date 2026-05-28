@@ -22,6 +22,8 @@ model User {
   notification_logs NotificationLog[]
   background_jobs   BackgroundJob[]   @relation("BackgroundJobTriggeredBy")
 
+  refresh_token     String?          @db.Text
+
   @@map("users")
 }
 
