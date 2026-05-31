@@ -1,0 +1,39 @@
+Description
+Initialize the Frontend project structure, configure the application router, and establish the Axios Client as the backbone for API communication. Implement Axios Interceptors to globally handle JWT token injection and handle authentication errors at the network layer seamlessly.
+
+Scope
+In Scope:
+
+Scaffold the project base utilizing React or Next.js with TypeScript and TailwindCSS.
+
+Establish a scalable directory structure according to modern architectural best practices (e.g., components, pages/app, services, hooks, utils).
+
+Configure a centralized Axios client instance with explicit baseURL and timeout settings.
+
+Implement an HTTP Request Interceptor: Automatically extract the JWT from storage (LocalStorage/Cookies) and attach it to the Authorization header as a Bearer <token> string.
+
+Implement an HTTP Response Interceptor: Globally intercept 401 Unauthorized or 403 Forbidden status codes to wipe out stale credentials and redirect users back to the /login route.
+
+Out of Scope:
+
+Designing specific module user interfaces or business flow views.
+
+Integrating payment gateway client logic or detailed Role-Based Access Control (RBAC) component guarding on the UI layout.
+
+Steps
+Scaffold the frontend application using the appropriate setup CLI tool and install core technical dependencies (axios, state management, UI libs, or tailwindcss).
+Create the file src/services/api.ts to fully configure the Axios instance and declare both request and response interceptors.
+Construct the core routing mechanism to clearly separate Public Routes (Home, Catalog) from Protected/Private Routes (Profile, Booking - Auth Required).
+Perform local end-to-end integration manual tests with a simulated server endpoint to verify that authorization tokens are injected and handled exactly as specified.
+Workflow Target
+
+CI only
+
+PR to develop
+
+Staging deploy after merge
+
+Release/deploy task
+Notes
+Storage & Security: Token resolution must be secure and robust. Ensure that handling a generic 401 error does not cause cascading infinite redirect page loops.
+Tech Stack Adaptability: The frontend tech stack can be safely modified or changed (e.g., swapping a UI kit or adjusting meta-frameworks) at any point during development as long as it aligns with the architectural contract and satisfies project delivery targets.

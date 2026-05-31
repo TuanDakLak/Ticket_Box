@@ -12,9 +12,12 @@
         "lint": "eslint \"apps/backend-api/src/**/*.ts\" \"prisma/**/*.ts\" \"prisma/seed.ts\" --cache --cache-location .cache/eslint",
         "typecheck:api": "tsc -p apps/backend-api/tsconfig.json --noEmit",
         "build:api": "tsc -p apps/backend-api/tsconfig.json",
-        "build": "npm run build:api",
+        "build:web": "cd apps/web-app && npm run build",
+        "build": "npm run build:api && npm run build:web",
         "start:api": "ts-node --project apps/backend-api/tsconfig.json apps/backend-api/src/main.ts",
-        "start:api:prod": "node apps/backend-api/dist/main.js"
+        "start:api:prod": "node apps/backend-api/dist/main.js",
+        "start:web": "cd apps/web-app && npm run dev",
+        "start:web:prod": "cd apps/web-app && npm run start"
     },
     "devDependencies": {
         "@eslint/js": "^10.0.1",
