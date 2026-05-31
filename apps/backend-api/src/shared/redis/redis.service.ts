@@ -36,7 +36,7 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
       this.logger.log(`Connected to Redis${url ? ` at ${url}` : ` at ${host}:${port}`}`);
     } catch (error) {
       this.logger.warn('Redis is unavailable; cache operations will be skipped', error as Error);
-      this.safeCloseClient();
+      await this.safeCloseClient();
       this.client = null;
     }
   }
@@ -54,15 +54,16 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
   }
 
   async getJson<T>(key: string): Promise<T | null> {
-    if (!this.client) {
+    const client = this.client;
+    if (!client || !client.isOpen) {
       return null;
     }
 
     let value: string | null;
     try {
-      value = await this.client.get(key);
-    } catch (error) {
-      this.logger.warn('Redis get failed; bypassing cache read', error as Error);
+      value = await client.get(key);
+    } catch {
+      this.markClientUnavailable();
       return null;
     }
 
@@ -79,19 +80,20 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
   }
 
   async setJson(key: string, value: unknown, ttlSeconds?: number): Promise<boolean> {
-    if (!this.client) {
+    const client = this.client;
+    if (!client || !client.isOpen) {
       return false;
     }
 
     const payload = JSON.stringify(value);
     try {
       if (ttlSeconds && ttlSeconds > 0) {
-        await this.client.set(key, payload, { EX: ttlSeconds });
+        await client.set(key, payload, { EX: ttlSeconds });
       } else {
-        await this.client.set(key, payload);
+        await client.set(key, payload);
       }
-    } catch (error) {
-      this.logger.warn('Redis set failed; bypassing cache write', error as Error);
+    } catch {
+      this.markClientUnavailable();
       return false;
     }
 
@@ -99,30 +101,32 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
   }
 
   async delete(key: string): Promise<number> {
-    if (!this.client) {
+    const client = this.client;
+    if (!client || !client.isOpen) {
       return 0;
     }
 
     try {
-      return await this.client.del(key);
-    } catch (error) {
-      this.logger.warn('Redis delete failed', error as Error);
+      return await client.del(key);
+    } catch {
+      this.markClientUnavailable();
       return 0;
     }
   }
 
   async deleteByPattern(pattern: string): Promise<number> {
-    if (!this.client) {
+    const client = this.client;
+    if (!client || !client.isOpen) {
       return 0;
     }
 
     const keys: string[] = [];
     try {
-      for await (const batch of this.client.scanIterator({ MATCH: pattern, COUNT: 100 })) {
+      for await (const batch of client.scanIterator({ MATCH: pattern, COUNT: 100 })) {
         keys.push(...batch);
       }
-    } catch (error) {
-      this.logger.warn('Redis scan failed; skip pattern invalidation', error as Error);
+    } catch {
+      this.markClientUnavailable();
       return 0;
     }
 
@@ -131,11 +135,16 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
     }
 
     try {
-      return await this.client.del(keys);
-    } catch (error) {
-      this.logger.warn('Redis batch delete failed', error as Error);
+      return await client.del(keys);
+    } catch {
+      this.markClientUnavailable();
       return 0;
     }
+  }
+
+  private markClientUnavailable(): void {
+    void this.safeCloseClient();
+    this.client = null;
   }
 
   private async safeCloseClient(): Promise<void> {
