@@ -20,6 +20,13 @@ Review:
 - Ít nhất 1 approve từ team owner hoặc CODEOWNERS
 - CI phải xanh trước khi merge
 
+Local quality gate (bắt buộc cho mỗi máy):
+- Chạy 1 lần sau khi clone/pull:
+    + `npm install`
+    + `npm run setup:hooks`
+- Từ đó, mỗi lần `git push` sẽ tự chạy pre-push hook.
+- Hook sẽ chặn push nếu `lint`, `typecheck:api`, hoặc `test:api:unit` fail.
+
 Issue:
 - Sử dụng templates trong docs/template/
     + `bug_report.md` cho lỗi

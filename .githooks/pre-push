@@ -1,0 +1,13 @@
+#!/usr/bin/env sh
+
+echo "[pre-push] Running local quality gate: lint + unit tests"
+npm run verify:push
+status=$?
+
+if [ $status -ne 0 ]; then
+  echo "[pre-push] Push blocked. Fix errors and push again."
+  exit $status
+fi
+
+echo "[pre-push] Quality gate passed. Proceeding with push."
+exit 0
