@@ -82,6 +82,9 @@ jobs:
       - name: Type check backend
         run: npm run typecheck:api
 
+      - name: Run backend unit tests
+        run: npm run test:api:unit
+
       - name: Build backend
         run: npm run build
 
