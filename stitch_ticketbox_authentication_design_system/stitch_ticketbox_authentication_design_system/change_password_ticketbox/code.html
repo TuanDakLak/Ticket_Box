@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Change Password - TicketBox</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "tertiary-container": "#8f4200",
+                      "surface-tint": "#7331df",
+                      "warning": "#F59E0B",
+                      "on-primary-fixed-variant": "#5b00c5",
+                      "border-subtle": "#E5E7EB",
+                      "background": "#fcf9f8",
+                      "outline": "#7b7486",
+                      "surface-container": "#f0eded",
+                      "tertiary-fixed-dim": "#ffb68b",
+                      "on-error-container": "#93000a",
+                      "surface-dim": "#dcd9d9",
+                      "primary-fixed": "#ebddff",
+                      "surface-container-lowest": "#ffffff",
+                      "on-secondary": "#ffffff",
+                      "on-error": "#ffffff",
+                      "on-primary-fixed": "#250059",
+                      "on-primary-container": "#dac5ff",
+                      "tertiary": "#6b3000",
+                      "surface-container-highest": "#e5e2e1",
+                      "on-secondary-container": "#600037",
+                      "secondary": "#b4136d",
+                      "on-tertiary": "#ffffff",
+                      "surface-bright": "#fcf9f8",
+                      "on-primary": "#ffffff",
+                      "primary-container": "#6d28d9",
+                      "on-background": "#1b1c1c",
+                      "surface-container-low": "#f6f3f2",
+                      "on-tertiary-fixed-variant": "#743400",
+                      "on-surface": "#1b1c1c",
+                      "on-surface-variant": "#4a4455",
+                      "surface-container-high": "#eae7e7",
+                      "on-tertiary-container": "#ffc19e",
+                      "surface-bg": "#F9FAFB",
+                      "surface": "#fcf9f8",
+                      "outline-variant": "#ccc3d7",
+                      "inverse-surface": "#303030",
+                      "surface-variant": "#e5e2e1",
+                      "on-tertiary-fixed": "#321300",
+                      "secondary-fixed": "#ffd9e4",
+                      "primary": "#5300b7",
+                      "secondary-fixed-dim": "#ffb0cd",
+                      "on-secondary-fixed": "#3e0022",
+                      "success": "#2DC275",
+                      "error": "#EF4444",
+                      "tertiary-fixed": "#ffdbc8",
+                      "error-container": "#ffdad6",
+                      "primary-fixed-dim": "#d3bbff",
+                      "inverse-on-surface": "#f3f0ef",
+                      "inverse-primary": "#d3bbff",
+                      "secondary-container": "#fd56a7",
+                      "on-secondary-fixed-variant": "#8c0053"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "gutter": "24px",
+                      "container-max": "1440px",
+                      "margin-mobile": "16px",
+                      "unit": "4px",
+                      "margin-desktop": "80px",
+                      "base": "8px"
+              },
+              "fontFamily": {
+                      "body-md": ["Inter"],
+                      "headline-lg-mobile": ["Inter"],
+                      "label-md": ["Inter"],
+                      "body-lg": ["Inter"],
+                      "label-sm": ["Inter"],
+                      "headline-md": ["Inter"],
+                      "headline-lg": ["Inter"],
+                      "display-lg": ["Inter"]
+              },
+              "fontSize": {
+                      "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                      "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                      "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600"}],
+                      "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                      "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "500"}],
+                      "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                      "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                      "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "800"}]
+              }
+            },
+          },
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; background-color: #fcf9f8; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(229, 231, 235, 0.5);
+        }
+        @keyframes slideIn {
+            from { transform: translateY(-100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .toast-animate {
+            animation: slideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface flex flex-col min-h-screen">
+<!-- TopAppBar -->
+<header class="bg-surface dark:bg-on-background shadow-sm docked full-width top-0 z-50">
+<div class="flex justify-between items-center w-full px-gutter h-16 max-w-container-max mx-auto">
+<div class="flex items-center gap-8">
+<span class="text-headline-md font-headline-md font-black text-primary dark:text-primary-fixed">TicketBox</span>
+<nav class="hidden md:flex items-center gap-6">
+<a class="text-on-surface-variant dark:text-outline-variant hover:text-primary dark:hover:text-primary-fixed transition-colors font-body-md text-body-md" href="#">Events</a>
+<a class="text-on-surface-variant dark:text-outline-variant hover:text-primary dark:hover:text-primary-fixed transition-colors font-body-md text-body-md" href="#">Venues</a>
+<a class="text-primary font-bold border-b-2 border-primary font-body-md text-body-md" href="#">Security</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<button class="hidden md:block text-on-surface-variant dark:text-outline-variant hover:text-primary transition-colors font-body-md text-body-md">Help</button>
+<div class="w-10 h-10 rounded-full bg-primary-fixed flex items-center justify-center text-primary font-bold overflow-hidden">
+<img alt="User Profile" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDWLrPiv9bdsXjhZntSRIOcr1xzQiM9sY-g5hPMuCW_hTwEKei9-RKWhBj4v7QrD-rRhK2sFw2HC3Ib_DAil6PxiVkbaYvqSkO9QhJHpKCNyKXR3cnpxpQrviba93sg_ROKjHRCIHXGFwUC8mNSl-ADF2SQVC4bRFf7PwYz8cuiGb_46DlrsivXKFEqURdmHoeQlSnYaWsHPx3bafL8N5Jg7LgYd6UgTpoPofFFvm6xnB4nrIrk62-vugutGNrsPG16xRQenbqC8_Tt"/>
+</div>
+</div>
+</div>
+</header>
+<main class="flex-grow flex flex-col lg:flex-row w-full max-w-container-max mx-auto px-gutter py-8 gap-8">
+<!-- SideNavBar - Identity/Security Focus -->
+<aside class="hidden lg:flex flex-col p-6 space-y-4 h-full bg-surface-container-low dark:bg-inverse-surface shadow-md h-full w-72 left-0 rounded-xl">
+<div class="mb-6">
+<h2 class="text-headline-md font-headline-md text-primary">Security Center</h2>
+<p class="text-on-surface-variant font-label-sm text-label-sm">Manage your access</p>
+</div>
+<nav class="space-y-1">
+<a class="flex items-center gap-3 p-3 text-on-surface-variant hover:bg-surface-variant rounded-lg font-label-md text-label-md transition-all" href="#">
+<span class="material-symbols-outlined">fingerprint</span> Identity
+                </a>
+<a class="flex items-center gap-3 p-3 bg-primary-container text-on-primary-container rounded-lg font-bold font-label-md text-label-md active:translate-x-1 duration-150" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">security</span> Security
+                </a>
+<a class="flex items-center gap-3 p-3 text-on-surface-variant hover:bg-surface-variant rounded-lg font-label-md text-label-md transition-all" href="#">
+<span class="material-symbols-outlined">admin_panel_settings</span> Permissions
+                </a>
+<a class="flex items-center gap-3 p-3 text-on-surface-variant hover:bg-surface-variant rounded-lg font-label-md text-label-md transition-all" href="#">
+<span class="material-symbols-outlined">devices</span> Devices
+                </a>
+</nav>
+<div class="mt-auto pt-6 border-t border-outline-variant">
+<button class="w-full py-3 bg-primary text-on-primary rounded-xl font-bold hover:opacity-90 transition-all">
+                    Review Security
+                </button>
+</div>
+</aside>
+<!-- Main Content Area -->
+<div class="flex-grow flex flex-col gap-8">
+<!-- Breadcrumbs -->
+<div class="flex items-center gap-2 text-on-surface-variant font-label-sm text-label-sm">
+<span>Account</span>
+<span class="material-symbols-outlined text-[16px]">chevron_right</span>
+<span>Security</span>
+<span class="material-symbols-outlined text-[16px]">chevron_right</span>
+<span class="text-primary font-bold">Change Password</span>
+</div>
+<div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
+<!-- Change Password Form Card -->
+<section class="xl:col-span-2 bg-white rounded-xl border border-border-subtle shadow-[0px_4px_20px_rgba(0,0,0,0.05)] overflow-hidden">
+<div class="p-8 border-b border-border-subtle bg-surface-container-low/30">
+<h1 class="font-headline-lg text-headline-lg text-on-surface">Change Your Password</h1>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1">Please enter your current password to verify your identity before creating a new one.</p>
+</div>
+<form class="p-8 space-y-6" id="passwordForm">
+<div class="space-y-2">
+<label class="font-label-md text-label-md text-on-surface" for="old_password">Old Password</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline">lock</span>
+<input class="w-full pl-12 pr-4 py-3 rounded-xl border border-outline-variant focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all" id="old_password" name="old_password" placeholder="••••••••" required="" type="password"/>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="space-y-2">
+<label class="font-label-md text-label-md text-on-surface" for="new_password">New Password</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline">key</span>
+<input class="w-full pl-12 pr-4 py-3 rounded-xl border border-outline-variant focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all" id="new_password" name="new_password" placeholder="Enter new password" required="" type="password"/>
+</div>
+</div>
+<div class="space-y-2">
+<label class="font-label-md text-label-md text-on-surface" for="confirm_password">Confirm Password</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline">verified_user</span>
+<input class="w-full pl-12 pr-4 py-3 rounded-xl border border-outline-variant focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all" id="confirm_password" name="confirm_password" placeholder="Repeat new password" required="" type="password"/>
+</div>
+</div>
+</div>
+<div class="pt-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+<p class="text-label-sm font-label-sm text-on-surface-variant max-w-xs">
+                                Changing your password will log you out of all other active sessions for your safety.
+                            </p>
+<button class="w-full sm:w-auto px-10 py-4 bg-primary-container text-on-primary-container font-bold rounded-xl hover:opacity-90 active:scale-95 transition-all shadow-md" type="submit">
+                                Save Changes
+                            </button>
+</div>
+</form>
+</section>
+<!-- Security Tips Panel -->
+<aside class="xl:col-span-1 space-y-6">
+<div class="bg-surface-container-high rounded-xl p-6 border border-outline-variant/30">
+<div class="flex items-center gap-2 mb-4">
+<span class="material-symbols-outlined text-warning" style="font-variation-settings: 'FILL' 1;">shield</span>
+<h3 class="font-headline-md text-headline-md text-on-surface">Security Tips</h3>
+</div>
+<ul class="space-y-4">
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-success text-[20px]">check_circle</span>
+<span class="font-body-md text-body-md text-on-surface-variant">Use at least 12 characters for maximum protection.</span>
+</li>
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-success text-[20px]">check_circle</span>
+<span class="font-body-md text-body-md text-on-surface-variant">Mix uppercase, lowercase, numbers, and symbols like (!, @, #).</span>
+</li>
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-success text-[20px]">check_circle</span>
+<span class="font-body-md text-body-md text-on-surface-variant">Avoid common words or sequences (e.g., "Password123").</span>
+</li>
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-success text-[20px]">check_circle</span>
+<span class="font-body-md text-body-md text-on-surface-variant">Don't reuse passwords from other online accounts.</span>
+</li>
+</ul>
+</div>
+<div class="relative rounded-xl overflow-hidden aspect-[4/3] shadow-lg group">
+<img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" data-alt="A futuristic cybersecurity concept visualization with glowing purple and cyan data streams moving through a glass-like digital space. The lighting is sophisticated and low-key, emphasizing depth and advanced technology. The aesthetic is clean and modern, perfectly aligning with a premium fintech or ticketing security brand identity." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA_LmrFlVWL1TbpSyJ6Y3SmHpcbfwWy4pWTQ9P2dRq6jzS4QE3G-pft8Tguk3KdJXTdceZuutRtR50U2SjqPP5oin7R4OquqYyoltCsfl35gVDO3RN6zoUAwuRuRnKtfTRJgBXU05fqAQe0ncZNEVwv7IBZWpOM2jeekJw09Ncf05NDw_L78MiLVYjvOoy8bdC4CAnOYjqhJxlnnTZU5_reA8NC5zbCTneFX1XlXjr4cU8C-B5WpReD6QPu20nzYmG5M62ZLcl9zCXP"/>
+<div class="absolute inset-0 bg-gradient-to-t from-primary/80 to-transparent flex flex-col justify-end p-6">
+<span class="text-white font-bold text-headline-md">Your safety is our priority</span>
+<p class="text-primary-fixed text-label-sm mt-1">TicketBox uses enterprise-grade encryption for all transactions.</p>
+</div>
+</div>
+</aside>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="bg-surface-container-highest dark:bg-on-background border-t border-outline-variant dark:border-outline mt-12">
+<div class="w-full py-8 px-gutter flex flex-col md:flex-row justify-between items-center max-w-container-max mx-auto gap-4">
+<span class="text-label-md font-bold text-on-surface">TicketBox</span>
+<p class="text-on-surface-variant dark:text-outline-variant font-label-sm text-label-sm text-center md:text-left">
+                © 2024 TicketBox. Proudly serving the Vietnamese music scene.
+            </p>
+<div class="flex gap-6">
+<a class="text-on-surface-variant hover:text-secondary transition-colors font-label-sm text-label-sm" href="#">Privacy Policy</a>
+<a class="text-on-surface-variant hover:text-secondary transition-colors font-label-sm text-label-sm" href="#">Terms of Service</a>
+<a class="text-on-surface-variant hover:text-secondary transition-colors font-label-sm text-label-sm" href="#">Security Whitepaper</a>
+</div>
+</div>
+</footer>
+<!-- Success Toast Notification (Hidden by default) -->
+<div class="fixed top-20 right-8 z-[100] hidden" id="successToast">
+<div class="toast-animate bg-success text-white px-6 py-4 rounded-xl shadow-xl flex items-center gap-4">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<div>
+<p class="font-bold text-label-md">Success!</p>
+<p class="text-label-sm opacity-90">Your password has been updated successfully.</p>
+</div>
+<button class="ml-4 hover:opacity-70" onclick="hideToast()">
+<span class="material-symbols-outlined">close</span>
+</button>
+</div>
+</div>
+<script>
+        const form = document.getElementById('passwordForm');
+        const toast = document.getElementById('successToast');
+
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            // Basic validation check for demo
+            const newPass = document.getElementById('new_password').value;
+            const confirmPass = document.getElementById('confirm_password').value;
+
+            if (newPass !== confirmPass) {
+                alert('Passwords do not match!');
+                return;
+            }
+
+            // Simulate API call
+            const btn = e.target.querySelector('button');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<span class="material-symbols-outlined animate-spin">progress_activity</span> Updating...';
+            btn.disabled = true;
+
+            setTimeout(() => {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+                showToast();
+                form.reset();
+            }, 1500);
+        });
+
+        function showToast() {
+            toast.classList.remove('hidden');
+            setTimeout(() => {
+                hideToast();
+            }, 5000);
+        }
+
+        function hideToast() {
+            toast.classList.add('hidden');
+        }
+    </script>
+</body></html>

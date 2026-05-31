@@ -1,160 +1,49 @@
-"use client";
-
-import { useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { authService } from "@/services/auth.service";
+import { TicketBoxAuthShell } from "@/components/ticketbox-auth-shell";
+import { ConcertHeroIllustration } from "@/components/ticketbox-illustrations";
 
 export default function RegisterPage() {
-  const router = useRouter();
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-    confirmPassword: "",
-    full_name: "",
-  });
-  const [error, setError] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
-
-    if (formData.password !== formData.confirmPassword) {
-      setError("Passwords do not match");
-      return;
-    }
-
-    if (formData.password.length < 8) {
-      setError("Password must be at least 8 characters long");
-      return;
-    }
-
-    setIsLoading(true);
-
-    try {
-      await authService.register(
-        formData.email,
-        formData.password,
-        formData.full_name
-      );
-      router.push("/dashboard");
-    } catch (err) {
-      const errorMessage =
-        err instanceof Error ? err.message : "Registration failed. Please try again.";
-      setError(errorMessage);
-      console.error("Registration error:", err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-600 to-indigo-800 flex items-center justify-center px-6">
-      <div className="w-full max-w-md bg-white rounded-lg shadow-xl p-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-6 text-center">
-          TicketBox
-        </h1>
-
-        <h2 className="text-xl font-semibold text-gray-900 mb-4 text-center">
-          Create Account
-        </h2>
-
-        {error && (
-          <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
-            {error}
+    <TicketBoxAuthShell
+      title="Join TicketBox"
+      description="Create an account to reserve seats, manage future ticket journeys, and keep a secure session lifecycle."
+      sidebar={<ConcertHeroIllustration />}
+      footerLinks={[
+        { label: "Already have an account? Sign in", href: "/login" },
+      ]}
+    >
+      <form className="space-y-5">
+        <div>
+          <label className="ticketbox-label" htmlFor="fullName">Full name</label>
+          <input id="fullName" type="text" className="ticketbox-input" placeholder="Nguyen Van A" />
+        </div>
+        <div>
+          <label className="ticketbox-label" htmlFor="email">Email address</label>
+          <input id="email" type="email" className="ticketbox-input" placeholder="name@company.com" />
+        </div>
+        <div>
+          <label className="ticketbox-label" htmlFor="password">Password</label>
+          <input id="password" type="password" className="ticketbox-input" placeholder="Min. 8 characters" />
+          <div className="mt-3 h-2 rounded-full bg-slate-100">
+            <div className="h-2 w-2/3 rounded-full bg-amber-500" />
           </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-gray-700 font-semibold mb-2">
-              Full Name
-            </label>
-            <input
-              type="text"
-              name="full_name"
-              value={formData.full_name}
-              onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              placeholder="John Doe"
-              required
-              disabled={isLoading}
-            />
-          </div>
-
-          <div>
-            <label className="block text-gray-700 font-semibold mb-2">
-              Email
-            </label>
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              placeholder="your@email.com"
-              required
-              disabled={isLoading}
-            />
-          </div>
-
-          <div>
-            <label className="block text-gray-700 font-semibold mb-2">
-              Password
-            </label>
-            <input
-              type="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              placeholder="••••••••"
-              required
-              disabled={isLoading}
-            />
-          </div>
-
-          <div>
-            <label className="block text-gray-700 font-semibold mb-2">
-              Confirm Password
-            </label>
-            <input
-              type="password"
-              name="confirmPassword"
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              placeholder="••••••••"
-              required
-              disabled={isLoading}
-            />
-          </div>
-
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="w-full py-2 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
-          >
-            {isLoading ? "Creating account..." : "Create Account"}
-          </button>
-        </form>
-
-        <p className="text-center text-gray-600 mt-6">
-          Already have an account?{" "}
-          <Link href="/login" className="text-indigo-600 font-semibold hover:underline">
-            Sign in here
-          </Link>
-        </p>
-      </div>
-    </div>
+          <p className="mt-2 text-xs font-semibold uppercase tracking-[0.2em] text-amber-600">Security strength: Medium</p>
+        </div>
+        <div>
+          <label className="ticketbox-label" htmlFor="confirmPassword">Confirm password</label>
+          <input id="confirmPassword" type="password" className="ticketbox-input" placeholder="Repeat your password" />
+        </div>
+        <label className="flex items-start gap-3 rounded-2xl border border-slate-200 px-4 py-3 text-sm text-slate-600">
+          <input type="checkbox" className="mt-1 h-4 w-4 rounded border-slate-300 text-[#0f62fe] focus:ring-[#0f62fe]" />
+          <span>
+            I agree to the <Link href="#" className="font-medium text-[#0f62fe]">Terms of Service</Link> and <Link href="#" className="font-medium text-[#0f62fe]">Privacy Policy</Link>.
+          </span>
+        </label>
+        <button className="ticketbox-button-primary w-full">Create account</button>
+        <div className="rounded-[28px] border border-dashed border-[#0f62fe]/25 bg-[#eff6ff] p-4 text-sm text-slate-600">
+          Success state: show a verification modal with resend countdown, then route users back to sign in.
+        </div>
+      </form>
+    </TicketBoxAuthShell>
   );
 }

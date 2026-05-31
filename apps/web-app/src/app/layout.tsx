@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "@/styles/globals.css";
 
 export const metadata: Metadata = {
-  title: "TicketBox - Premium Ticket Management",
-  description: "Buy and manage concert tickets with ease",
+  title: "TicketBox - Auth Prototype",
+  description: "TicketBox authentication prototype for login, register, verification, and recovery flows",
 };
 
 export default function RootLayout({
@@ -13,7 +13,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="bg-gray-50 font-sans">{children}</body>
+      <body className="bg-[#faf9ff] font-sans text-slate-900">{children}</body>
     </html>
   );
 }

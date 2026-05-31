@@ -7,33 +7,23 @@ export default function AccessDeniedPage() {
   const { isAuthenticated } = useAuth();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-red-600 to-red-800 flex items-center justify-center px-6">
-      <div className="text-center text-white">
-        <h1 className="text-6xl font-bold mb-4">403</h1>
-        <h2 className="text-3xl font-semibold mb-6">Access Denied</h2>
-        <p className="text-xl mb-8 text-red-100">
-          You don&apos;t have permission to access this resource.
-        </p>
+    <main className="auth-page flex items-center justify-center px-4 py-12">
+      <div className="ticketbox-panel max-w-xl p-8 text-center">
+        <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-rose-100 text-4xl text-rose-600">
+          403
+        </div>
+        <h1 className="mt-6 text-4xl font-black text-slate-900">Access denied</h1>
+        <p className="ticketbox-muted mt-3">This route uses the same auth guard pattern future checkout and admin concept screens will rely on.</p>
 
-        {isAuthenticated ? (
-          <Link
-            href="/dashboard"
-            className="inline-block px-8 py-3 bg-white text-red-600 font-semibold rounded-lg hover:bg-gray-100"
-          >
-            Back to Dashboard
-          </Link>
-        ) : (
-          <>
-            <p className="mb-4">Please log in to continue.</p>
-            <Link
-              href="/login"
-              className="inline-block px-8 py-3 bg-white text-red-600 font-semibold rounded-lg hover:bg-gray-100"
-            >
-              Go to Login
-            </Link>
-          </>
-        )}
+        <div className="mt-8 flex flex-wrap justify-center gap-3">
+          {isAuthenticated ? (
+            <Link href="/dashboard" className="ticketbox-button-primary px-5 py-3">Back to dashboard</Link>
+          ) : (
+            <Link href="/login" className="ticketbox-button-primary px-5 py-3">Go to login</Link>
+          )}
+          <Link href="/" className="ticketbox-button-secondary px-5 py-3">Back home</Link>
+        </div>
       </div>
-    </div>
+    </main>
   );
 }

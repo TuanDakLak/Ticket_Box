@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Login | TicketBox</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #fcf9f8;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "tertiary-container": "#8f4200",
+                      "surface-tint": "#7331df",
+                      "warning": "#F59E0B",
+                      "on-primary-fixed-variant": "#5b00c5",
+                      "border-subtle": "#E5E7EB",
+                      "background": "#fcf9f8",
+                      "outline": "#7b7486",
+                      "surface-container": "#f0eded",
+                      "tertiary-fixed-dim": "#ffb68b",
+                      "on-error-container": "#93000a",
+                      "surface-dim": "#dcd9d9",
+                      "primary-fixed": "#ebddff",
+                      "surface-container-lowest": "#ffffff",
+                      "on-secondary": "#ffffff",
+                      "on-error": "#ffffff",
+                      "on-primary-fixed": "#250059",
+                      "on-primary-container": "#dac5ff",
+                      "tertiary": "#6b3000",
+                      "surface-container-highest": "#e5e2e1",
+                      "on-secondary-container": "#600037",
+                      "secondary": "#b4136d",
+                      "on-tertiary": "#ffffff",
+                      "surface-bright": "#fcf9f8",
+                      "on-primary": "#ffffff",
+                      "primary-container": "#6d28d9",
+                      "on-background": "#1b1c1c",
+                      "surface-container-low": "#f6f3f2",
+                      "on-tertiary-fixed-variant": "#743400",
+                      "on-surface": "#1b1c1c",
+                      "on-surface-variant": "#4a4455",
+                      "surface-container-high": "#eae7e7",
+                      "on-tertiary-container": "#ffc19e",
+                      "surface-bg": "#F9FAFB",
+                      "surface": "#fcf9f8",
+                      "outline-variant": "#ccc3d7",
+                      "inverse-surface": "#303030",
+                      "surface-variant": "#e5e2e1",
+                      "on-tertiary-fixed": "#321300",
+                      "secondary-fixed": "#ffd9e4",
+                      "primary": "#5300b7",
+                      "secondary-fixed-dim": "#ffb0cd",
+                      "on-secondary-fixed": "#3e0022",
+                      "success": "#2DC275",
+                      "error": "#EF4444",
+                      "tertiary-fixed": "#ffdbc8",
+                      "error-container": "#ffdad6",
+                      "primary-fixed-dim": "#d3bbff",
+                      "inverse-on-surface": "#f3f0ef",
+                      "inverse-primary": "#d3bbff",
+                      "secondary-container": "#fd56a7",
+                      "on-secondary-fixed-variant": "#8c0053"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "gutter": "24px",
+                      "container-max": "1440px",
+                      "margin-mobile": "16px",
+                      "unit": "4px",
+                      "margin-desktop": "80px",
+                      "base": "8px"
+              },
+              "fontFamily": {
+                      "body-md": ["Inter"],
+                      "headline-lg-mobile": ["Inter"],
+                      "label-md": ["Inter"],
+                      "body-lg": ["Inter"],
+                      "label-sm": ["Inter"],
+                      "headline-md": ["Inter"],
+                      "headline-lg": ["Inter"],
+                      "display-lg": ["Inter"]
+              },
+              "fontSize": {
+                      "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                      "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                      "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600"}],
+                      "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                      "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "500"}],
+                      "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                      "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                      "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "800"}]
+              }
+            },
+          },
+        }
+    </script>
+</head>
+<body class="bg-surface text-on-surface antialiased overflow-hidden">
+<main class="flex min-h-screen">
+<!-- Left Section: Hero Visual -->
+<section class="hidden lg:flex lg:w-1/2 relative items-end p-margin-desktop overflow-hidden">
+<!-- Background Image -->
+<img alt="Hero Concert" class="absolute inset-0 w-full h-full object-cover" data-alt="A massive, high-energy indoor stadium concert filled with a dense, cheering crowd seen from a low angle. The stage is flooded with intense purple and magenta theatrical lighting and bright white spotlights cutting through a light haze. The atmosphere is electric and vibrant, capturing the professional corporate modern aesthetic with high-saturation colors. The lighting creates a dramatic, cinematic feel, emphasizing the scale and excitement of a premier live music event in Vietnam." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBTrkkAF-LZBa99Gx0KaiJnSvxlQi9fwwu19k8Cc_bSWqH2vt49eOmzmFJXGxDHALUaNW7eALE_c0KWc2Coeu0q15ExloJHMNBHpZucjClWSxoCNAtIr3Ljej63nM9YA0eZasMVRig-i4VfiQU3SSsJC3cQv2IDxBD-hwgVo8m8455xW943LckoQYxCTPezVhGJi25kmHo2FXUL2fPBXdkIot22pt3dKHuyw768NTuLoKsA4S7XDL1tdTsX0Py018ZsRuel0meV-zds"/>
+<!-- Overlay Gradient -->
+<div class="absolute inset-0 bg-gradient-to-t from-on-background/80 via-on-background/20 to-transparent"></div>
+<!-- Content Anchor -->
+<div class="relative z-10 max-w-lg mb-8">
+<h1 class="font-display-lg text-display-lg text-white mb-4 leading-tight">
+                    The front row is waiting.
+                </h1>
+<p class="font-body-lg text-body-lg text-white/90">
+                    Tickets for 'Anh Trai Say Hi' and the biggest live events in Vietnam. Fast, secure, and right in your pocket.
+                </p>
+<!-- Micro-interaction Tag -->
+<div class="mt-8 flex items-center space-x-2 bg-white/10 backdrop-blur-md rounded-full px-4 py-2 border border-white/20 inline-flex">
+<span class="material-symbols-outlined text-white text-sm">local_activity</span>
+<span class="font-label-md text-label-md text-white">4.8k tickets sold today</span>
+</div>
+</div>
+</section>
+<!-- Right Section: Login Form -->
+<section class="w-full lg:w-1/2 bg-surface flex flex-col justify-center items-center px-6 py-12 lg:px-margin-desktop">
+<div class="w-full max-w-[440px]">
+<!-- Brand Identity -->
+<div class="mb-10 text-center lg:text-left">
+<div class="inline-block mb-8">
+<span class="font-headline-md text-headline-md font-black text-primary">TicketBox</span>
+</div>
+<h2 class="font-headline-lg text-headline-lg text-on-surface mb-2">Welcome back</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Access your tickets and personalized events.</p>
+</div>
+<!-- Social Login Cluster -->
+<div class="grid grid-cols-2 gap-4 mb-8">
+<button class="flex items-center justify-center space-x-2 py-3 px-4 border border-outline-variant rounded-xl hover:bg-surface-container-low transition-all active:scale-95">
+<svg class="w-5 h-5" viewbox="0 0 24 24">
+<path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"></path>
+<path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"></path>
+<path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"></path>
+<path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"></path>
+</svg>
+<span class="font-label-md text-label-md">Google</span>
+</button>
+<button class="flex items-center justify-center space-x-2 py-3 px-4 border border-outline-variant rounded-xl hover:bg-surface-container-low transition-all active:scale-95">
+<svg class="w-5 h-5" fill="#1877F2" viewbox="0 0 24 24">
+<path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.469h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"></path>
+</svg>
+<span class="font-label-md text-label-md">Facebook</span>
+</button>
+</div>
+<div class="relative flex items-center mb-8">
+<div class="flex-grow border-t border-outline-variant"></div>
+<span class="flex-shrink mx-4 font-label-sm text-label-sm text-on-surface-variant">OR CONTINUE WITH EMAIL</span>
+<div class="flex-grow border-t border-outline-variant"></div>
+</div>
+<!-- Form Section -->
+<form class="space-y-5" id="loginForm">
+<!-- Email Field (Validation Error State Shown) -->
+<div>
+<label class="block font-label-md text-label-md text-on-surface mb-2" for="email">Email Address</label>
+<div class="relative">
+<input class="w-full px-4 py-3 rounded-xl bg-surface border border-error focus:ring-2 focus:ring-error focus:border-error outline-none transition-all font-body-md text-body-md" id="email" placeholder="name@example.com" type="email" value="support@ticketbox"/>
+<span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-error text-[20px]">error</span>
+</div>
+<p class="mt-2 font-label-sm text-label-sm text-error">Invalid email address. Please include '@' and a domain.</p>
+</div>
+<!-- Password Field -->
+<div>
+<div class="flex justify-between items-center mb-2">
+<label class="block font-label-md text-label-md text-on-surface" for="password">Password</label>
+<a class="font-label-sm text-label-sm text-primary hover:underline" href="#">Forgot password?</a>
+</div>
+<div class="relative">
+<input class="w-full px-4 py-3 rounded-xl bg-surface border border-outline-variant focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all font-body-md text-body-md" id="password" placeholder="Enter your password" type="password"/>
+<button class="absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-on-surface transition-colors" onclick="togglePassword()" type="button">
+<span class="material-symbols-outlined text-[20px]" id="passwordIcon">visibility</span>
+</button>
+</div>
+</div>
+<!-- Remember Me -->
+<div class="flex items-center">
+<input class="w-5 h-5 rounded border-outline-variant text-primary focus:ring-primary" id="remember" type="checkbox"/>
+<label class="ml-3 font-body-md text-body-md text-on-surface-variant select-none" for="remember">Remember me for 30 days</label>
+</div>
+<!-- CTA Button -->
+<button class="w-full bg-primary-container text-on-primary py-4 rounded-xl font-label-md text-label-md shadow-lg hover:shadow-primary-container/20 hover:scale-[1.02] active:scale-95 transition-all" type="submit">
+                        Sign In
+                    </button>
+</form>
+<!-- Footer Register Link -->
+<div class="mt-8 text-center">
+<p class="font-body-md text-body-md text-on-surface-variant">
+                        Don't have an account? 
+                        <a class="text-primary font-bold hover:underline" href="#">Register now</a>
+</p>
+</div>
+</div>
+<!-- Mobile Copyright (Internal Navigation Rule) -->
+<div class="mt-auto pt-8 flex flex-col items-center lg:hidden">
+<span class="font-label-sm text-label-sm text-on-surface-variant">© 2024 TicketBox. Music is life.</span>
+</div>
+</section>
+</main>
+<!-- Footer Component logic (Suppressed as per Transactional rule, but adding minimal branding for security) -->
+<footer class="hidden lg:flex fixed bottom-0 right-0 w-1/2 py-8 px-margin-desktop justify-between items-center bg-transparent pointer-events-none">
+<div class="font-label-sm text-label-sm text-on-surface-variant/50 pointer-events-auto">
+            © 2024 TicketBox. Proudly serving the Vietnamese music scene.
+        </div>
+<div class="flex space-x-6 pointer-events-auto">
+<a class="font-label-sm text-label-sm text-on-surface-variant/50 hover:text-primary transition-colors" href="#">Privacy Policy</a>
+<a class="font-label-sm text-label-sm text-on-surface-variant/50 hover:text-primary transition-colors" href="#">Terms</a>
+</div>
+</footer>
+<script>
+        function togglePassword() {
+            const passwordInput = document.getElementById('password');
+            const passwordIcon = document.getElementById('passwordIcon');
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                passwordIcon.textContent = 'visibility_off';
+            } else {
+                passwordInput.type = 'password';
+                passwordIcon.textContent = 'visibility';
+            }
+        }
+
+        // Simple animation for the error state focus
+        const emailInput = document.getElementById('email');
+        emailInput.addEventListener('focus', () => {
+            emailInput.classList.remove('border-error');
+            emailInput.classList.add('border-primary');
+        });
+
+        // Form submission micro-interaction
+        document.getElementById('loginForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const btn = e.target.querySelector('button[type="submit"]');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = `<span class="flex items-center justify-center"><svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Verifying...</span>`;
+            setTimeout(() => {
+                btn.innerHTML = originalText;
+            }, 2000);
+        });
+    </script>
+</body></html>
