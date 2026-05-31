@@ -13,7 +13,7 @@ import type { ApiErrorResponse } from "@/types/auth.types";
  */
 
 const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3001/api";
+  process.env.NEXT_PUBLIC_API_BASE_URL || "/api/proxy";
 const REQUEST_TIMEOUT = 30000; // 30 seconds
 
 // Create Axios instance
@@ -87,59 +87,55 @@ apiClient.interceptors.response.use(
 
     // Handle 401 Unauthorized
     if (error.response?.status === 401) {
+      if (!originalRequest._retry) {
+        originalRequest._retry = true;
+      }
+
       if (!isRefreshing) {
         isRefreshing = true;
 
         try {
-          // Attempt to refresh token
           const refreshToken = tokenStorage.getRefreshToken();
-
           if (!refreshToken) {
-            // No refresh token available, redirect to login
-            throw new Error("No refresh token available");
+            throw new Error('No refresh token available');
           }
 
-          // You can implement token refresh logic here
-          // For now, we'll just clear tokens and redirect
-          tokenStorage.clearTokens();
-          processQueue(null, null);
+          // Use a plain axios instance without interceptors for refresh
+          const plain = axios.create({ baseURL: API_BASE_URL });
+          const refreshResp = await plain.post('/auth/refresh', { refreshToken });
 
-          // Redirect to login page
-          if (typeof window !== "undefined") {
-            window.location.href = "/login";
+          if (refreshResp?.data) {
+            const newAccess = refreshResp.data.accessToken;
+            const newRefresh = refreshResp.data.refreshToken;
+            tokenStorage.setTokens(newAccess, newRefresh);
+            processQueue(null, newAccess);
+          } else {
+            throw new Error('Invalid refresh response');
           }
-
-          return Promise.reject(error);
         } catch (err) {
-          // Refresh failed, clear tokens and redirect
           tokenStorage.clearTokens();
           processQueue(err, null);
-
-          if (typeof window !== "undefined") {
-            window.location.href = "/login";
+          if (typeof window !== 'undefined') {
+            window.location.href = '/login';
           }
-
           return Promise.reject(error);
         } finally {
           isRefreshing = false;
         }
       }
 
-      // Wait for token refresh to complete
       return new Promise((resolve, reject) => {
-        failedQueue.push({
-          resolve,
-          reject,
-        });
-      }).then(() => {
-        // Retry original request with new token
-        const token = tokenStorage.getAccessToken();
-        if (token && originalRequest.headers) {
-          originalRequest.headers.Authorization = `Bearer ${token}`;
-          return apiClient(originalRequest);
-        }
-        return Promise.reject(error);
-      });
+        failedQueue.push({ resolve, reject });
+      })
+        .then((token) => {
+          const t = token as string | null;
+          if (t && originalRequest.headers) {
+            originalRequest.headers.Authorization = `Bearer ${t}`;
+            return apiClient(originalRequest);
+          }
+          return Promise.reject(error);
+        })
+        .catch((err) => Promise.reject(err));
     }
 
     // Handle 403 Forbidden

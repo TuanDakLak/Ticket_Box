@@ -1,7 +1,7 @@
 import type { TokenPayload } from "@/types/auth.types";
 
-const ACCESS_TOKEN_KEY = "access_token";
-const REFRESH_TOKEN_KEY = "refresh_token";
+const ACCESS_TOKEN_KEY = "accessToken";
+const REFRESH_TOKEN_KEY = "refreshToken";
 
 /**
  * Storage utility functions for token management

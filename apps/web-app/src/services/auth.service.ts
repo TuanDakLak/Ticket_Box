@@ -19,9 +19,10 @@ export const authService = {
       });
 
       if (response.data) {
+        // Backend returns camelCase: accessToken, refreshToken
         tokenStorage.setTokens(
-          response.data.access_token,
-          response.data.refresh_token
+          response.data.accessToken,
+          response.data.refreshToken
         );
       }
 
@@ -38,20 +39,23 @@ export const authService = {
   register: async (
     email: string,
     password: string,
-    full_name: string
+    fullName: string
   ): Promise<AuthResponse> => {
     try {
       const response = await apiClient.post<AuthResponse>("/auth/register", {
         email,
         password,
-        full_name,
+        fullName,
       });
 
       if (response.data) {
-        tokenStorage.setTokens(
-          response.data.access_token,
-          response.data.refresh_token
-        );
+        // Register response may not include tokens; guard accordingly
+        if ((response.data as any).accessToken && (response.data as any).refreshToken) {
+          tokenStorage.setTokens(
+            (response.data as any).accessToken,
+            (response.data as any).refreshToken
+          );
+        }
       }
 
       return response.data;
@@ -80,15 +84,15 @@ export const authService = {
       }
 
       const response = await apiClient.post<AuthResponse>(
-        "/auth/refresh-token",
+        "/auth/refresh",
         {
-          refresh_token: refreshToken,
+          refreshToken,
         }
       );
 
       if (response.data) {
-        tokenStorage.setAccessToken(response.data.access_token);
-        return response.data.access_token;
+        tokenStorage.setTokens(response.data.accessToken, response.data.refreshToken);
+        return response.data.accessToken;
       }
 
       throw new Error("Failed to refresh token");

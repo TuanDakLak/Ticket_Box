@@ -11,14 +11,15 @@ export interface TokenPayload {
 }
 
 export interface AuthResponse {
-  access_token: string;
-  refresh_token: string;
-  expires_in: number;
+  accessToken: string;
+  refreshToken: string;
+  expires_in?: number;
   user: {
     id: string;
     email: string;
-    full_name: string;
-    role: string;
+    fullName: string;
+    roles: string[];
+    permissions?: string[];
   };
 }
 

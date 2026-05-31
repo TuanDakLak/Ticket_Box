@@ -1,8 +1,31 @@
+"use client";
+
 import Link from "next/link";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { TicketBoxAuthShell } from "@/components/ticketbox-auth-shell";
 import { ConcertHeroIllustration } from "@/components/ticketbox-illustrations";
+import { authService } from "@/services/auth.service";
 
 export default function LoginPage() {
+  const router = useRouter();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const onSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      await authService.login(email, password);
+      router.push("/dashboard");
+    } catch (err: any) {
+      alert(err?.response?.data?.message || err?.message || 'Login failed');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <TicketBoxAuthShell
       title="Welcome back"
@@ -13,17 +36,17 @@ export default function LoginPage() {
         { label: "Create account", href: "/register" },
       ]}
     >
-      <form className="space-y-5">
+      <form className="space-y-5" onSubmit={onSubmit}>
         <div>
           <label className="ticketbox-label" htmlFor="email">Email address</label>
-          <input id="email" type="email" className="ticketbox-input" placeholder="name@company.com" />
+          <input id="email" value={email} onChange={(e) => setEmail(e.target.value)} type="email" className="ticketbox-input" placeholder="name@company.com" />
         </div>
         <div>
           <div className="mb-2 flex items-center justify-between gap-3">
             <label className="ticketbox-label mb-0" htmlFor="password">Password</label>
             <Link href="/forgot-password" className="text-sm font-medium text-[#0f62fe] hover:text-[#0353e9]">Forgot password?</Link>
           </div>
-          <input id="password" type="password" className="ticketbox-input" placeholder="••••••••" />
+          <input id="password" value={password} onChange={(e) => setPassword(e.target.value)} type="password" className="ticketbox-input" placeholder="••••••••" />
         </div>
         <label className="flex items-center gap-3 rounded-2xl border border-slate-200 px-4 py-3 text-sm text-slate-600">
           <input type="checkbox" className="h-4 w-4 rounded border-slate-300 text-[#0f62fe] focus:ring-[#0f62fe]" />
@@ -32,7 +55,7 @@ export default function LoginPage() {
         <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
           Account not verified. <Link href="/resend-verification" className="font-semibold underline">Resend verification email</Link>
         </div>
-        <button className="ticketbox-button-primary w-full">Sign in</button>
+        <button className="ticketbox-button-primary w-full" disabled={loading}>{loading ? 'Signing in...' : 'Sign in'}</button>
       </form>
     </TicketBoxAuthShell>
   );
