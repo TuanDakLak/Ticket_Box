@@ -58,7 +58,7 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
       return null;
     }
 
-    let value: string | null = null;
+    let value: string | null;
     try {
       value = await this.client.get(key);
     } catch (error) {
