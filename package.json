@@ -9,6 +9,8 @@
         "prisma:generate": "prisma generate",
         "prisma:validate": "prisma validate",
         "db:migrate:deploy": "prisma migrate deploy",
+        "setup:hooks": "git config core.hooksPath .githooks",
+        "verify:push": "npm run lint && npm run typecheck:api && npm run test:api:unit",
         "lint": "eslint \"apps/backend-api/src/**/*.ts\" \"prisma/**/*.ts\" \"prisma/seed.ts\" --cache --cache-location .cache/eslint",
         "typecheck:api": "tsc -p apps/backend-api/tsconfig.json --noEmit",
         "test:api:unit": "node --test --import tsx apps/backend-api/tests/concert-cache-aside.unit.ts",
