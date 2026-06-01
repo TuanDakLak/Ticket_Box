@@ -110,6 +110,7 @@ model Order {
   status       String   @db.VarChar(50)
   created_at   DateTime @default(now())
   expires_at   DateTime
+  ticket_metadata Json?  @db.JsonB
 
   user                 User                 @relation(fields: [user_id], references: [id])
   concert              Concert              @relation(fields: [concert_id], references: [id])
