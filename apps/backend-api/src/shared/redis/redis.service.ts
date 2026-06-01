@@ -34,7 +34,7 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
       this.client.on('error', this.handleClientError);
       this.errorLogSuppressed = false;
       this.logger.log(`Connected to Redis${url ? ` at ${url}` : ` at ${host}:${port}`}`);
-    } catch (error) {
+    } catch {
       this.logger.warn('Redis is unavailable; cache operations will be skipped');
       await this.safeCloseClient();
       this.client = null;
