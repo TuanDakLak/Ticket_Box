@@ -7,6 +7,13 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
   private client: RedisClientType | null = null;
   private readonly connectTimeoutMs = Number(process.env.REDIS_CONNECT_TIMEOUT_MS ?? 3000);
   private errorLogSuppressed = false;
+  private readonly handleClientError = (error: unknown) => {
+    if (!this.errorLogSuppressed) {
+      this.logger.error('Redis client error', error);
+      this.logger.warn('Suppressing repeated Redis client errors. Cache will be bypassed until Redis recovers.');
+      this.errorLogSuppressed = true;
+    }
+  };
 
   async onModuleInit() {
     const url = process.env.REDIS_URL;
@@ -22,20 +29,13 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
       ? createClient({ url, socket: socketOptions })
       : createClient({ socket: { ...socketOptions, host, port } });
 
-    this.client.on('error', (error: unknown) => {
-      if (!this.errorLogSuppressed) {
-        this.logger.error('Redis client error', error);
-        this.logger.warn('Suppressing repeated Redis client errors. Cache will be bypassed until Redis recovers.');
-        this.errorLogSuppressed = true;
-      }
-    });
-
     try {
       await this.client.connect();
+      this.client.on('error', this.handleClientError);
       this.errorLogSuppressed = false;
       this.logger.log(`Connected to Redis${url ? ` at ${url}` : ` at ${host}:${port}`}`);
     } catch (error) {
-      this.logger.warn('Redis is unavailable; cache operations will be skipped', error as Error);
+      this.logger.warn('Redis is unavailable; cache operations will be skipped');
       await this.safeCloseClient();
       this.client = null;
     }
