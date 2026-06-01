@@ -4,11 +4,11 @@ import { PrismaService } from '../../shared/prisma.service';
 import { ConcertService } from './services/concert.service';
 import { ConcertController } from './controllers/concert.controller';
 import { RolesGuard } from '../../shared/guards/roles.guard';
-import { RedisService } from '../../shared/redis';
+import { RedisModule } from '../../shared/redis/redis.module';
 
 @Module({
-  imports: [],
-  providers: [PrismaService, RedisService, ConcertRepository, ConcertService, RolesGuard],
+  imports: [RedisModule],
+  providers: [PrismaService, ConcertRepository, ConcertService, RolesGuard],
   controllers: [ConcertController],
   exports: [ConcertRepository, ConcertService],
 })
