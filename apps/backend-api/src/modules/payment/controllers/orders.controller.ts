@@ -16,8 +16,11 @@ import {
     ApiTags,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../../shared/guards/jwt-auth.guard';
+import { RolesGuard } from '../../../shared/guards/roles.guard';
+import { Roles } from '../../../shared/decorators/roles.decorator';
 import { OrdersService } from '../services/orders.service';
 import { OrderListQueryDto } from '../dtos/order-list-query.dto';
+import { AdminOrderListQueryDto } from '../dtos/admin-order-list-query.dto';
 import { OrderListResponseDto } from '../dtos/order-list-response.dto';
 import { OrderDetailDto } from '../dtos/order-detail.dto';
 
@@ -34,6 +37,25 @@ export class OrdersController {
     @ApiOkResponse({ type: OrderListResponseDto })
     async getOrders(@Req() req: any, @Query() query: OrderListQueryDto) {
         return this.ordersService.getOrderHistory(req.user.sub, query);
+    }
+
+    @Get('admin')
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles('ADMIN')
+    @ApiOperation({ summary: 'Admin search order history' })
+    @ApiOkResponse({ type: OrderListResponseDto })
+    async getAdminOrders(@Query() query: AdminOrderListQueryDto) {
+        return this.ordersService.getAdminOrderHistory(query);
+    }
+
+    @Get('admin/:id')
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles('ADMIN')
+    @ApiOperation({ summary: 'Admin get any order detail' })
+    @ApiOkResponse({ type: OrderDetailDto })
+    @ApiNotFoundResponse({ description: 'Order not found' })
+    async getAdminOrderById(@Param('id') id: string) {
+        return this.ordersService.getAdminOrderDetail(id);
     }
 
     @Get(':id')
