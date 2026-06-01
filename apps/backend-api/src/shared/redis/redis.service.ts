@@ -100,6 +100,26 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
     return true;
   }
 
+  async setIfAbsentJson(key: string, value: unknown, ttlSeconds?: number): Promise<boolean> {
+    const client = this.client;
+    if (!client || !client.isOpen) {
+      return false;
+    }
+
+    const payload = JSON.stringify(value);
+    try {
+      const result = await client.set(key, payload, {
+        NX: true,
+        ...(ttlSeconds && ttlSeconds > 0 ? { EX: ttlSeconds } : {}),
+      });
+
+      return result === 'OK';
+    } catch {
+      this.markClientUnavailable();
+      return false;
+    }
+  }
+
   async delete(key: string): Promise<number> {
     const client = this.client;
     if (!client || !client.isOpen) {
