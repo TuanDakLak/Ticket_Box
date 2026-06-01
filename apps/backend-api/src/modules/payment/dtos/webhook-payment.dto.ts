@@ -19,7 +19,7 @@ export class WebhookPaymentDto {
     payment_method!: PaymentMethod;
 
     @ApiProperty({ example: 'pay_3rd_party_12345' })
-    @IsUUID('4', { message: 'transaction_id_3rd_party must be a UUID v4 in mock mode' })
+    @IsUUID('4', { message: 'transaction_id_3rd_party must be a UUID v4' })
     transaction_id_3rd_party!: string;
 
     @ApiProperty({ enum: WebhookPaymentStatus, example: WebhookPaymentStatus.SUCCESS })

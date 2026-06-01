@@ -16,7 +16,7 @@ export class PaymentProcessResponseDto {
     @ApiProperty({ example: 'SUCCESS' })
     gateway_status!: string;
 
-    @ApiPropertyOptional({ example: 'https://mock-gateway.ticketbox.local/pay/...' })
+    @ApiPropertyOptional({ example: 'https://payments.ticketbox.local/checkout/...' })
     checkout_url?: string | null;
 
     @ApiProperty({ example: '8a0d2b4e-3d1e-4b89-a9ff-65de6f7ccabc' })
