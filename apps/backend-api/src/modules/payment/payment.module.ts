@@ -7,8 +7,7 @@ import { PaymentService } from './services/payment.service';
 import { OrdersService } from './services/orders.service';
 import { RolesGuard } from '../../shared/guards/roles.guard';
 import { PaymentGatewayClient } from './services/gateway/payment-gateway.client';
-import { MomoStrategy } from './services/gateway/momo.strategy';
-import { VnpayStrategy } from './services/gateway/vnpay.strategy';
+import { PayOsStrategy } from './services/gateway/payos.strategy';
 import { PaymentIdempotencyInterceptor } from './interceptors/payment-idempotency.interceptor';
 
 @Module({
@@ -19,8 +18,7 @@ import { PaymentIdempotencyInterceptor } from './interceptors/payment-idempotenc
         OrdersService,
         RolesGuard,
         PaymentGatewayClient,
-        VnpayStrategy,
-        MomoStrategy,
+        PayOsStrategy,
         PaymentIdempotencyInterceptor,
     ],
     controllers: [PaymentController, OrdersController],

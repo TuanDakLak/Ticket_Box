@@ -13,7 +13,7 @@ import { RedisService } from '../../../shared/redis';
 import { CreatePaymentDto } from '../dtos/create-payment.dto';
 import { PaymentMethod } from '../dtos/payment-method.enum';
 import { PaymentProcessResponseDto } from '../dtos/payment-process-response.dto';
-import { PaymentWebhookRequestDto, PaymentWebhookOutcome } from '../dtos/payment-webhook-request.dto';
+import { PaymentWebhookRequestDto } from '../dtos/payment-webhook-request.dto';
 import { PaymentWebhookResponseDto } from '../dtos/payment-webhook-response.dto';
 import { PaymentTicketBreakdownDto } from '../dtos/payment-ticket-breakdown.dto';
 import { PaymentGatewayClient } from './gateway/payment-gateway.client';
@@ -129,7 +129,7 @@ export class PaymentService {
             where: { idempotency_key: normalizedKey },
         });
         if (existingTransaction) {
-            const mapped = this.mapProcessTransaction(existingTransaction, normalizedKey, 'CLOSED', null, 'SUCCESS');
+            const mapped = this.mapProcessTransaction(existingTransaction, normalizedKey, 'CLOSED', null, null, null, 'SUCCESS');
             await this.persistIdempotencyCompletion(cacheKey, mapped);
             return mapped;
         }
@@ -163,6 +163,8 @@ export class PaymentService {
                 normalizedKey,
                 this.paymentGatewayClient.getCircuitState(dto.payment_method),
                 gatewayResult.checkoutUrl,
+                gatewayResult.qrCode ?? null,
+                gatewayResult.accountName ?? null,
                 gatewayResult.outcome,
             );
 
@@ -199,6 +201,8 @@ export class PaymentService {
                 normalizedKey,
                 this.paymentGatewayClient.getCircuitState(dto.payment_method),
                 null,
+                null,
+                null,
                 'ERROR',
             );
             await this.persistIdempotencyFailure(cacheKey, normalizedKey, {
@@ -213,13 +217,23 @@ export class PaymentService {
         dto: PaymentWebhookRequestDto,
         signature: string | undefined,
     ): Promise<PaymentWebhookResponseDto> {
-        this.paymentGatewayClient.verifyWebhookSignature(dto.payment_method, dto, signature);
+        await this.paymentGatewayClient.verifyWebhookSignature(PaymentMethod.PAYOS, dto, signature);
+
+        // If this is a webhook confirmation request from PayOS, return success immediately
+        if (dto.desc === 'confirm webhook' || dto.data?.description === 'confirm webhook' || !dto.data?.paymentLinkId) {
+            return new PaymentWebhookResponseDto({
+                order_status: 'PENDING',
+                payment_status: 'SUCCESS',
+                ticket_count: 0,
+                message: 'Webhook confirmed',
+                ticket_ids: [],
+            });
+        }
 
         const transaction = await this.prisma.paymentTransaction.findFirst({
             where: {
-                idempotency_key: dto.idempotency_key,
-                order_id: dto.order_id,
-                payment_method: dto.payment_method,
+                transaction_id_3rd_party: String(dto.data.paymentLinkId),
+                payment_method: PaymentMethod.PAYOS,
             },
             include: {
                 order: {
@@ -237,13 +251,12 @@ export class PaymentService {
             throw new NotFoundException('Payment transaction not found');
         }
 
-        if (dto.outcome === PaymentWebhookOutcome.FAILED) {
+        if (dto.code !== '00') { // 00 means success in PayOS
             await this.prisma.$transaction(async (tx) => {
                 await tx.paymentTransaction.update({
                     where: { id: transaction.id },
                     data: {
                         status: 'FAILED',
-                        transaction_id_3rd_party: dto.transaction_id_3rd_party,
                         raw_response: this.mergeTelemetry(transaction.raw_response, {
                             webhook: this.buildWebhookTelemetry(dto, signature),
                         }) as Prisma.JsonObject,
@@ -270,7 +283,7 @@ export class PaymentService {
                 where: { id: transaction.id },
                 data: {
                     status: 'SUCCESS',
-                    transaction_id_3rd_party: dto.transaction_id_3rd_party,
+                    transaction_id_3rd_party: String(dto.data.paymentLinkId),
                     raw_response: this.mergeTelemetry(transaction.raw_response, {
                         webhook: this.buildWebhookTelemetry(dto, signature),
                     }) as Prisma.JsonObject,
@@ -294,7 +307,7 @@ export class PaymentService {
                 where: { id: transaction.id },
                 data: {
                     status: 'SUCCESS',
-                    transaction_id_3rd_party: dto.transaction_id_3rd_party,
+                    transaction_id_3rd_party: String(dto.data.paymentLinkId),
                     raw_response: this.mergeTelemetry(transaction.raw_response, {
                         webhook: this.buildWebhookTelemetry(dto, signature),
                     }) as Prisma.JsonObject,
@@ -351,7 +364,7 @@ export class PaymentService {
             return null;
         }
 
-        const result = this.mapProcessTransaction(existingTransaction, idempotencyKey, this.paymentGatewayClient.getCircuitState(existingTransaction.payment_method as PaymentMethod), null, 'SUCCESS');
+        const result = this.mapProcessTransaction(existingTransaction, idempotencyKey, this.paymentGatewayClient.getCircuitState(existingTransaction.payment_method as PaymentMethod), null, null, null, 'SUCCESS');
         await this.persistIdempotencyCompletion(cacheKey, result);
         return result;
     }
@@ -361,6 +374,8 @@ export class PaymentService {
         idempotencyKey: string,
         circuitBreakerState: ReturnType<PaymentGatewayClient['getCircuitState']>,
         checkoutUrl: string | null,
+        qrCode: string | null,
+        accountName: string | null,
         gatewayStatus: string,
     ): PaymentProcessResponseDto {
         return new PaymentProcessResponseDto({
@@ -370,6 +385,8 @@ export class PaymentService {
             status: transaction.status,
             gateway_status: gatewayStatus,
             checkout_url: checkoutUrl,
+            qr_code: qrCode,
+            account_name: accountName,
             idempotency_key: idempotencyKey,
             circuit_breaker_state: circuitBreakerState,
         });
@@ -398,7 +415,7 @@ export class PaymentService {
             concert: { ticket_categories: Array<{ id: string; name: string }> };
         },
     ): PaymentTicketBreakdownDto[] {
-        const fromWebhook = dto.ticket_breakdown ?? [];
+        const fromWebhook = dto.data?.ticket_breakdown ?? [];
         if (fromWebhook.length > 0) {
             return fromWebhook;
         }
@@ -478,9 +495,7 @@ export class PaymentService {
         };
     }
 
-    private verifyWebhookSignature(dto: PaymentWebhookRequestDto, signature: string | undefined): void {
-        this.paymentGatewayClient.verifyWebhookSignature(dto.payment_method, dto, signature);
-    }
+
 
     private async persistIdempotencyCompletion(
         cacheKey: string,

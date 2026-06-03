@@ -2,8 +2,7 @@ import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import CircuitBreaker from 'opossum';
 import { PaymentMethod } from '../../dtos/payment-method.enum';
 import { PaymentGatewaySessionInput, PaymentGatewaySessionResult, PaymentGatewayState, PaymentGatewayStrategy } from './payment-gateway.types';
-import { MomoStrategy } from './momo.strategy';
-import { VnpayStrategy } from './vnpay.strategy';
+import { PayOsStrategy } from './payos.strategy';
 
 @Injectable()
 export class PaymentGatewayClient {
@@ -12,8 +11,7 @@ export class PaymentGatewayClient {
     private readonly states = new Map<PaymentMethod, PaymentGatewayState>();
 
     constructor(
-        private readonly vnpayStrategy: VnpayStrategy,
-        private readonly momoStrategy: MomoStrategy,
+        private readonly payosStrategy: PayOsStrategy,
     ) {}
 
     async createPaymentSession(
@@ -28,8 +26,8 @@ export class PaymentGatewayClient {
         return this.states.get(paymentMethod) ?? 'CLOSED';
     }
 
-    verifyWebhookSignature(paymentMethod: PaymentMethod, payload: unknown, signature: string | undefined): void {
-        this.getStrategy(paymentMethod).verifyWebhookSignature(payload, signature);
+    async verifyWebhookSignature(paymentMethod: PaymentMethod, payload: unknown, signature: string | undefined): Promise<void> {
+        await this.getStrategy(paymentMethod).verifyWebhookSignature(payload, signature);
     }
 
     private getBreaker(paymentMethod: PaymentMethod): CircuitBreaker<[PaymentGatewaySessionInput], PaymentGatewaySessionResult> {
@@ -77,10 +75,8 @@ export class PaymentGatewayClient {
 
     private getStrategy(paymentMethod: PaymentMethod): PaymentGatewayStrategy {
         switch (paymentMethod) {
-            case PaymentMethod.VNPAY:
-                return this.vnpayStrategy;
-            case PaymentMethod.MOMO:
-                return this.momoStrategy;
+            case PaymentMethod.PAYOS:
+                return this.payosStrategy;
             default:
                 throw new BadRequestException(`Unsupported payment method: ${paymentMethod}`);
         }

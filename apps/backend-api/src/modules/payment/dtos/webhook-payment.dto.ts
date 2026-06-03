@@ -14,7 +14,7 @@ export class WebhookPaymentDto {
     @IsUUID()
     order_id!: string;
 
-    @ApiProperty({ enum: PaymentMethod, example: PaymentMethod.VNPAY })
+    @ApiProperty({ enum: PaymentMethod, example: PaymentMethod.PAYOS })
     @IsEnum(PaymentMethod)
     payment_method!: PaymentMethod;
 

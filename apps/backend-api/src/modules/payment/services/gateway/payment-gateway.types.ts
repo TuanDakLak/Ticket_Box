@@ -17,6 +17,8 @@ export type PaymentGatewaySessionResult = {
     paymentMethod: PaymentMethod;
     providerTransactionId: string;
     checkoutUrl: string;
+    qrCode?: string;
+    accountName?: string;
     outcome: PaymentGatewayOutcome;
     raw: Record<string, unknown>;
 };
@@ -26,5 +28,5 @@ export interface PaymentGatewayStrategy {
 
     createPaymentSession(input: PaymentGatewaySessionInput): Promise<PaymentGatewaySessionResult>;
 
-    verifyWebhookSignature(payload: unknown, signature: string | undefined): void;
+    verifyWebhookSignature(payload: unknown, signature: string | undefined): Promise<void> | void;
 }

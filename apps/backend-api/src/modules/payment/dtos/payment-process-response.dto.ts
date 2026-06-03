@@ -19,6 +19,12 @@ export class PaymentProcessResponseDto {
     @ApiPropertyOptional({ example: 'https://payments.ticketbox.local/checkout/...' })
     checkout_url?: string | null;
 
+    @ApiPropertyOptional({ example: '00020101021238580010A000000727012800069704070114...6304D1B5' })
+    qr_code?: string | null;
+
+    @ApiPropertyOptional({ example: 'TICKET BOX VN' })
+    account_name?: string | null;
+
     @ApiProperty({ example: '8a0d2b4e-3d1e-4b89-a9ff-65de6f7ccabc' })
     idempotency_key!: string;
 
