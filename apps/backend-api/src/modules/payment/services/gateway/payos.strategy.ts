@@ -66,14 +66,10 @@ export class PayOsStrategy implements PaymentGatewayStrategy {
         }
     }
 
-    async verifyWebhookSignature(payload: unknown, signature: string | undefined): Promise<void> {
+    async verifyWebhookSignature(payload: unknown): Promise<void> {
         try {
-            if (!signature) {
-                throw new BadRequestException('Missing webhook signature');
-            }
-            
-            // For PayOS, the payload comes as a standard body and PayOS verifies it.
-            // Assuming payload contains `data` and `signature`
+            // For PayOS, the signature is embedded inside the payload body (payload.signature)
+            // webhooks.verify verifies the webhook data from the body
             const webhookData = await this.payOS.webhooks.verify(payload as any);
             if (!webhookData) {
                 throw new BadRequestException('Invalid PayOS signature');

@@ -26,8 +26,8 @@ export class PaymentGatewayClient {
         return this.states.get(paymentMethod) ?? 'CLOSED';
     }
 
-    async verifyWebhookSignature(paymentMethod: PaymentMethod, payload: unknown, signature: string | undefined): Promise<void> {
-        await this.getStrategy(paymentMethod).verifyWebhookSignature(payload, signature);
+    async verifyWebhookSignature(paymentMethod: PaymentMethod, payload: unknown): Promise<void> {
+        await this.getStrategy(paymentMethod).verifyWebhookSignature(payload);
     }
 
     private getBreaker(paymentMethod: PaymentMethod): CircuitBreaker<[PaymentGatewaySessionInput], PaymentGatewaySessionResult> {

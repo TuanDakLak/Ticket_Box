@@ -28,5 +28,5 @@ export interface PaymentGatewayStrategy {
 
     createPaymentSession(input: PaymentGatewaySessionInput): Promise<PaymentGatewaySessionResult>;
 
-    verifyWebhookSignature(payload: unknown, signature: string | undefined): Promise<void> | void;
+    verifyWebhookSignature(payload: unknown): Promise<void> | void;
 }

@@ -215,9 +215,8 @@ export class PaymentService {
 
     async handleWebhook(
         dto: PaymentWebhookRequestDto,
-        signature: string | undefined,
     ): Promise<PaymentWebhookResponseDto> {
-        await this.paymentGatewayClient.verifyWebhookSignature(PaymentMethod.PAYOS, dto, signature);
+        await this.paymentGatewayClient.verifyWebhookSignature(PaymentMethod.PAYOS, dto);
 
         // If this is a webhook confirmation request from PayOS, return success immediately
         if (dto.desc === 'confirm webhook' || dto.data?.description === 'confirm webhook' || !dto.data?.paymentLinkId) {
@@ -258,7 +257,7 @@ export class PaymentService {
                     data: {
                         status: 'FAILED',
                         raw_response: this.mergeTelemetry(transaction.raw_response, {
-                            webhook: this.buildWebhookTelemetry(dto, signature),
+                            webhook: this.buildWebhookTelemetry(dto, dto.signature),
                         }) as Prisma.JsonObject,
                     },
                 });
@@ -285,7 +284,7 @@ export class PaymentService {
                     status: 'SUCCESS',
                     transaction_id_3rd_party: String(dto.data.paymentLinkId),
                     raw_response: this.mergeTelemetry(transaction.raw_response, {
-                        webhook: this.buildWebhookTelemetry(dto, signature),
+                        webhook: this.buildWebhookTelemetry(dto, dto.signature),
                     }) as Prisma.JsonObject,
                 },
             });
@@ -309,7 +308,7 @@ export class PaymentService {
                     status: 'SUCCESS',
                     transaction_id_3rd_party: String(dto.data.paymentLinkId),
                     raw_response: this.mergeTelemetry(transaction.raw_response, {
-                        webhook: this.buildWebhookTelemetry(dto, signature),
+                        webhook: this.buildWebhookTelemetry(dto, dto.signature),
                     }) as Prisma.JsonObject,
                 },
             });

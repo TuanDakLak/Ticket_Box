@@ -51,14 +51,12 @@ export class PaymentController {
     @Post('webhook')
     @HttpCode(HttpStatus.OK)
     @ApiOperation({ summary: 'Handle payment provider webhook callback' })
-    @ApiHeader({ name: 'X-Payment-Signature', required: true, description: 'HMAC signature for webhook verification' })
     @ApiBody({ type: PaymentWebhookRequestDto })
     @ApiCreatedResponse({ type: PaymentWebhookResponseDto })
     @ApiBadRequestResponse({ description: 'Validation failed or signature mismatch' })
     async handleWebhook(
-        @Req() req: any,
         @Body() dto: PaymentWebhookRequestDto,
     ) {
-        return this.paymentService.handleWebhook(dto, req.headers['x-payment-signature']);
+        return this.paymentService.handleWebhook(dto);
     }
 }
