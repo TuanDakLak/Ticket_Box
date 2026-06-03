@@ -69,6 +69,7 @@ export class ConcertService {
     const created = await this.concertRepo.create(payload);
     await this.invalidateConcertListCaches();
     await this.redisService.setJson(this.getConcertDetailCacheKey(created.id), created, this.cacheTtlSeconds);
+    await this.warmUpConcertRedisCache(created);
     return created;
   }
 
@@ -79,6 +80,7 @@ export class ConcertService {
     const updated = await this.concertRepo.update(id, payload);
     await this.redisService.setJson(this.getConcertDetailCacheKey(id), updated, this.cacheTtlSeconds);
     await this.invalidateConcertListCaches();
+    await this.warmUpConcertRedisCache(updated);
     return updated;
   }
 
@@ -92,6 +94,22 @@ export class ConcertService {
     await this.redisService.setJson(this.getConcertDetailCacheKey(id), deleted, this.cacheTtlSeconds);
     await this.invalidateConcertListCaches();
     return deleted;
+  }
+
+  private async warmUpConcertRedisCache(concert: ConcertResponseDto) {
+    if (concert.status === 'PUBLISHED' && concert.ticketTiers) {
+      const client = this.redisService.getClient();
+      if (client && client.isOpen) {
+        for (const tier of concert.ticketTiers) {
+          const key = `category:${tier.id}`;
+          await client.hSet(key, {
+            available: tier.total_quantity.toString(),
+            max_per_user: tier.max_per_user.toString(),
+          });
+          this.logger.log(`[Redis Warmup] Automatically initialized category ${tier.id} for concert ${concert.name}`);
+        }
+      }
+    }
   }
 
   private getConcertListCacheKey(
