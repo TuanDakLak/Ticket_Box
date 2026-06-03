@@ -6,10 +6,21 @@ import { OrdersController } from './controllers/orders.controller';
 import { PaymentService } from './services/payment.service';
 import { OrdersService } from './services/orders.service';
 import { RolesGuard } from '../../shared/guards/roles.guard';
+import { PaymentGatewayClient } from './services/gateway/payment-gateway.client';
+import { PayOsStrategy } from './services/gateway/payos.strategy';
+import { PaymentIdempotencyInterceptor } from './interceptors/payment-idempotency.interceptor';
 
 @Module({
     imports: [RedisModule],
-    providers: [PrismaService, PaymentService, OrdersService, RolesGuard],
+    providers: [
+        PrismaService,
+        PaymentService,
+        OrdersService,
+        RolesGuard,
+        PaymentGatewayClient,
+        PayOsStrategy,
+        PaymentIdempotencyInterceptor,
+    ],
     controllers: [PaymentController, OrdersController],
     exports: [PaymentService, OrdersService],
 })
