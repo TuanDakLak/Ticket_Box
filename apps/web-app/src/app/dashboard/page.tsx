@@ -10,8 +10,8 @@ function DashboardContent() {
   const router = useRouter();
   const { user, logout } = useAuth();
 
-  const handleLogout = () => {
-    authService.logout();
+  const handleLogout = async () => {
+    await authService.logout();
     logout();
     router.push("/");
   };
@@ -51,7 +51,7 @@ function DashboardContent() {
             <h2 className="text-2xl font-black text-slate-900">User information</h2>
             <div className="mt-5 space-y-4 text-sm text-slate-600">
               <div className="rounded-2xl bg-slate-50 px-4 py-3"><strong>Email:</strong> {user?.email}</div>
-              <div className="rounded-2xl bg-slate-50 px-4 py-3"><strong>Role:</strong> {user?.role || "User"}</div>
+              <div className="rounded-2xl bg-slate-50 px-4 py-3"><strong>Roles:</strong> {user?.roles?.join(", ") || "User"}</div>
               <div className="rounded-2xl bg-slate-50 px-4 py-3"><strong>Permissions:</strong> {user?.permissions?.join(", ") || "None"}</div>
             </div>
             <div className="mt-6 rounded-[24px] border border-[#0f62fe]/20 bg-[#eff6ff] p-5">

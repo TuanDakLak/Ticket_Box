@@ -10,17 +10,32 @@ export interface TokenPayload {
   exp?: number;
 }
 
+export interface UserProfile {
+  id: string;
+  email: string;
+  fullName: string;
+  status?: string;
+  roles: string[];
+  permissions?: string[];
+}
+
 export interface AuthResponse {
   accessToken: string;
   refreshToken: string;
   expires_in?: number;
-  user: {
-    id: string;
-    email: string;
-    fullName: string;
-    roles: string[];
-    permissions?: string[];
-  };
+  user: UserProfile;
+}
+
+export interface RegisterResponse {
+  id: string;
+  email: string;
+  fullName: string;
+  status: string;
+  roles: string[];
+}
+
+export interface MessageResponse {
+  message: string;
 }
 
 export interface ApiErrorResponse {

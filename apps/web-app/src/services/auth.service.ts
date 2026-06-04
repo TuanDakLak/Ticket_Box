@@ -1,5 +1,10 @@
 import apiClient from "./api";
-import type { AuthResponse } from "@/types/auth.types";
+import type {
+  AuthResponse,
+  MessageResponse,
+  RegisterResponse,
+  UserProfile,
+} from "@/types/auth.types";
 import { tokenStorage } from "@/utils/token.utils";
 
 /**
@@ -40,23 +45,13 @@ export const authService = {
     email: string,
     password: string,
     fullName: string
-  ): Promise<AuthResponse> => {
+  ): Promise<RegisterResponse> => {
     try {
-      const response = await apiClient.post<AuthResponse>("/auth/register", {
+      const response = await apiClient.post<RegisterResponse>("/auth/register", {
         email,
         password,
         fullName,
       });
-
-      if (response.data) {
-        // Register response may not include tokens; guard accordingly
-        if ((response.data as any).accessToken && (response.data as any).refreshToken) {
-          tokenStorage.setTokens(
-            (response.data as any).accessToken,
-            (response.data as any).refreshToken
-          );
-        }
-      }
 
       return response.data;
     } catch (error) {
@@ -66,10 +61,74 @@ export const authService = {
   },
 
   /**
-   * Logout - clear tokens
+   * Logout - invalidate refresh token on server and clear local tokens
    */
-  logout: (): void => {
-    tokenStorage.clearTokens();
+  logout: async (): Promise<void> => {
+    try {
+      await apiClient.post<MessageResponse>("/auth/logout");
+    } catch {
+      // ignore
+    } finally {
+      tokenStorage.clearTokens();
+    }
+  },
+
+  /**
+   * Resend email verification
+   */
+  resendVerification: async (email: string): Promise<MessageResponse> => {
+    const response = await apiClient.post<MessageResponse>(
+      "/auth/resend-verification",
+      { email }
+    );
+    return response.data;
+  },
+
+  /**
+   * Restore session on reload (F5)
+   */
+  me: async (): Promise<UserProfile> => {
+    const response = await apiClient.get<UserProfile>("/auth/me");
+    return response.data;
+  },
+
+  /**
+   * Change password
+   */
+  changePassword: async (
+    oldPassword: string,
+    newPassword: string
+  ): Promise<MessageResponse> => {
+    const response = await apiClient.post<MessageResponse>(
+      "/auth/change-password",
+      { oldPassword, newPassword }
+    );
+    return response.data;
+  },
+
+  /**
+   * Forgot password
+   */
+  forgotPassword: async (email: string): Promise<MessageResponse> => {
+    const response = await apiClient.post<MessageResponse>(
+      "/auth/forgot-password",
+      { email }
+    );
+    return response.data;
+  },
+
+  /**
+   * Reset password
+   */
+  resetPassword: async (
+    token: string,
+    newPassword: string
+  ): Promise<MessageResponse> => {
+    const response = await apiClient.post<MessageResponse>(
+      "/auth/reset-password",
+      { token, newPassword }
+    );
+    return response.data;
   },
 
   /**

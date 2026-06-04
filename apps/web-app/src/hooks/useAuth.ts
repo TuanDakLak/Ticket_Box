@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { decodeToken, tokenStorage, isTokenExpired } from "@/utils/token.utils";
-import type { TokenPayload } from "@/types/auth.types";
+import { tokenStorage, isTokenExpired } from "@/utils/token.utils";
+import type { UserProfile } from "@/types/auth.types";
+import { authService } from "@/services/auth.service";
 
 /**
  * Custom hook for authentication
@@ -12,7 +13,7 @@ import type { TokenPayload } from "@/types/auth.types";
 interface UseAuthReturn {
   isAuthenticated: boolean;
   isLoading: boolean;
-  user: TokenPayload | null;
+  user: UserProfile | null;
   logout: () => void;
   hasPermission: (permission: string) => boolean;
 }
@@ -20,22 +21,51 @@ interface UseAuthReturn {
 export const useAuth = (): UseAuthReturn => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [user, setUser] = useState<TokenPayload | null>(null);
+  const [user, setUser] = useState<UserProfile | null>(null);
 
   // Initialize auth state on mount
   useEffect(() => {
-    const token = tokenStorage.getAccessToken();
+    let mounted = true;
 
-    if (token && !isTokenExpired(token)) {
-      const decoded = decodeToken(token);
-      setUser(decoded);
-      setIsAuthenticated(true);
-    } else {
-      tokenStorage.clearTokens();
-      setIsAuthenticated(false);
-    }
+    const bootstrap = async () => {
+      try {
+        const token = tokenStorage.getAccessToken();
+        if (!token) {
+          tokenStorage.clearTokens();
+          if (mounted) {
+            setIsAuthenticated(false);
+            setUser(null);
+          }
+          return;
+        }
 
-    setIsLoading(false);
+        if (isTokenExpired(token) && tokenStorage.getRefreshToken()) {
+          await authService.refreshToken();
+        }
+
+        const profile = await authService.me();
+        if (mounted) {
+          setUser(profile);
+          setIsAuthenticated(true);
+        }
+      } catch {
+        tokenStorage.clearTokens();
+        if (mounted) {
+          setIsAuthenticated(false);
+          setUser(null);
+        }
+      } finally {
+        if (mounted) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    bootstrap();
+
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   const logout = useCallback((): void => {

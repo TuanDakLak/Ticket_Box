@@ -85,11 +85,30 @@ apiClient.interceptors.response.use(
       _retry?: boolean;
     };
 
+    const requestUrl = originalRequest?.url ?? "";
+    const isRefreshRequest = requestUrl.includes("/auth/refresh");
+
     // Handle 401 Unauthorized
     if (error.response?.status === 401) {
-      if (!originalRequest._retry) {
-        originalRequest._retry = true;
+      // Never attempt refresh if the refresh call itself failed
+      if (isRefreshRequest) {
+        tokenStorage.clearTokens();
+        if (typeof window !== "undefined") {
+          window.location.href = "/login";
+        }
+        return Promise.reject(error);
       }
+
+      // If we've already retried once, stop here to avoid loops
+      if (originalRequest._retry) {
+        tokenStorage.clearTokens();
+        if (typeof window !== "undefined") {
+          window.location.href = "/login";
+        }
+        return Promise.reject(error);
+      }
+
+      originalRequest._retry = true;
 
       if (!isRefreshing) {
         isRefreshing = true;

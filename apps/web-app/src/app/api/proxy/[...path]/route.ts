@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 function buildTargetUrl(request: NextRequest, pathSegments: string[]) {
-  const remoteBase = process.env.REMOTE_API_URL;
+  const remoteBase = process.env.REMOTE_API_URL || process.env.NEXT_PUBLIC_API_URL;
   if (!remoteBase) {
     throw new Error('REMOTE_API_URL not configured on server');
   }

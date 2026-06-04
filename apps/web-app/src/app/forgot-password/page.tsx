@@ -1,44 +1,49 @@
-import Link from "next/link";
+"use client";
+
+import { useState } from "react";
 import { TicketBoxAuthShell } from "@/components/ticketbox-auth-shell";
 import { SecurityIllustration } from "@/components/ticketbox-illustrations";
+import { authService } from "@/services/auth.service";
 
 export default function ForgotPasswordPage() {
+  const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const onSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const res = await authService.forgotPassword(email);
+      alert(res.message || "Recovery email sent. Please check your inbox.");
+    } catch (err: any) {
+      alert(err?.response?.data?.message || err?.message || "Failed to send recovery email");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <TicketBoxAuthShell
       title="Forgot your password?"
-      description="Enter your email and TicketBox will send a recovery link for the same auth flow used across future account screens."
+      description="Enter your email and we'll send a recovery link."
       sidebar={<SecurityIllustration />}
       footerLinks={[{ label: "Back to sign in", href: "/login" }]}
     >
-      <form className="space-y-5">
+      <form className="space-y-5" onSubmit={onSubmit}>
         <div>
           <label className="ticketbox-label" htmlFor="email">Email address</label>
-          <input id="email" type="email" className="ticketbox-input" placeholder="name@company.com" />
+          <input
+            id="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            type="email"
+            className="ticketbox-input"
+            placeholder="name@company.com"
+          />
         </div>
-        <button className="ticketbox-button-primary w-full">Send recovery link</button>
-        <p className="ticketbox-muted text-center">Success toast: “If the account exists, you’ll receive a recovery email shortly.”</p>
-      </form>
-    </TicketBoxAuthShell>
-  );
-}import Link from "next/link";
-import { TicketBoxAuthShell } from "@/components/ticketbox-auth-shell";
-import { SecurityIllustration } from "@/components/ticketbox-illustrations";
-
-export default function ForgotPasswordPage() {
-  return (
-    <TicketBoxAuthShell
-      title="Forgot your password?"
-      description="Enter your email and TicketBox will send a recovery link for the same auth flow used across future account screens."
-      sidebar={<SecurityIllustration />}
-      footerLinks={[{ label: "Back to sign in", href: "/login" }]}
-    >
-      <form className="space-y-5">
-        <div>
-          <label className="ticketbox-label" htmlFor="email">Email address</label>
-          <input id="email" type="email" className="ticketbox-input" placeholder="name@company.com" />
-        </div>
-        <button className="ticketbox-button-primary w-full">Send recovery link</button>
-        <p className="ticketbox-muted text-center">Success toast: “If the account exists, you’ll receive a recovery email shortly.”</p>
+        <button className="ticketbox-button-primary w-full" disabled={loading}>
+          {loading ? "Sending..." : "Send recovery link"}
+        </button>
       </form>
     </TicketBoxAuthShell>
   );
