@@ -68,8 +68,9 @@ export async function fetchClient<T>(
       // Handle 401 Unauthorized
       if (response.status === 401) {
         const isRefreshRequest = endpoint.includes("/auth/refresh");
+        const isLoginRequest = endpoint.includes("/auth/login");
 
-        if (isRefreshRequest || _retry) {
+        if (isRefreshRequest || isLoginRequest || _retry) {
           tokenStorage.clearTokens();
           if (typeof window !== "undefined") {
             window.location.href = "/login";

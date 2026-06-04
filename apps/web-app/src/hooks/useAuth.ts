@@ -69,7 +69,7 @@ export const useAuth = (): UseAuthReturn => {
   }, []);
 
   const logout = useCallback((): void => {
-    tokenStorage.clearTokens();
+    tokenStorage.clearTokens();tokenStorage
     setIsAuthenticated(false);
     setUser(null);
   }, []);

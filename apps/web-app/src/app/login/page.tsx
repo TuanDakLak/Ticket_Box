@@ -32,9 +32,7 @@ function LoginForm() {
       router.push(returnUrl);
     } catch (err: unknown) {
       const responseMessage =
-        typeof err === "object" &&
-        err !== null &&
-        "response" in err
+        typeof err === "object" && err !== null && "response" in err
           ? (err as { response?: { data?: { message?: string } } }).response
               ?.data?.message
           : undefined;
@@ -53,7 +51,9 @@ function LoginForm() {
       title="Welcome back"
       description="Sign in to your account to manage tickets, events, and your profile."
       sidebar={<ConcertHeroIllustration />}
-      footerLinks={[{ label: "Don't have an account? Sign up", href: "/register" }]}
+      footerLinks={[
+        { label: "Don't have an account? Sign up", href: "/register" },
+      ]}
     >
       <form className="space-y-5" onSubmit={onSubmit}>
         {error ? (
@@ -117,7 +117,10 @@ function LoginForm() {
           </label>
         </div>
 
-        <button className="ticketbox-button-primary mt-2 w-full" disabled={loading}>
+        <button
+          className="ticketbox-button-primary mt-2 w-full"
+          disabled={loading}
+        >
           {loading ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
