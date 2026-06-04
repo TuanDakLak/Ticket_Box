@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { BrandMark, Button, Card, SectionHeading, SiteShell } from "@/components/common";
 import { ConcertCard, HeroCarousel } from "@/components/screens";
@@ -121,8 +122,27 @@ function GuestLanding() {
 }
 
 function AuthenticatedHome() {
+  const router = useRouter();
+  const { logout } = useAuth();
+
+  const handleLogout = async () => {
+    await logout();
+    router.replace("/login");
+  };
+
   return (
-    <SiteShell active="/" action={{ label: "My Tickets", href: "/my-tickets" }}>
+    <SiteShell
+      active="/"
+      action={
+        <button
+          type="button"
+          onClick={handleLogout}
+          className="ticketbox-button-primary px-4 py-2 text-sm"
+        >
+          Log out
+        </button>
+      }
+    >
       <HeroCarousel />
       <section className="mx-auto grid w-full max-w-7xl gap-8 px-4 py-14 sm:px-6 lg:px-8">
         <SectionHeading

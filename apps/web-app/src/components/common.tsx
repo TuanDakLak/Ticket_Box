@@ -208,18 +208,11 @@ export function BrandMark({ compact = false }: { compact?: boolean }) {
 export function SiteShell({
   children,
   active = "/",
-  action = {
-    label: "Sign In",
-    href: "/login",
-  },
+  action,
 }: {
   children: ReactNode;
   active?: string;
-  action?: {
-    label: string;
-    href: string;
-    variant?: "primary" | "secondary" | "ghost" | "soft";
-  };
+  action?: ReactNode;
 }) {
   return (
     <div className="flex min-h-screen flex-col">
@@ -246,13 +239,7 @@ export function SiteShell({
               </span>
               <span>Search artists, venues</span>
             </div>
-            <Button
-              href={action.href}
-              variant={action.variant ?? "primary"}
-              className="px-4 py-2 text-sm"
-            >
-              {action.label}
-            </Button>
+            {action}
           </div>
         </div>
       </header>
