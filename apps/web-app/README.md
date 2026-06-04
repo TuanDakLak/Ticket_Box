@@ -1,36 +1,48 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# TicketBox Web App
 
-## Getting Started
+TicketBox is a Next.js frontend for the ticketing flow. The public home route acts as the entry gate:
 
-First, run the development server:
+- Guests see the auth landing and can go to `/login` or `/register`.
+- After login, `/` switches to the current ticketing experience for discovery, checkout, tickets, and profile management.
+
+## Tech Stack
+
+- Next.js App Router
+- TypeScript
+- Tailwind CSS
+- JWT-backed auth with token refresh
+- Framer Motion for auth shell transitions
+
+## Main Routes
+
+- `/` - auth gate for guests, ticketing home for authenticated users
+- `/login` - sign in
+- `/register` - create account
+- `/dashboard` - authenticated account hub
+- `/catalog` - public event preview
+- `/my-tickets` - ticket library
+- `/profile` - member profile
+- `/support` - support center
+
+## Scripts
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm run build
+npm run start
+npm run lint
+npm run type-check
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Auth Flow
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. User opens `/`.
+2. If not authenticated, the app shows the auth landing and login/register routes.
+3. On successful login, tokens are stored and the session is restored through `AuthContext`.
+4. The home route renders the ticketing UI so the user can buy tickets, view tickets, and manage the account.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Notes
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Root layout wraps the app with `AuthProvider`.
+- Global styling lives in `src/app/globals.css`.
+- The ticketing UI and auth UI share the same color system and component utilities.

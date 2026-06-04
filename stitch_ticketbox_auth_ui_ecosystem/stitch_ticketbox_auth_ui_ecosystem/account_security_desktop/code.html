@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+    body { font-family: 'Inter', sans-serif; }
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+  </style>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+                  "primary-fixed": "#dbe1ff",
+                  "inverse-on-surface": "#eff0fd",
+                  "on-secondary-fixed-variant": "#862208",
+                  "tertiary-fixed-dim": "#ffb59d",
+                  "surface-dim": "#d8d9e6",
+                  "surface-container-high": "#e7e7f4",
+                  "on-secondary": "#ffffff",
+                  "on-background": "#191b24",
+                  "on-tertiary-container": "#fff1ed",
+                  "on-primary-fixed": "#00174c",
+                  "surface-variant": "#e1e1ee",
+                  "primary-container": "#0f62fe",
+                  "on-error-container": "#93000a",
+                  "surface-tint": "#0052dd",
+                  "on-primary-fixed-variant": "#003da9",
+                  "on-error": "#ffffff",
+                  "surface": "#faf8ff",
+                  "error": "#ba1a1a",
+                  "secondary-fixed-dim": "#ffb4a2",
+                  "on-primary-container": "#f3f3ff",
+                  "surface-bright": "#faf8ff",
+                  "background": "#faf8ff",
+                  "on-secondary-fixed": "#3c0700",
+                  "on-surface-variant": "#424656",
+                  "surface-container-lowest": "#ffffff",
+                  "inverse-primary": "#b4c5ff",
+                  "primary-fixed-dim": "#b4c5ff",
+                  "inverse-surface": "#2e303a",
+                  "primary": "#004ccd",
+                  "outline-variant": "#c3c6d8",
+                  "on-tertiary-fixed-variant": "#832700",
+                  "tertiary": "#9e3100",
+                  "surface-container-low": "#f2f3ff",
+                  "on-primary": "#ffffff",
+                  "surface-container-highest": "#e1e1ee",
+                  "on-tertiary-fixed": "#390c00",
+                  "error-container": "#ffdad6",
+                  "on-surface": "#191b24",
+                  "secondary-fixed": "#ffdad2",
+                  "secondary": "#a7391e",
+                  "tertiary-container": "#c84000",
+                  "secondary-container": "#fd7958",
+                  "outline": "#737687",
+                  "on-tertiary": "#ffffff",
+                  "tertiary-fixed": "#ffdbd0",
+                  "surface-container": "#ecedfa",
+                  "on-secondary-container": "#6e1500"
+          },
+          "borderRadius": {
+                  "DEFAULT": "0.25rem",
+                  "lg": "0.5rem",
+                  "xl": "0.75rem",
+                  "full": "9999px"
+          },
+          "spacing": {
+                  "md": "16px",
+                  "margin-mobile": "16px",
+                  "3xl": "64px",
+                  "base": "4px",
+                  "2xl": "48px",
+                  "lg": "24px",
+                  "sm": "8px",
+                  "xs": "4px",
+                  "margin-desktop": "24px",
+                  "xl": "32px",
+                  "gutter": "16px"
+          },
+          "fontFamily": {
+                  "label-md": ["Inter"],
+                  "headline-lg-mobile": ["Inter"],
+                  "headline-md": ["Inter"],
+                  "label-sm": ["Inter"],
+                  "headline-sm": ["Inter"],
+                  "body-lg": ["Inter"],
+                  "headline-lg": ["Inter"],
+                  "body-sm": ["Inter"],
+                  "body-md": ["Inter"]
+          },
+          "fontSize": {
+                  "label-md": ["14px", {"lineHeight": "20px", "fontWeight": "500"}],
+                  "headline-lg-mobile": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                  "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                  "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                  "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "500"}],
+                  "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                  "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                  "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                  "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}]
+          }
+        },
+      },
+    }
+  </script>
+</head>
+<body class="bg-surface text-on-surface min-h-screen flex flex-col">
+<!-- TopAppBar Component -->
+<header class="docked full-width top-0 bg-surface border-b border-outline-variant shadow-sm z-50">
+<div class="flex justify-between items-center w-full px-margin-mobile md:px-margin-desktop h-16 max-w-7xl mx-auto">
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-primary" data-icon="shield_lock">shield_lock</span>
+<span class="font-headline-md text-headline-md font-bold text-primary">TicketBox</span>
+</div>
+<nav class="hidden md:flex items-center gap-lg">
+<a class="text-on-surface-variant font-label-md text-label-md hover:bg-surface-container-low transition-colors duration-200 px-3 py-2 rounded" href="#">Dashboard</a>
+<a class="text-on-surface-variant font-label-md text-label-md hover:bg-surface-container-low transition-colors duration-200 px-3 py-2 rounded" href="#">Orders</a>
+<a class="text-primary font-bold border-b-2 border-primary font-label-md text-label-md px-3 py-2" href="#">Account</a>
+</nav>
+<div class="flex items-center gap-md">
+<button class="material-symbols-outlined text-on-surface-variant hover:bg-surface-container-low p-2 rounded-full" data-icon="notifications">notifications</button>
+<div class="w-8 h-8 rounded-full bg-primary-fixed flex items-center justify-center border border-outline-variant">
+<span class="text-on-primary-fixed font-label-sm text-label-sm">JD</span>
+</div>
+</div>
+</div>
+</header>
+<main class="flex-grow w-full max-w-7xl mx-auto px-margin-mobile md:px-margin-desktop py-lg space-y-lg">
+<!-- Breadcrumb -->
+<nav class="flex items-center space-x-2 text-on-surface-variant">
+<a class="font-label-md text-label-md hover:text-primary transition-colors" href="#">Account</a>
+<span class="material-symbols-outlined text-[16px]" data-icon="chevron_right">chevron_right</span>
+<span class="font-label-md text-label-md text-on-surface font-bold">Security</span>
+</nav>
+<!-- Header Content -->
+<div class="space-y-xs">
+<h1 class="font-headline-lg text-headline-lg text-on-surface">Security Settings</h1>
+<p class="font-body-md text-body-md text-on-surface-variant">Manage your account protection, password, and active device sessions.</p>
+</div>
+<!-- Main Content Layout -->
+<div class="grid grid-cols-1 md:grid-cols-12 gap-lg items-start">
+<!-- Left Column: Change Password -->
+<section class="md:col-span-5 bg-surface-container-lowest border border-outline-variant rounded-xl p-xl shadow-sm">
+<div class="flex items-center gap-sm mb-lg">
+<span class="material-symbols-outlined text-primary" data-icon="key">key</span>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Change password</h2>
+</div>
+<form class="space-y-md" onsubmit="return false;">
+<div class="space-y-xs">
+<label class="font-label-md text-label-md text-on-surface-variant">Current password</label>
+<input class="w-full h-[44px] px-md bg-surface border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary focus:ring-offset-2 outline-none transition-all" placeholder="••••••••" type="password"/>
+</div>
+<div class="space-y-xs">
+<label class="font-label-md text-label-md text-on-surface-variant">New password</label>
+<input class="w-full h-[44px] px-md bg-surface border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary focus:ring-offset-2 outline-none transition-all" placeholder="••••••••" type="password"/>
+<p class="font-label-sm text-label-sm text-on-surface-variant mt-1">Minimum 12 characters with symbols.</p>
+</div>
+<div class="space-y-xs">
+<label class="font-label-md text-label-md text-on-surface-variant">Confirm new password</label>
+<input class="w-full h-[44px] px-md bg-surface border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary focus:ring-offset-2 outline-none transition-all" placeholder="••••••••" type="password"/>
+</div>
+<div class="pt-md">
+<button class="w-full h-[44px] bg-primary text-on-primary font-label-md text-label-md rounded-lg hover:opacity-90 active:scale-95 transition-all shadow-sm">
+              Update Password
+            </button>
+</div>
+</form>
+</section>
+<!-- Right Column: Active Sessions -->
+<section class="md:col-span-7 bg-surface-container-lowest border border-outline-variant rounded-xl p-xl shadow-sm">
+<div class="flex justify-between items-center mb-lg">
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-primary" data-icon="devices">devices</span>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Active Sessions</h2>
+</div>
+<button class="font-label-sm text-label-sm text-primary hover:underline transition-all">Logout from all devices</button>
+</div>
+<div class="space-y-md">
+<!-- Session Item 1 (Current) -->
+<div class="flex items-center justify-between p-md bg-surface-container-low border border-outline-variant rounded-lg">
+<div class="flex items-center gap-md">
+<div class="w-10 h-10 rounded-lg bg-primary-fixed flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" data-icon="laptop_mac">laptop_mac</span>
+</div>
+<div>
+<div class="flex items-center gap-sm">
+<p class="font-label-md text-label-md text-on-surface">MacBook Pro 16"</p>
+<span class="bg-primary-container text-on-primary-container px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider">Current</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">San Francisco, USA • Chrome</p>
+</div>
+</div>
+<div class="text-right">
+<p class="font-label-sm text-label-sm text-on-surface-variant mb-1">Active now</p>
+<button class="material-symbols-outlined text-on-surface-variant hover:text-error transition-colors p-1" data-icon="logout">logout</button>
+</div>
+</div>
+<!-- Session Item 2 -->
+<div class="flex items-center justify-between p-md border border-outline-variant rounded-lg">
+<div class="flex items-center gap-md">
+<div class="w-10 h-10 rounded-lg bg-surface-variant flex items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined" data-icon="phone_iphone">phone_iphone</span>
+</div>
+<div>
+<p class="font-label-md text-label-md text-on-surface">iPhone 15 Pro</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant">London, UK • TicketBox iOS App</p>
+</div>
+</div>
+<div class="text-right">
+<p class="font-label-sm text-label-sm text-on-surface-variant mb-1">2 hours ago</p>
+<button class="material-symbols-outlined text-on-surface-variant hover:text-error transition-colors p-1" data-icon="logout">logout</button>
+</div>
+</div>
+<!-- Session Item 3 -->
+<div class="flex items-center justify-between p-md border border-outline-variant rounded-lg">
+<div class="flex items-center gap-md">
+<div class="w-10 h-10 rounded-lg bg-surface-variant flex items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined" data-icon="desktop_windows">desktop_windows</span>
+</div>
+<div>
+<p class="font-label-md text-label-md text-on-surface">Windows Workstation</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Berlin, Germany • Firefox</p>
+</div>
+</div>
+<div class="text-right">
+<p class="font-label-sm text-label-sm text-on-surface-variant mb-1">Jan 24, 2024</p>
+<button class="material-symbols-outlined text-on-surface-variant hover:text-error transition-colors p-1" data-icon="logout">logout</button>
+</div>
+</div>
+</div>
+<!-- Security Notice -->
+<div class="mt-xl p-md bg-error-container rounded-lg flex gap-md items-start">
+<span class="material-symbols-outlined text-on-error-container mt-0.5" data-icon="warning">warning</span>
+<div class="space-y-1">
+<p class="font-label-md text-label-md text-on-error-container font-bold">Unrecognized activity?</p>
+<p class="font-body-sm text-body-sm text-on-error-container opacity-90">If you don't recognize a device or location, terminate the session and change your password immediately.</p>
+</div>
+</div>
+</section>
+</div>
+<!-- Security Logs Section (Bonus for Enterprise Grade feel) -->
+<section class="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden shadow-sm">
+<div class="p-xl border-b border-outline-variant flex justify-between items-center">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Recent Security Events</h2>
+<button class="flex items-center gap-xs text-primary font-label-md text-label-md hover:underline transition-all">
+          View full audit log
+          <span class="material-symbols-outlined text-[18px]" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left">
+<thead class="bg-surface-container font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">
+<tr>
+<th class="px-xl py-md">Event</th>
+<th class="px-xl py-md">Status</th>
+<th class="px-xl py-md">Location</th>
+<th class="px-xl py-md">Date &amp; Time</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant">
+<tr class="hover:bg-surface-container-low transition-colors">
+<td class="px-xl py-md font-label-md text-label-md text-on-surface">Successful login</td>
+<td class="px-xl py-md">
+<span class="bg-primary-fixed text-on-primary-fixed-variant px-2 py-0.5 rounded text-[12px] font-bold">SUCCESS</span>
+</td>
+<td class="px-xl py-md font-body-sm text-body-sm text-on-surface-variant">192.168.1.1 (SF, CA)</td>
+<td class="px-xl py-md font-body-sm text-body-sm text-on-surface-variant">Today, 10:45 AM</td>
+</tr>
+<tr class="hover:bg-surface-container-low transition-colors">
+<td class="px-xl py-md font-label-md text-label-md text-on-surface">Password change attempt</td>
+<td class="px-xl py-md">
+<span class="bg-error-container text-on-error-container px-2 py-0.5 rounded text-[12px] font-bold">FAILED</span>
+</td>
+<td class="px-xl py-md font-body-sm text-body-sm text-on-surface-variant">Unknown (Moscow, RU)</td>
+<td class="px-xl py-md font-body-sm text-body-sm text-on-surface-variant">Yesterday, 11:20 PM</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+</main>
+<!-- Footer Component -->
+<footer class="bg-surface-container-lowest border-t border-outline-variant mt-3xl">
+<div class="flex flex-col md:flex-row justify-between items-center w-full py-8 px-margin-mobile md:px-margin-desktop max-w-7xl mx-auto gap-4">
+<div class="flex flex-col items-center md:items-start gap-1">
+<span class="font-headline-sm text-headline-sm font-bold text-on-surface">TicketBox</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant">© 2024 TicketBox Security. All rights reserved.</p>
+</div>
+<div class="flex flex-wrap justify-center gap-lg">
+<a class="text-on-surface-variant font-label-sm text-label-sm hover:text-primary underline transition-all" href="#">Privacy Policy</a>
+<a class="text-on-surface-variant font-label-sm text-label-sm hover:text-primary underline transition-all" href="#">Terms of Service</a>
+<a class="text-on-surface-variant font-label-sm text-label-sm hover:text-primary underline transition-all" href="#">Security Center</a>
+<a class="text-on-surface-variant font-label-sm text-label-sm hover:text-primary underline transition-all" href="#">Support</a>
+</div>
+</div>
+</footer>
+<script>
+    // Subtle interaction effect for input fields
+    const inputs = document.querySelectorAll('input');
+    inputs.forEach(input => {
+      input.addEventListener('focus', () => {
+        input.parentElement.classList.add('scale-[1.01]');
+        input.parentElement.style.transition = 'transform 0.2s ease-out';
+      });
+      input.addEventListener('blur', () => {
+        input.parentElement.classList.remove('scale-[1.01]');
+      });
+    });
+
+    // Logout button interaction
+    const logoutButtons = document.querySelectorAll('[data-icon="logout"]');
+    logoutButtons.forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const row = e.target.closest('.flex.items-center.justify-between');
+        row.style.opacity = '0.5';
+        row.style.transition = 'opacity 0.3s ease';
+        setTimeout(() => {
+          row.style.display = 'none';
+        }, 300);
+      });
+    });
+  </script>
+</body></html>

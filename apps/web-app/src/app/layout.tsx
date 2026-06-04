@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Montserrat } from "next/font/google";
 import "./globals.css";
+import { AuthProvider } from "@/context/AuthContext";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -14,22 +15,22 @@ const montserrat = Montserrat({
 
 export const metadata: Metadata = {
   title: "TicketBox",
-  description:
-    "TicketBox concert discovery, checkout, and ticketing experience.",
+  description: "TicketBox authentication and concert ticketing experience.",
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <html
       lang="en"
       className={`${inter.variable} ${montserrat.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
-      <body className="min-h-full bg-background text-on-surface">
-        {children}
+      <body className="min-h-full bg-background text-foreground">
+        <AuthProvider>{children}</AuthProvider>
       </body>
     </html>
   );
