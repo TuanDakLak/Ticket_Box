@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import "@/styles/globals.css";
+import { AuthProvider } from "@/context/AuthContext";
 
 export const metadata: Metadata = {
-  title: "TicketBox - Auth Prototype",
-  description: "TicketBox authentication prototype for login, register, verification, and recovery flows",
+  title: "TicketBox",
+  description: "TicketBox authentication and ticket management",
 };
 
 export default function RootLayout({
@@ -12,8 +13,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body className="bg-[#faf9ff] font-sans text-slate-900">{children}</body>
+    <html lang="en" suppressHydrationWarning>
+      <body className="bg-background font-sans text-foreground">
+        <AuthProvider>{children}</AuthProvider>
+      </body>
     </html>
   );
 }

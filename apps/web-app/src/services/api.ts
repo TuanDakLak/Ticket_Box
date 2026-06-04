@@ -1,59 +1,21 @@
-import axios, {
-  type AxiosInstance,
-  type InternalAxiosRequestConfig,
-  type AxiosResponse,
-  type AxiosError,
-} from "axios";
 import { tokenStorage } from "@/utils/token.utils";
 import type { ApiErrorResponse } from "@/types/auth.types";
 
-/**
- * Centralized Axios instance for API communication
- * Configured with base URL, timeout, and automatic interceptor setup
- */
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "/api/proxy";
 
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL || "/api/proxy";
-const REQUEST_TIMEOUT = 30000; // 30 seconds
+class FetchError extends Error {
+  public response: { data: any; status: number; statusText: string };
 
-// Create Axios instance
-const apiClient: AxiosInstance = axios.create({
-  baseURL: API_BASE_URL,
-  timeout: REQUEST_TIMEOUT,
-  headers: {
-    "Content-Type": "application/json",
-  },
-});
-
-/**
- * Request Interceptor: Inject JWT token into Authorization header
- * - Extract token from localStorage
- * - Attach as Bearer token to every request
- * - Handle errors gracefully
- */
-apiClient.interceptors.request.use(
-  (config: InternalAxiosRequestConfig) => {
-    const token = tokenStorage.getAccessToken();
-
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-
-    return config;
-  },
-  (error) => {
-    console.error("Request interceptor error:", error);
-    return Promise.reject(error);
+  constructor(message: string, response: Response, data: any) {
+    super(message);
+    this.name = "FetchError";
+    this.response = {
+      data,
+      status: response.status,
+      statusText: response.statusText,
+    };
   }
-);
-
-/**
- * Response Interceptor: Handle authentication errors globally
- * - Intercept 401 Unauthorized: Token expired or invalid
- * - Intercept 403 Forbidden: User lacks permissions
- * - Clear credentials and redirect to login
- * - Prevent infinite redirect loops
- */
+}
 
 let isRefreshing = false;
 let failedQueue: Array<{
@@ -61,10 +23,7 @@ let failedQueue: Array<{
   reject: (reason?: unknown) => void;
 }> = [];
 
-const processQueue = (
-  error: unknown,
-  token: string | null = null
-): void => {
+const processQueue = (error: unknown, token: string | null = null): void => {
   failedQueue.forEach((prom) => {
     if (error) {
       prom.reject(error);
@@ -72,105 +31,162 @@ const processQueue = (
       prom.resolve(token);
     }
   });
-
   failedQueue = [];
 };
 
-apiClient.interceptors.response.use(
-  (response: AxiosResponse) => {
-    return response;
-  },
-  async (error: AxiosError<ApiErrorResponse>) => {
-    const originalRequest = error.config as InternalAxiosRequestConfig & {
-      _retry?: boolean;
-    };
+export async function fetchClient<T>(
+  endpoint: string,
+  options: RequestInit = {},
+  _retry = false
+): Promise<T> {
+  const url = `${API_BASE_URL}${endpoint}`;
+  const token = tokenStorage.getAccessToken();
 
-    const requestUrl = originalRequest?.url ?? "";
-    const isRefreshRequest = requestUrl.includes("/auth/refresh");
+  const headers = new Headers(options.headers || {});
+  headers.set("Content-Type", "application/json");
 
-    // Handle 401 Unauthorized
-    if (error.response?.status === 401) {
-      // Never attempt refresh if the refresh call itself failed
-      if (isRefreshRequest) {
-        tokenStorage.clearTokens();
-        if (typeof window !== "undefined") {
-          window.location.href = "/login";
-        }
-        return Promise.reject(error);
-      }
-
-      // If we've already retried once, stop here to avoid loops
-      if (originalRequest._retry) {
-        tokenStorage.clearTokens();
-        if (typeof window !== "undefined") {
-          window.location.href = "/login";
-        }
-        return Promise.reject(error);
-      }
-
-      originalRequest._retry = true;
-
-      if (!isRefreshing) {
-        isRefreshing = true;
-
-        try {
-          const refreshToken = tokenStorage.getRefreshToken();
-          if (!refreshToken) {
-            throw new Error('No refresh token available');
-          }
-
-          // Use a plain axios instance without interceptors for refresh
-          const plain = axios.create({ baseURL: API_BASE_URL });
-          const refreshResp = await plain.post('/auth/refresh', { refreshToken });
-
-          if (refreshResp?.data) {
-            const newAccess = refreshResp.data.accessToken;
-            const newRefresh = refreshResp.data.refreshToken;
-            tokenStorage.setTokens(newAccess, newRefresh);
-            processQueue(null, newAccess);
-          } else {
-            throw new Error('Invalid refresh response');
-          }
-        } catch (err) {
-          tokenStorage.clearTokens();
-          processQueue(err, null);
-          if (typeof window !== 'undefined') {
-            window.location.href = '/login';
-          }
-          return Promise.reject(error);
-        } finally {
-          isRefreshing = false;
-        }
-      }
-
-      return new Promise((resolve, reject) => {
-        failedQueue.push({ resolve, reject });
-      })
-        .then((token) => {
-          const t = token as string | null;
-          if (t && originalRequest.headers) {
-            originalRequest.headers.Authorization = `Bearer ${t}`;
-            return apiClient(originalRequest);
-          }
-          return Promise.reject(error);
-        })
-        .catch((err) => Promise.reject(err));
-    }
-
-    // Handle 403 Forbidden
-    if (error.response?.status === 403) {
-      console.error("Access forbidden:", error.response.data);
-
-      if (typeof window !== "undefined") {
-        window.location.href = "/access-denied";
-      }
-
-      return Promise.reject(error);
-    }
-
-    // Handle other errors
-    return Promise.reject(error);
+  if (token) {
+    headers.set("Authorization", `Bearer ${token}`);
   }
-);
+
+  const config: RequestInit = {
+    ...options,
+    headers,
+  };
+
+  try {
+    const response = await fetch(url, config);
+
+    if (!response.ok) {
+      let errorData;
+      try {
+        errorData = await response.json();
+      } catch (e) {
+        errorData = { message: response.statusText };
+      }
+
+      // Handle 401 Unauthorized
+      if (response.status === 401) {
+        const isRefreshRequest = endpoint.includes("/auth/refresh");
+
+        if (isRefreshRequest || _retry) {
+          tokenStorage.clearTokens();
+          if (typeof window !== "undefined") {
+            window.location.href = "/login";
+          }
+          throw new FetchError("Unauthorized", response, errorData);
+        }
+
+        if (!isRefreshing) {
+          isRefreshing = true;
+
+          try {
+            const refreshToken = tokenStorage.getRefreshToken();
+            if (!refreshToken) {
+              throw new Error("No refresh token available");
+            }
+
+            const refreshResp = await fetch(`${API_BASE_URL}/auth/refresh`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ refreshToken }),
+            });
+
+            if (refreshResp.ok) {
+              const refreshData = await refreshResp.json();
+              tokenStorage.setTokens(refreshData.accessToken, refreshData.refreshToken);
+              processQueue(null, refreshData.accessToken);
+            } else {
+              throw new Error("Invalid refresh response");
+            }
+          } catch (err) {
+            tokenStorage.clearTokens();
+            processQueue(err, null);
+            if (typeof window !== "undefined") {
+              window.location.href = "/login";
+            }
+            throw err;
+          } finally {
+            isRefreshing = false;
+          }
+        }
+
+        // Wait for the token refresh to complete
+        return new Promise<T>((resolve, reject) => {
+          failedQueue.push({ resolve: resolve as (value?: unknown) => void, reject });
+        })
+          .then((newToken) => {
+            const t = newToken as string | null;
+            if (t) {
+              const newHeaders = new Headers(config.headers);
+              newHeaders.set("Authorization", `Bearer ${t}`);
+              return fetchClient<T>(endpoint, { ...config, headers: newHeaders }, true);
+            }
+            throw new FetchError("Unauthorized", response, errorData);
+          })
+          .catch((err) => {
+            throw err;
+          });
+      }
+
+      // Handle 403 Forbidden
+      if (response.status === 403) {
+        console.error("Access forbidden:", errorData);
+        if (typeof window !== "undefined") {
+          window.location.href = "/access-denied";
+        }
+        throw new FetchError("Forbidden", response, errorData);
+      }
+
+      throw new FetchError(errorData.message || "Fetch failed", response, errorData);
+    }
+
+    // Return parsed JSON if successful
+    if (response.status === 204) {
+      return {} as T;
+    }
+    
+    const text = await response.text();
+    if (!text) {
+      return {} as T;
+    }
+    
+    try {
+      return JSON.parse(text) as T;
+    } catch {
+      return text as unknown as T;
+    }
+  } catch (error) {
+    if (error instanceof FetchError) {
+      throw error;
+    }
+    throw error;
+  }
+}
+
+export const apiClient = {
+  get: <T>(endpoint: string, options?: RequestInit) =>
+    fetchClient<T>(endpoint, { ...options, method: "GET" }),
+  post: <T>(endpoint: string, body?: any, options?: RequestInit) =>
+    fetchClient<T>(endpoint, {
+      ...options,
+      method: "POST",
+      body: body ? JSON.stringify(body) : undefined,
+    }),
+  put: <T>(endpoint: string, body?: any, options?: RequestInit) =>
+    fetchClient<T>(endpoint, {
+      ...options,
+      method: "PUT",
+      body: body ? JSON.stringify(body) : undefined,
+    }),
+  patch: <T>(endpoint: string, body?: any, options?: RequestInit) =>
+    fetchClient<T>(endpoint, {
+      ...options,
+      method: "PATCH",
+      body: body ? JSON.stringify(body) : undefined,
+    }),
+  delete: <T>(endpoint: string, options?: RequestInit) =>
+    fetchClient<T>(endpoint, { ...options, method: "DELETE" }),
+};
 
 export default apiClient;

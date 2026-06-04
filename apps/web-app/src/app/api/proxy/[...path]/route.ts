@@ -44,6 +44,9 @@ async function forward(request: NextRequest, pathSegments: string[]) {
   responseHeaders.delete('te');
   responseHeaders.delete('trailers');
   responseHeaders.delete('upgrade');
+  // Node fetch decompresses the body automatically. If we forward content-encoding, the browser will fail to decode.
+  responseHeaders.delete('content-encoding');
+  responseHeaders.delete('content-length');
 
   return new NextResponse(response.body, {
     status: response.status,

@@ -1,63 +1,49 @@
 "use client";
 
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { useAuth } from "@/hooks/useAuth";
-
-/**
- * Protected route component
- * Automatically redirects to login if user is not authenticated
- */
+import { useEffect, useState } from "react";
+import { useRouter, usePathname } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  requiredPermission?: string;
+  allowedRoles?: string[];
 }
 
-export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
-  children,
-  requiredPermission,
-}) => {
+export function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) {
+  const { user, isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
-  const { isAuthenticated, isLoading, hasPermission } = useAuth();
+  const pathname = usePathname();
+  const [isAuthorized, setIsAuthorized] = useState(false);
 
   useEffect(() => {
-    // Don't redirect while loading
-    if (isLoading) {
-      return;
-    }
+    if (isLoading) return;
 
-    // Redirect to login if not authenticated
     if (!isAuthenticated) {
-      router.push("/login");
+      // Not logged in, redirect to login with return url
+      router.push(`/login?returnUrl=${encodeURIComponent(pathname || "/")}`);
       return;
     }
 
-    // Check permission if required
-    if (requiredPermission && !hasPermission(requiredPermission)) {
-      router.push("/access-denied");
+    if (allowedRoles && allowedRoles.length > 0) {
+      // Check if user has required role
+      const hasRole = user?.roles?.some(role => allowedRoles.includes(role));
+      if (!hasRole) {
+        // Logged in but missing role, redirect to access denied
+        router.push("/access-denied");
+        return;
+      }
     }
-  }, [isAuthenticated, isLoading, requiredPermission, hasPermission, router]);
 
-  // Show loading state while checking auth
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-lg font-semibold">Loading...</div>
-      </div>
-    );
-  }
+    setIsAuthorized(true);
+  }, [isLoading, isAuthenticated, user, router, pathname, allowedRoles]);
 
-  // Show access denied if not authenticated or missing permission
-  if (!isAuthenticated) {
+  if (isLoading || !isAuthorized) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-lg font-semibold text-red-600">
-          Access Denied
-        </div>
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
       </div>
     );
   }
 
   return <>{children}</>;
-};
+}

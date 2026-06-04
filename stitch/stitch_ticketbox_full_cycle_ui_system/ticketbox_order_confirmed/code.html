@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>TicketBox - Order Confirmation</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&amp;family=Montserrat:ital,wght@0,600;0,700;1,900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container": "#eceef0",
+                        "tertiary-fixed": "#dae2fd",
+                        "surface-dim": "#d8dadc",
+                        "surface": "#f7f9fb",
+                        "on-tertiary-fixed-variant": "#3f465c",
+                        "secondary-fixed": "#eaddff",
+                        "outline-variant": "#c7c4d8",
+                        "background": "#f7f9fb",
+                        "on-primary": "#ffffff",
+                        "on-error-container": "#93000a",
+                        "tertiary": "#41485e",
+                        "primary": "#3525cd",
+                        "on-background": "#191c1e",
+                        "surface-container-high": "#e6e8ea",
+                        "on-surface-variant": "#464555",
+                        "error": "#ba1a1a",
+                        "secondary-container": "#8a4cfc",
+                        "primary-fixed": "#e2dfff",
+                        "surface-variant": "#e0e3e5",
+                        "surface-tint": "#4d44e3",
+                        "on-tertiary-container": "#d4dbf5",
+                        "on-secondary-fixed": "#25005a",
+                        "surface-container-lowest": "#ffffff",
+                        "outline": "#777587",
+                        "inverse-primary": "#c3c0ff",
+                        "surface-container-low": "#f2f4f6",
+                        "inverse-on-surface": "#eff1f3",
+                        "on-secondary-container": "#fffbff",
+                        "on-primary-container": "#dad7ff",
+                        "error-container": "#ffdad6",
+                        "tertiary-fixed-dim": "#bec6e0",
+                        "primary-container": "#4f46e5",
+                        "on-tertiary-fixed": "#131b2e",
+                        "inverse-surface": "#2d3133",
+                        "surface-container-highest": "#e0e3e5",
+                        "on-secondary": "#ffffff",
+                        "on-surface": "#191c1e",
+                        "surface-bright": "#f7f9fb",
+                        "on-primary-fixed": "#0f0069",
+                        "primary-fixed-dim": "#c3c0ff",
+                        "on-error": "#ffffff",
+                        "secondary-fixed-dim": "#d2bbff",
+                        "on-tertiary": "#ffffff",
+                        "on-primary-fixed-variant": "#3323cc",
+                        "tertiary-container": "#586076",
+                        "on-secondary-fixed-variant": "#5a00c6",
+                        "secondary": "#712ae2"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "gutter": "24px",
+                        "margin-desktop": "40px",
+                        "base": "4px",
+                        "margin-mobile": "16px",
+                        "container-max": "1280px"
+                    },
+                    "fontFamily": {
+                        "label-sm": ["Inter"],
+                        "headline-md": ["Montserrat"],
+                        "display-lg-mobile": ["Montserrat"],
+                        "display-lg": ["Montserrat"],
+                        "body-lg": ["Inter"],
+                        "body-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "label-sm": ["12px", { "lineHeight": "16px", "fontWeight": "600" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "display-lg-mobile": ["32px", { "lineHeight": "40px", "fontWeight": "700" }],
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .ticket-cutout {
+            position: relative;
+        }
+        .ticket-cutout::before,
+        .ticket-cutout::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            width: 24px;
+            height: 24px;
+            background-color: theme('colors.surface');
+            border-radius: 50%;
+            transform: translateY(-50%);
+            z-index: 10;
+        }
+        .ticket-cutout::before {
+            left: -12px;
+            box-shadow: inset -4px 0 8px -4px rgba(15, 23, 42, 0.08);
+        }
+        .ticket-cutout::after {
+            right: -12px;
+            box-shadow: inset 4px 0 8px -4px rgba(15, 23, 42, 0.08);
+        }
+        .dashed-line {
+            border-top: 2px dashed theme('colors.outline-variant');
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface min-h-screen flex flex-col font-body-md antialiased">
+<!-- TopNavBar (Transactional Intent - Canvas Focus, so Nav is suppressed as per mandate, but keeping minimal brand presence) -->
+<header class="w-full bg-surface shadow-sm h-16 flex items-center justify-center px-margin-mobile md:px-margin-desktop sticky top-0 z-50">
+<div class="font-display-lg text-display-lg-mobile md:text-display-lg text-primary italic font-black">
+            TicketBox
+        </div>
+</header>
+<main class="flex-grow flex flex-col items-center justify-start py-12 px-margin-mobile md:px-margin-desktop">
+<!-- Success Header -->
+<div class="text-center mb-8 animate-[fadeInUp_0.5s_ease-out]">
+<div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary-container text-on-primary-container mb-4 shadow-[0px_4px_20px_rgba(15,23,42,0.08)]">
+<span class="material-symbols-outlined text-4xl" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<h1 class="font-display-lg-mobile md:font-display-lg text-display-lg-mobile md:text-display-lg text-on-surface mb-2">Order Confirmed!</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-lg mx-auto">
+                You're all set for the event. A confirmation email with your receipt has been sent to your inbox.
+            </p>
+</div>
+<!-- Ticket Card -->
+<div class="w-full max-w-md bg-surface-container-lowest rounded-2xl shadow-[0px_4px_20px_rgba(15,23,42,0.08)] overflow-hidden flex flex-col mb-10 relative">
+<!-- Event Hero Image -->
+<div class="h-48 w-full relative bg-surface-variant">
+<img alt="Event Banner" class="w-full h-full object-cover" data-alt="A vibrant, high-energy concert scene captured from the crowd's perspective, looking towards a brightly lit stage. The lighting is an intense mix of electric violet and deep indigo hues, creating a dynamic, tech-forward modern aesthetic. Laser beams cut through a slight haze, adding depth and excitement. The overall mood is exhilarating and premium, perfectly matching a high-end ticketing platform's vibe." src="https://lh3.googleusercontent.com/aida-public/AB6AXuANPZBTgASg88uAWVFhMnQlco1IfVw6zbPUBvyGBrea4BchMHU6r3fvWuuYT5X9nNo0B9_O3vqzoqXIJd-Ta6PifQhJAg_tqcmFlCW8EQ6ab9w9R3NYyavG9Z9vFzI-678FDKfO_hRHCb88GiDEXiBE5xVy7UZftb6BIO7jCb-Tf14KXf1cN8T_hkCTrtM_FLTXcXknHWzoYMDWSX7ZXeHm-VNc1OiNnlSPwnwjgM2L9mBuw65gLvI0-94Zl7mLz09L8OzZneBJ7F1L"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex flex-col justify-end p-6">
+<h2 class="font-headline-md text-headline-md text-white mb-1">Lumina Flux</h2>
+<p class="font-label-sm text-label-sm text-surface-container-high flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">calendar_month</span>
+                        Oct 24, 2024 • 8:00 PM
+                    </p>
+</div>
+</div>
+<!-- Ticket Details -->
+<div class="p-6 pb-8 ticket-cutout">
+<div class="flex justify-between items-start mb-6">
+<div>
+<p class="font-label-sm text-label-sm text-outline mb-1 uppercase tracking-wider">Venue</p>
+<p class="font-body-md text-body-md text-on-surface font-semibold">Echo Arena</p>
+</div>
+<div class="text-right">
+<p class="font-label-sm text-label-sm text-outline mb-1 uppercase tracking-wider">Admit</p>
+<p class="font-body-md text-body-md text-on-surface font-semibold">1</p>
+</div>
+</div>
+<div class="grid grid-cols-3 gap-4 mb-6 bg-surface p-4 rounded-xl border border-outline-variant/30">
+<div>
+<p class="font-label-sm text-label-sm text-outline mb-1">Zone</p>
+<p class="font-body-lg text-body-lg text-primary font-bold">SVIP</p>
+</div>
+<div>
+<p class="font-label-sm text-label-sm text-outline mb-1">Row</p>
+<p class="font-body-lg text-body-lg text-on-surface font-bold">A</p>
+</div>
+<div>
+<p class="font-label-sm text-label-sm text-outline mb-1">Seat</p>
+<p class="font-body-lg text-body-lg text-on-surface font-bold">5</p>
+</div>
+</div>
+<!-- Separation Line -->
+<div class="w-full dashed-line my-6"></div>
+<!-- QR Code Section -->
+<div class="flex flex-col items-center justify-center pt-2">
+<div class="bg-white p-4 rounded-xl shadow-sm border border-outline-variant/20 mb-3">
+<img alt="Ticket QR Code" class="w-32 h-32 object-contain mix-blend-multiply" data-alt="A clean, crisp, high-contrast black and white square QR code centered on a stark white background. The QR code pattern is intricate and modern, designed for quick scanning at a concert venue. The image relies purely on stark geometry without any gradient or color tinting, fitting seamlessly into a tech-forward digital ticket UI." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAZFG0iSAg6lwVHsUrUDymJifNUi1vFo_t6E8sS6pw13IAhaqCko0eUrVmjFy5eYWHYW3yxWnFfrssCbvmypOEV9c56Fhgk59e2eUO84O9d6v-zyNXqSV1crsG2xQb-EbD_-v_pwZh6poQWz6f4qLlvOxOd3zRN8hs4CFCY6-jnSfeFLPImoA50G7ltB685imOMVuBkq_JD5OTaxJvoeIfbHgR0ZFw6EjSo5P1uB77_sNzn-EbetqK9eoaAP8dEUyYWfKP4wN45BSGL"/>
+</div>
+<p class="font-label-sm text-label-sm text-outline tracking-[0.2em]">TBX-8829-4410</p>
+</div>
+</div>
+</div>
+<!-- Action Buttons -->
+<div class="w-full max-w-md flex flex-col gap-3">
+<button class="w-full bg-primary text-on-primary font-label-sm text-label-sm py-4 rounded-xl flex items-center justify-center gap-2 hover:bg-primary/90 active:scale-98 transition-all duration-200 shadow-[0px_4px_20px_rgba(15,23,42,0.08)]">
+<span class="material-symbols-outlined text-[20px]">download</span>
+                Download Ticket
+            </button>
+<button class="w-full bg-black text-white font-label-sm text-label-sm py-4 rounded-xl flex items-center justify-center gap-2 hover:bg-black/90 active:scale-98 transition-all duration-200">
+<span class="material-symbols-outlined text-[20px]">account_balance_wallet</span>
+                Add to Apple Wallet
+            </button>
+<button class="w-full bg-transparent border border-outline text-on-surface font-label-sm text-label-sm py-4 rounded-xl flex items-center justify-center gap-2 hover:bg-surface-variant active:scale-98 transition-all duration-200 mt-2">
+                View My Tickets
+            </button>
+</div>
+</main>
+<!-- Footer (Minimal for transactional page) -->
+<footer class="w-full py-8 text-center border-t border-outline-variant mt-auto bg-surface-container-lowest">
+<p class="font-label-sm text-label-sm text-outline">
+            Need help? Contact <a class="text-primary hover:underline" href="#">Support</a>
+</p>
+</footer>
+</body></html>

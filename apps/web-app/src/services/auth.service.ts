@@ -23,15 +23,14 @@ export const authService = {
         password,
       });
 
-      if (response.data) {
-        // Backend returns camelCase: accessToken, refreshToken
+      if (response) {
         tokenStorage.setTokens(
-          response.data.accessToken,
-          response.data.refreshToken
+          response.accessToken,
+          response.refreshToken
         );
       }
 
-      return response.data;
+      return response;
     } catch (error) {
       console.error("Login failed:", error);
       throw error;
@@ -53,7 +52,7 @@ export const authService = {
         fullName,
       });
 
-      return response.data;
+      return response;
     } catch (error) {
       console.error("Registration failed:", error);
       throw error;
@@ -81,7 +80,7 @@ export const authService = {
       "/auth/resend-verification",
       { email }
     );
-    return response.data;
+    return response;
   },
 
   /**
@@ -89,7 +88,7 @@ export const authService = {
    */
   me: async (): Promise<UserProfile> => {
     const response = await apiClient.get<UserProfile>("/auth/me");
-    return response.data;
+    return response;
   },
 
   /**
@@ -103,7 +102,7 @@ export const authService = {
       "/auth/change-password",
       { oldPassword, newPassword }
     );
-    return response.data;
+    return response;
   },
 
   /**
@@ -114,7 +113,7 @@ export const authService = {
       "/auth/forgot-password",
       { email }
     );
-    return response.data;
+    return response;
   },
 
   /**
@@ -128,7 +127,7 @@ export const authService = {
       "/auth/reset-password",
       { token, newPassword }
     );
-    return response.data;
+    return response;
   },
 
   /**
@@ -149,9 +148,9 @@ export const authService = {
         }
       );
 
-      if (response.data) {
-        tokenStorage.setTokens(response.data.accessToken, response.data.refreshToken);
-        return response.data.accessToken;
+      if (response) {
+        tokenStorage.setTokens(response.accessToken, response.refreshToken);
+        return response.accessToken;
       }
 
       throw new Error("Failed to refresh token");

@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Roles &amp; Permissions - TicketBox Admin</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&amp;family=Montserrat:wght@600;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "secondary-fixed": "#eaddff",
+                      "surface-variant": "#e0e3e5",
+                      "primary-fixed-dim": "#c3c0ff",
+                      "on-primary-fixed": "#0f0069",
+                      "on-error": "#ffffff",
+                      "secondary-container": "#8a4cfc",
+                      "surface-dim": "#d8dadc",
+                      "surface-bright": "#f7f9fb",
+                      "tertiary-container": "#586076",
+                      "surface-container-high": "#e6e8ea",
+                      "on-tertiary-fixed": "#131b2e",
+                      "on-surface": "#191c1e",
+                      "on-primary-container": "#dad7ff",
+                      "inverse-on-surface": "#eff1f3",
+                      "error-container": "#ffdad6",
+                      "on-secondary": "#ffffff",
+                      "surface-tint": "#4d44e3",
+                      "surface-container": "#eceef0",
+                      "surface-container-low": "#f2f4f6",
+                      "secondary": "#712ae2",
+                      "tertiary-fixed": "#dae2fd",
+                      "on-background": "#191c1e",
+                      "on-tertiary-container": "#d4dbf5",
+                      "surface-container-highest": "#e0e3e5",
+                      "surface-container-lowest": "#ffffff",
+                      "on-secondary-fixed-variant": "#5a00c6",
+                      "error": "#ba1a1a",
+                      "inverse-surface": "#2d3133",
+                      "tertiary-fixed-dim": "#bec6e0",
+                      "primary-container": "#4f46e5",
+                      "on-surface-variant": "#464555",
+                      "primary-fixed": "#e2dfff",
+                      "tertiary": "#41485e",
+                      "on-primary-fixed-variant": "#3323cc",
+                      "on-secondary-container": "#fffbff",
+                      "on-error-container": "#93000a",
+                      "outline-variant": "#c7c4d8",
+                      "on-tertiary": "#ffffff",
+                      "inverse-primary": "#c3c0ff",
+                      "on-secondary-fixed": "#25005a",
+                      "surface": "#f7f9fb",
+                      "primary": "#3525cd",
+                      "outline": "#777587",
+                      "on-tertiary-fixed-variant": "#3f465c",
+                      "background": "#f7f9fb",
+                      "on-primary": "#ffffff",
+                      "secondary-fixed-dim": "#d2bbff"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "margin-mobile": "16px",
+                      "margin-desktop": "40px",
+                      "gutter": "24px",
+                      "container-max": "1280px",
+                      "base": "4px"
+              },
+              "fontFamily": {
+                      "headline-md": [
+                              "Montserrat"
+                      ],
+                      "display-lg": [
+                              "Montserrat"
+                      ],
+                      "display-lg-mobile": [
+                              "Montserrat"
+                      ],
+                      "body-md": [
+                              "Inter"
+                      ],
+                      "body-lg": [
+                              "Inter"
+                      ],
+                      "label-sm": [
+                              "Inter"
+                      ]
+              },
+              "fontSize": {
+                      "headline-md": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "display-lg": [
+                              "48px",
+                              {
+                                      "lineHeight": "56px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "display-lg-mobile": [
+                              "32px",
+                              {
+                                      "lineHeight": "40px",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "body-md": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "body-lg": [
+                              "18px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "label-sm": [
+                              "12px",
+                              {
+                                      "lineHeight": "16px",
+                                      "fontWeight": "600"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+    </script>
+<style>
+        /* Custom toggle switch styles to match design system */
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #3525cd; /* primary */
+        }
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #3525cd; /* primary */
+        }
+        .toggle-checkbox:disabled + .toggle-label {
+            background-color: #e0e3e5; /* surface-variant */
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md text-body-md flex h-screen overflow-hidden antialiased">
+<!-- SideNavBar -->
+<nav class="bg-surface-container-lowest dark:bg-surface-container-low border-r border-outline-variant dark:border-outline docked left-0 h-full w-64 flex flex-col p-4 gap-4 hidden md:flex shrink-0">
+<!-- Brand Logo/Header -->
+<div class="mb-6 px-2">
+<h1 class="font-headline-md text-headline-md text-primary dark:text-primary-fixed-dim font-bold tracking-tight">TicketBox Admin</h1>
+<p class="font-label-sm text-label-sm text-on-surface-variant mt-1 uppercase tracking-wider">Management Suite</p>
+</div>
+<!-- Primary CTA -->
+<button class="w-full bg-primary hover:bg-primary/90 text-on-primary font-label-sm text-label-sm py-3 px-4 rounded-lg flex items-center justify-center gap-2 transition-colors duration-200 shadow-sm active:scale-95">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">add</span>
+            Create Event
+        </button>
+<!-- Navigation Links -->
+<ul class="flex flex-col gap-1 mt-4 flex-grow">
+<li>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container-high transition-all font-label-sm text-label-sm" href="#">
+<span class="material-symbols-outlined text-outline">dashboard</span>
+                    Dashboard
+                </a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container-high transition-all font-label-sm text-label-sm" href="#">
+<span class="material-symbols-outlined text-outline">event</span>
+                    Events
+                </a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container-high transition-all font-label-sm text-label-sm" href="#">
+<span class="material-symbols-outlined text-outline">payments</span>
+                    Revenue
+                </a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-3 py-2.5 bg-primary-container text-on-primary-container rounded-lg font-bold transition-all scale-[0.98] font-label-sm text-label-sm shadow-[0_4px_20px_rgba(15,23,42,0.08)]" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">badge</span>
+                    Staff
+                </a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container-high transition-all font-label-sm text-label-sm" href="#">
+<span class="material-symbols-outlined text-outline">settings</span>
+                    Settings
+                </a>
+</li>
+</ul>
+<!-- Footer Links -->
+<div class="mt-auto border-t border-outline-variant pt-4">
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container-high transition-all font-label-sm text-label-sm" href="#">
+<span class="material-symbols-outlined text-outline">help</span>
+                Help Center
+            </a>
+<!-- User Profile Snippet in Nav -->
+<div class="flex items-center gap-3 px-3 py-3 mt-2 rounded-lg bg-surface-container-low border border-outline-variant/50">
+<div class="w-8 h-8 rounded-full bg-primary-fixed-dim flex items-center justify-center text-on-primary-fixed font-bold font-label-sm text-label-sm shrink-0">
+                    AD
+                </div>
+<div class="overflow-hidden">
+<p class="font-label-sm text-label-sm text-on-surface truncate font-semibold">Admin User</p>
+<p class="font-label-sm text-label-sm text-on-surface-variant truncate opacity-80" style="font-size: 10px;">System Admin</p>
+</div>
+</div>
+</div>
+</nav>
+<!-- Main Content Canvas -->
+<main class="flex-1 flex flex-col bg-surface overflow-hidden relative">
+<!-- Top Header Area (Canvas Header) -->
+<header class="bg-surface-container-lowest border-b border-outline-variant px-margin-mobile md:px-margin-desktop py-4 flex items-center justify-between z-10 shrink-0">
+<!-- Breadcrumbs -->
+<div class="flex items-center text-sm font-label-sm text-label-sm text-on-surface-variant gap-2">
+<a class="hover:text-primary transition-colors" href="#">User Management</a>
+<span class="material-symbols-outlined text-[16px]">chevron_right</span>
+<span class="text-on-surface font-semibold">Roles &amp; Permissions</span>
+</div>
+<!-- Mobile Menu Trigger -->
+<button class="md:hidden text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined">menu</span>
+</button>
+</header>
+<!-- Scrollable Content Area -->
+<div class="flex-1 overflow-y-auto p-margin-mobile md:p-margin-desktop">
+<div class="max-w-container-max mx-auto w-full">
+<!-- Role Header & Summary Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-gutter mb-gutter">
+<!-- Role Details Card -->
+<div class="lg:col-span-2 bg-surface-container-lowest rounded-xl shadow-[0px_4px_20px_rgba(15,23,42,0.08)] p-6 md:p-8 flex flex-col justify-between relative overflow-hidden group">
+<!-- Decorative gradient blob -->
+<div class="absolute -top-10 -right-10 w-40 h-40 bg-secondary-fixed-dim rounded-full blur-3xl opacity-20 group-hover:opacity-40 transition-opacity duration-500 pointer-events-none"></div>
+<div>
+<div class="flex items-center gap-3 mb-2">
+<span class="bg-primary-container text-on-primary-container px-2 py-1 rounded text-xs font-bold uppercase tracking-wider font-label-sm">Standard Role</span>
+<span class="flex items-center gap-1 text-on-surface-variant font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[14px]">group</span>
+                                    14 Users assigned
+                                </span>
+</div>
+<h2 class="font-headline-md text-headline-md text-on-surface mb-2 font-bold flex items-center gap-3">
+                                Organizer
+                                <span class="material-symbols-outlined text-secondary text-[24px]" style="font-variation-settings: 'FILL' 1;">verified</span>
+</h2>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-2xl leading-relaxed">
+                                Organizers have full access to create, manage, and analyze events. They can handle ticketing inventory, view revenue reports for their specific events, but cannot access global system settings or financial payouts.
+                            </p>
+</div>
+<div class="mt-6 flex items-center gap-4">
+<button class="bg-surface-container border border-outline hover:border-primary text-on-surface font-label-sm text-label-sm py-2 px-4 rounded-lg transition-colors flex items-center gap-2 group/btn">
+<span class="material-symbols-outlined text-[18px] text-on-surface-variant group-hover/btn:text-primary transition-colors">edit</span>
+                                Edit Role Info
+                            </button>
+<button class="text-error hover:text-on-error hover:bg-error font-label-sm text-label-sm py-2 px-4 rounded-lg transition-colors border border-transparent hover:border-error">
+                                Delete Role
+                            </button>
+</div>
+</div>
+<!-- Access Level Summary Card -->
+<div class="bg-primary text-on-primary rounded-xl shadow-[0px_4px_20px_rgba(15,23,42,0.15)] p-6 md:p-8 relative overflow-hidden">
+<!-- Background pattern -->
+<div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(circle at 2px 2px, white 1px, transparent 0); background-size: 20px 20px;"></div>
+<h3 class="font-label-sm text-label-sm uppercase tracking-widest text-primary-fixed opacity-90 mb-6 relative z-10">Access Summary</h3>
+<div class="space-y-4 relative z-10">
+<div class="flex items-center justify-between border-b border-primary-fixed/20 pb-3">
+<span class="font-body-md text-body-md opacity-90">System Access</span>
+<span class="font-label-sm text-label-sm font-bold bg-primary-container text-on-primary-container px-2 py-0.5 rounded">Partial</span>
+</div>
+<div class="flex items-center justify-between border-b border-primary-fixed/20 pb-3">
+<span class="font-body-md text-body-md opacity-90">Events Managed</span>
+<span class="font-label-sm text-label-sm font-bold">Assigned Only</span>
+</div>
+<div class="flex items-center justify-between">
+<span class="font-body-md text-body-md opacity-90">Risk Level</span>
+<div class="flex items-center gap-1 text-secondary-fixed">
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">warning</span>
+<span class="font-label-sm text-label-sm font-bold">Medium</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Permissions Grid Section -->
+<div class="bg-surface-container-lowest rounded-xl shadow-[0px_4px_20px_rgba(15,23,42,0.08)] overflow-hidden border border-outline-variant/30">
+<div class="p-6 border-b border-outline-variant bg-surface-bright flex flex-col md:flex-row md:items-center justify-between gap-4">
+<div>
+<h3 class="font-headline-md text-headline-md text-on-surface text-[20px] mb-1">Module Permissions</h3>
+<p class="font-body-md text-body-md text-on-surface-variant text-[14px]">Define granular access rights across all system modules.</p>
+</div>
+<!-- Global Toggles / Filters (Optional UI enhancement) -->
+<div class="flex items-center gap-3">
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[18px]">search</span>
+<input class="w-full md:w-64 pl-9 pr-3 py-2 rounded-lg border border-outline-variant bg-surface focus:ring-2 focus:ring-primary focus:border-primary font-body-md text-body-md text-[14px] outline-none transition-shadow" placeholder="Search modules..." type="text"/>
+</div>
+</div>
+</div>
+<!-- Detailed Grid -->
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-low border-b border-outline-variant font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">
+<th class="py-4 px-6 font-semibold w-1/3">Module Name</th>
+<th class="py-4 px-4 font-semibold text-center">View</th>
+<th class="py-4 px-4 font-semibold text-center">Create</th>
+<th class="py-4 px-4 font-semibold text-center">Edit</th>
+<th class="py-4 px-4 font-semibold text-center">Delete</th>
+<th class="py-4 px-4 font-semibold text-center">Export</th>
+</tr>
+</thead>
+<tbody class="font-body-md text-body-md text-on-surface divide-y divide-outline-variant/50">
+<!-- Events Module -->
+<tr class="hover:bg-surface-bright transition-colors group">
+<td class="py-4 px-6">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">event</span>
+</div>
+<div>
+<p class="font-semibold text-on-surface">Events Management</p>
+<p class="font-label-sm text-label-sm text-on-surface-variant mt-0.5">Create and manage ticketed events</p>
+</div>
+</div>
+</td>
+<td class="py-4 px-4 text-center">
+<label class="relative inline-block w-10 h-5 cursor-pointer align-middle">
+<input checked="" class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-2 border-outline-variant appearance-none cursor-pointer transition-all duration-200 z-10 top-0 left-0 checked:border-primary" type="checkbox"/>
+<span class="toggle-label block overflow-hidden h-5 rounded-full bg-outline-variant cursor-pointer transition-colors duration-200"></span>
+</label>
+</td>
+<td class="py-4 px-4 text-center">
+<label class="relative inline-block w-10 h-5 cursor-pointer align-middle">
+<input checked="" class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-2 border-outline-variant appearance-none cursor-pointer transition-all duration-200 z-10 top-0 left-0 checked:border-primary" type="checkbox"/>
+<span class="toggle-label block overflow-hidden h-5 rounded-full bg-outline-variant cursor-pointer transition-colors duration-200"></span>
+</label>
+</td>
+<td class="py-4 px-4 text-center">
+<label class="relative inline-block w-10 h-5 cursor-pointer align-middle">
+<input checked="" class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-2 border-outline-variant appearance-none cursor-pointer transition-all duration-200 z-10 top-0 left-0 checked:border-primary" type="checkbox"/>
+<span class="toggle-label block overflow-hidden h-5 rounded-full bg-outline-variant cursor-pointer transition-colors duration-200"></span>
+</label>
+</td>
+<td class="py-4 px-4 text-center">
+<label class="relative inline-block w-10 h-5 cursor-pointer align-middle">
+<input class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-2 border-outline-variant appearance-none cursor-pointer transition-all duration-200 z-10 top-0 left-0 checked:border-primary" type="checkbox"/>
+<span class="toggle-label block overflow-hidden h-5 rounded-full bg-outline-variant cursor-pointer transition-colors duration-200"></span>
+</label>
+</td>
+<td class="py-4 px-4 text-center">
+<label class="relative inline-block w-10 h-5 cursor-pointer align-middle">
+<input checked="" class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-2 border-outline-variant appearance-none cursor-pointer transition-all duration-200 z-10 top-0 left-0 checked:border-primary" type="checkbox"/>
+<span class="toggle-label block overflow-hidden h-5 rounded-full bg-outline-variant cursor-pointer transition-colors duration-200"></span>
+</label>
+</td>
+</tr>
+<!-- Revenue Module -->
+<tr class="hover:bg-surface-bright transition-colors group">
+<td class="py-4 px-6">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-secondary/10 flex items-center justify-center text-secondary group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">payments</span>
+</div>
+<div>
+<p class="font-semibold text-on-surface">Revenue &amp; Reports</p>
+<p class="font-label-sm text-label-sm text-on-surface-variant mt-0.5">Financial data and ticket sales analytics</p>
+</div>
+</div>
+</td>
+<td class="py-4 px-4 text-center">
+<label class="relative inline-block w-10 h-5 cursor-pointer align-middle">
+<input checked="" class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-2 border-outline-variant appearance-none cursor-pointer transition-all duration-200 z-10 top-0 left-0 checked:border-primary" type="checkbox"/>
+<span class="toggle-label block overflow-hidden h-5 rounded-full bg-outline-variant cursor-pointer transition-colors duration-200"></span>
+</label>
+</td>
+<td class="py-4 px-4 text-center">
+<!-- Disabled Checkbox visual -->
+<div class="inline-flex items-center justify-center w-5 h-5 rounded border border-outline-variant/30 bg-surface-container-high opacity-50 cursor-not-allowed" title="Not applicable for this module">
+<span class="material-symbols-outlined text-[14px] text-on-surface-variant">remove</span>
+</div>
+</td>
+<td class="py-4 px-4 text-center">
+<div class="inline-flex items-center justify-center w-5 h-5 rounded border border-outline-variant/30 bg-surface-container-high opacity-50 cursor-not-allowed">
+<span class="material-symbols-outlined text-[14px] text-on-surface-variant">remove</span>
+</div>
+</td>
+<td class="py-4 px-4 text-center">
+<div class="inline-flex items-center justify-center w-5 h-5 rounded border border-outline-variant/30 bg-surface-container-high opacity-50 cursor-not-allowed">
+<span class="material-symbols-outlined text-[14px] text-on-surface-variant">remove</span>
+</div>
+</td>
+<td class="py-4 px-4 text-center">
+<label class="relative inline-block w-10 h-5 cursor-pointer align-middle">
+<input checked="" class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-2 border-outline-variant appearance-none cursor-pointer transition-all duration-200 z-10 top-0 left-0 checked:border-primary" type="checkbox"/>
+<span class="toggle-label block overflow-hidden h-5 rounded-full bg-outline-variant cursor-pointer transition-colors duration-200"></span>
+</label>
+</td>
+</tr>
+<!-- Staff/Users Module -->
+<tr class="hover:bg-surface-bright transition-colors group">
+<td class="py-4 px-6">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-tertiary/10 flex items-center justify-center text-tertiary group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">badge</span>
+</div>
+<div>
+<p class="font-semibold text-on-surface">Staff &amp; Users</p>
+<p class="font-label-sm text-label-sm text-on-surface-variant mt-0.5">Manage team members and roles</p>
+</div>
+</div>
+</td>
+<td class="py-4 px-4 text-center">
+<label class="relative inline-block w-10 h-5 cursor-pointer align-middle">
+<input checked="" class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-2 border-outline-variant appearance-none cursor-pointer transition-all duration-200 z-10 top-0 left-0 checked:border-primary" type="checkbox"/>
+<span class="toggle-label block overflow-hidden h-5 rounded-full bg-outline-variant cursor-pointer transition-colors duration-200"></span>
+</label>
+</td>
+<td class="py-4 px-4 text-center">
+<label class="relative inline-block w-10 h-5 cursor-pointer align-middle opacity-50 cursor-not-allowed">
+<input class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-surface-container-high border-2 border-outline-variant/50 appearance-none z-10 top-0 left-0" disabled="" type="checkbox"/>
+<span class="toggle-label block overflow-hidden h-5 rounded-full bg-outline-variant/30"></span>
+</label>
+</td>
+<td class="py-4 px-4 text-center">
+<label class="relative inline-block w-10 h-5 cursor-pointer align-middle opacity-50 cursor-not-allowed">
+<input class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-surface-container-high border-2 border-outline-variant/50 appearance-none z-10 top-0 left-0" disabled="" type="checkbox"/>
+<span class="toggle-label block overflow-hidden h-5 rounded-full bg-outline-variant/30"></span>
+</label>
+</td>
+<td class="py-4 px-4 text-center">
+<label class="relative inline-block w-10 h-5 cursor-pointer align-middle opacity-50 cursor-not-allowed">
+<input class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-surface-container-high border-2 border-outline-variant/50 appearance-none z-10 top-0 left-0" disabled="" type="checkbox"/>
+<span class="toggle-label block overflow-hidden h-5 rounded-full bg-outline-variant/30"></span>
+</label>
+</td>
+<td class="py-4 px-4 text-center">
+<div class="inline-flex items-center justify-center w-5 h-5 rounded border border-outline-variant/30 bg-surface-container-high opacity-50 cursor-not-allowed">
+<span class="material-symbols-outlined text-[14px] text-on-surface-variant">remove</span>
+</div>
+</td>
+</tr>
+<!-- Scanner Module -->
+<tr class="hover:bg-surface-bright transition-colors group">
+<td class="py-4 px-6">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-primary-fixed-dim/30 flex items-center justify-center text-primary-container group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">qr_code_scanner</span>
+</div>
+<div>
+<p class="font-semibold text-on-surface">Scanner App Access</p>
+<p class="font-label-sm text-label-sm text-on-surface-variant mt-0.5">Ticket validation and entry management</p>
+</div>
+</div>
+</td>
+<td class="py-4 px-4 text-center">
+<label class="relative inline-block w-10 h-5 cursor-pointer align-middle">
+<input checked="" class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-2 border-outline-variant appearance-none cursor-pointer transition-all duration-200 z-10 top-0 left-0 checked:border-primary" type="checkbox"/>
+<span class="toggle-label block overflow-hidden h-5 rounded-full bg-outline-variant cursor-pointer transition-colors duration-200"></span>
+</label>
+</td>
+<td class="py-4 px-4 text-center">
+<div class="inline-flex items-center justify-center w-5 h-5 rounded border border-outline-variant/30 bg-surface-container-high opacity-50 cursor-not-allowed">
+<span class="material-symbols-outlined text-[14px] text-on-surface-variant">remove</span>
+</div>
+</td>
+<td class="py-4 px-4 text-center">
+<label class="relative inline-block w-10 h-5 cursor-pointer align-middle">
+<input checked="" class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-2 border-outline-variant appearance-none cursor-pointer transition-all duration-200 z-10 top-0 left-0 checked:border-primary" type="checkbox"/>
+<span class="toggle-label block overflow-hidden h-5 rounded-full bg-outline-variant cursor-pointer transition-colors duration-200"></span>
+</label>
+</td>
+<td class="py-4 px-4 text-center">
+<div class="inline-flex items-center justify-center w-5 h-5 rounded border border-outline-variant/30 bg-surface-container-high opacity-50 cursor-not-allowed">
+<span class="material-symbols-outlined text-[14px] text-on-surface-variant">remove</span>
+</div>
+</td>
+<td class="py-4 px-4 text-center">
+<div class="inline-flex items-center justify-center w-5 h-5 rounded border border-outline-variant/30 bg-surface-container-high opacity-50 cursor-not-allowed">
+<span class="material-symbols-outlined text-[14px] text-on-surface-variant">remove</span>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- Footer Actions Sticky Area -->
+<div class="mt-8 mb-4 sticky bottom-0 bg-surface/90 backdrop-blur-md py-4 border-t border-outline-variant/30 flex items-center justify-end gap-4 px-2">
+<button class="bg-surface border border-outline hover:bg-surface-container-low text-on-surface font-label-sm text-label-sm py-2.5 px-6 rounded-lg transition-colors shadow-sm">
+                        Cancel
+                    </button>
+<button class="bg-primary hover:bg-primary/90 text-on-primary font-label-sm text-label-sm py-2.5 px-6 rounded-lg transition-all duration-200 shadow-sm active:scale-95 flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">save</span>
+                        Save Changes
+                    </button>
+</div>
+</div>
+</div>
+</main>
+</body></html>

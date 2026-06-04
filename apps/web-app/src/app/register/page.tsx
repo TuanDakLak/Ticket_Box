@@ -1,78 +1,126 @@
 "use client";
 
-import Link from "next/link";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { TicketBoxAuthShell } from "@/components/ticketbox-auth-shell";
 import { ConcertHeroIllustration } from "@/components/ticketbox-illustrations";
 import { authService } from "@/services/auth.service";
+import { AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
 
 export default function RegisterPage() {
-  const router = useRouter();
-  const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const [fullName, setFullName] = useState("");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (password !== confirmPassword) {
-      alert('Passwords do not match');
-      return;
-    }
     setLoading(true);
+    setError(null);
     try {
       await authService.register(email, password, fullName);
-      alert('Account created. Please check your email to verify.');
-      router.push('/login');
+      setSuccess(true);
     } catch (err: any) {
-      alert(err?.response?.data?.message || err?.message || 'Registration failed');
+      setError(err?.response?.data?.message || err?.message || 'Registration failed');
     } finally {
       setLoading(false);
     }
   };
 
+  if (success) {
+    return (
+      <TicketBoxAuthShell
+        title="Check your email"
+        description="We've sent a verification link to your email address. Please verify your account to continue."
+        sidebar={<ConcertHeroIllustration />}
+      >
+        <div className="flex flex-col items-center justify-center space-y-4 py-8 text-center">
+          <div className="rounded-full bg-green-50 p-3 text-green-600 dark:bg-green-950/50 dark:text-green-400">
+            <CheckCircle2 className="h-12 w-12" />
+          </div>
+          <p className="text-muted-foreground">
+            Once verified, you can sign in to your account.
+          </p>
+          <a href="/login" className="ticketbox-button-primary mt-4 w-full sm:w-auto">
+            Return to sign in
+          </a>
+        </div>
+      </TicketBoxAuthShell>
+    );
+  }
+
   return (
     <TicketBoxAuthShell
-      title="Join TicketBox"
-      description="Create an account to reserve seats, manage future ticket journeys, and keep a secure session lifecycle."
+      title="Create an account"
+      description="Join TicketBox to discover and book tickets for the best events."
       sidebar={<ConcertHeroIllustration />}
       footerLinks={[
         { label: "Already have an account? Sign in", href: "/login" },
       ]}
     >
       <form className="space-y-5" onSubmit={onSubmit}>
-        <div>
-          <label className="ticketbox-label" htmlFor="fullName">Full name</label>
-          <input id="fullName" value={fullName} onChange={(e) => setFullName(e.target.value)} type="text" className="ticketbox-input" placeholder="Nguyen Van A" />
-        </div>
-        <div>
-          <label className="ticketbox-label" htmlFor="email">Email address</label>
-          <input id="email" value={email} onChange={(e) => setEmail(e.target.value)} type="email" className="ticketbox-input" placeholder="name@company.com" />
-        </div>
-        <div>
-          <label className="ticketbox-label" htmlFor="password">Password</label>
-          <input id="password" value={password} onChange={(e) => setPassword(e.target.value)} type="password" className="ticketbox-input" placeholder="Min. 8 characters" />
-          <div className="mt-3 h-2 rounded-full bg-slate-100">
-            <div className="h-2 w-2/3 rounded-full bg-amber-500" />
+        {error && (
+          <div className="flex items-center gap-3 rounded-xl bg-red-50 p-4 text-sm text-red-800 dark:bg-red-950/50 dark:text-red-200">
+            <AlertCircle className="h-5 w-5 shrink-0" />
+            <p>{error}</p>
           </div>
-          <p className="mt-2 text-xs font-semibold uppercase tracking-[0.2em] text-amber-600">Security strength: Medium</p>
+        )}
+        
+        <div className="space-y-1">
+          <label className="ticketbox-label" htmlFor="fullName">Full name</label>
+          <input 
+            id="fullName" 
+            value={fullName} 
+            onChange={(e) => setFullName(e.target.value)} 
+            type="text" 
+            className="ticketbox-input" 
+            placeholder="John Doe" 
+            required
+            disabled={loading}
+          />
         </div>
-        <div>
-          <label className="ticketbox-label" htmlFor="confirmPassword">Confirm password</label>
-          <input id="confirmPassword" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} type="password" className="ticketbox-input" placeholder="Repeat your password" />
+
+        <div className="space-y-1">
+          <label className="ticketbox-label" htmlFor="email">Email address</label>
+          <input 
+            id="email" 
+            value={email} 
+            onChange={(e) => setEmail(e.target.value)} 
+            type="email" 
+            className="ticketbox-input" 
+            placeholder="name@example.com" 
+            required
+            disabled={loading}
+          />
         </div>
-        <label className="flex items-start gap-3 rounded-2xl border border-slate-200 px-4 py-3 text-sm text-slate-600">
-          <input type="checkbox" className="mt-1 h-4 w-4 rounded border-slate-300 text-[#0f62fe] focus:ring-[#0f62fe]" />
-          <span>
-            I agree to the <Link href="#" className="font-medium text-[#0f62fe]">Terms of Service</Link> and <Link href="#" className="font-medium text-[#0f62fe]">Privacy Policy</Link>.
-          </span>
-        </label>
-        <button className="ticketbox-button-primary w-full" disabled={loading}>{loading ? 'Creating...' : 'Create account'}</button>
-        <div className="rounded-[28px] border border-dashed border-[#0f62fe]/25 bg-[#eff6ff] p-4 text-sm text-slate-600">
-          Success state: show a verification modal with resend countdown, then route users back to sign in.
+        
+        <div className="space-y-1">
+          <label className="ticketbox-label" htmlFor="password">Password</label>
+          <input 
+            id="password" 
+            value={password} 
+            onChange={(e) => setPassword(e.target.value)} 
+            type="password" 
+            className="ticketbox-input" 
+            placeholder="••••••••" 
+            required
+            minLength={8}
+            disabled={loading}
+          />
+          <p className="text-xs text-muted-foreground mt-1">Must be at least 8 characters.</p>
         </div>
+        
+        <button className="ticketbox-button-primary w-full mt-4" disabled={loading}>
+          {loading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Creating account...
+            </>
+          ) : (
+            'Create account'
+          )}
+        </button>
       </form>
     </TicketBoxAuthShell>
   );
