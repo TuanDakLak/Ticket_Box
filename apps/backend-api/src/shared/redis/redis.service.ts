@@ -162,6 +162,59 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
     }
   }
 
+  private readonly scriptShaMap = new Map<string, string>();
+
+  async runLuaScript(script: string, keys: string[], args: string[]): Promise<unknown> {
+    const client = this.client;
+    if (!client || !client.isOpen) {
+      throw new Error('Redis client is not available');
+    }
+
+    let sha = this.scriptShaMap.get(script);
+    if (!sha) {
+      try {
+        sha = await client.scriptLoad(script);
+        this.scriptShaMap.set(script, sha);
+      } catch (error) {
+        this.logger.error('Failed to load Lua script into Redis, falling back to direct eval', error);
+        return await client.eval(script, {
+          keys,
+          arguments: args,
+        });
+      }
+    }
+
+    try {
+      return await client.evalSha(sha, {
+        keys,
+        arguments: args,
+      });
+    } catch (error: any) {
+      if (error?.message && error.message.includes('NOSCRIPT')) {
+        this.logger.log('NOSCRIPT error encountered, reloading Lua script...');
+        try {
+          sha = await client.scriptLoad(script);
+          this.scriptShaMap.set(script, sha);
+          return await client.evalSha(sha, {
+            keys,
+            arguments: args,
+          });
+        } catch (reloadError) {
+          this.logger.error('Failed to reload Lua script, falling back to direct eval', reloadError);
+          return await client.eval(script, {
+            keys,
+            arguments: args,
+          });
+        }
+      }
+      throw error;
+    }
+  }
+
+  getClient(): RedisClientType | null {
+    return this.client;
+  }
+
   private markClientUnavailable(): void {
     void this.safeCloseClient();
     this.client = null;
