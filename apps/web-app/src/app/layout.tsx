@@ -1,6 +1,13 @@
 import type { Metadata } from "next";
+import { Inter } from "next/font/google";
 import "@/styles/globals.css";
 import { AuthProvider } from "@/context/AuthContext";
+
+const inter = Inter({
+  subsets: ["latin", "vietnamese"],
+  variable: "--font-inter",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "TicketBox",
@@ -13,8 +20,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className="bg-background font-sans text-foreground">
+    <html lang="vi" suppressHydrationWarning>
+      <body className={`${inter.variable} bg-background font-sans text-foreground`}>
         <AuthProvider>{children}</AuthProvider>
       </body>
     </html>

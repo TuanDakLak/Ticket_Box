@@ -99,8 +99,8 @@ export class EmailService {
   }
 
   async sendVerificationEmail(toEmail: string, fullName: string, token: string): Promise<boolean> {
-    const backendUrl = process.env.BACKEND_URL || 'http://localhost:3000';
-    const verifyUrl = `${backendUrl}/auth/verify?token=${token}`;
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+    const verifyUrl = `${frontendUrl}/verify-email?token=${token}`;
 
     const html = `
       <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px; background-color: #ffffff;">

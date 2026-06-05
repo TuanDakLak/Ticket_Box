@@ -1,53 +1,30 @@
 "use client";
 
-import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "next/navigation";
-import { TicketBoxAuthShell } from "@/components/ticketbox-auth-shell";
-import { SecurityIllustration } from "@/components/ticketbox-illustrations";
+import { useEffect, useMemo } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Loader2 } from "lucide-react";
+import { AuthCardLayout } from "@/components/auth/auth-card-layout";
 
+/** Legacy route: redirects /verify?token= to /verify-email?token= */
 export default function VerifyClient() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const token = useMemo(() => searchParams?.get("token") ?? null, [searchParams]);
-  const [status, setStatus] = useState<"idle" | "redirecting">("idle");
 
   useEffect(() => {
-    if (!token) return;
-
-    window.history.replaceState({}, document.title, window.location.pathname);
-    setStatus("redirecting");
-
-    const backendBase = process.env.NEXT_PUBLIC_API_URL;
-    if (!backendBase) {
-      setStatus("idle");
-      return;
+    if (token) {
+      router.replace(`/verify-email?token=${encodeURIComponent(token)}`);
+    } else {
+      router.replace("/verify-email");
     }
-
-    window.location.href = `${backendBase.replace(/\/+$/, "")}/auth/verify?token=${encodeURIComponent(token)}`;
-  }, [token]);
+  }, [token, router]);
 
   return (
-    <TicketBoxAuthShell
-      title={status === "redirecting" ? "Verifying your account" : "Account verified"}
-      description={
-        status === "redirecting"
-          ? "Redirecting to complete verification…"
-          : "Your email verification is complete. You can sign in now."
-      }
-      sidebar={<SecurityIllustration />}
-      footerLinks={[
-        { label: "Back to sign in", href: "/login" },
-        { label: "Resend verification", href: "/resend-verification" },
-      ]}
-    >
-      <div className="space-y-5 text-center">
-        <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-[#0f62fe]/10 text-[#0f62fe]">
-          <span className="text-3xl">✓</span>
-        </div>
-        <Link href="/login" className="ticketbox-button-primary w-full">
-          Continue to sign in
-        </Link>
+    <AuthCardLayout mesh={false}>
+      <div className="tb-card text-center">
+        <Loader2 className="mx-auto h-10 w-10 animate-spin text-primary" />
+        <p className="mt-4 text-muted-foreground">Đang chuyển hướng...</p>
       </div>
-    </TicketBoxAuthShell>
+    </AuthCardLayout>
   );
 }

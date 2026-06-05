@@ -9,23 +9,48 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        background: "var(--background)",
-        foreground: "var(--foreground)",
+        background: "#f9fafb",
+        foreground: "#1b1c1c",
         primary: {
-          DEFAULT: "var(--primary)",
-          foreground: "var(--primary-foreground)",
-          hover: "var(--primary-hover)",
+          DEFAULT: "#0f62fe",
+          foreground: "#ffffff",
+          hover: "#0353e9",
+          light: "#eff6ff",
+          muted: "#dbeafe",
         },
         muted: {
-          DEFAULT: "var(--muted)",
-          foreground: "var(--muted-foreground)",
+          DEFAULT: "#f1f5f9",
+          foreground: "#64748b",
         },
-        border: "var(--border)",
-        input: "var(--input)",
-        ring: "var(--ring)",
+        border: "#e5e7eb",
+        input: "#e2e8f0",
+        ring: "#0f62fe",
+        success: "#2DC275",
+        warning: "#F59E0B",
+        error: "#EF4444",
+        surface: {
+          DEFAULT: "#ffffff",
+          bg: "#f9fafb",
+          variant: "#f1f5f9",
+        },
+        accent: {
+          coral: "#ff7a59",
+        },
       },
       fontFamily: {
-        sans: ["var(--font-inter)", "sans-serif"],
+        sans: ["var(--font-inter)", "Inter", "system-ui", "sans-serif"],
+      },
+      maxWidth: {
+        "auth-form": "440px",
+        "container-auth": "1440px",
+      },
+      spacing: {
+        gutter: "24px",
+        "margin-desktop": "80px",
+      },
+      boxShadow: {
+        card: "0px 4px 20px rgba(0, 0, 0, 0.05)",
+        "card-hover": "0px 10px 30px rgba(15, 98, 254, 0.12)",
       },
     },
   },

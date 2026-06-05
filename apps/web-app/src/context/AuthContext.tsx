@@ -1,16 +1,24 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 import { UserProfile } from "@/types/auth.types";
 import { authService } from "@/services/auth.service";
-import { tokenStorage } from "@/utils/token.utils";
+import { tokenStorage, isTokenExpired } from "@/utils/token.utils";
 
 interface AuthContextType {
   user: UserProfile | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (user: UserProfile) => void;
-  logout: () => void;
+  logout: () => Promise<void>;
+  hasPermission: (permission: string) => boolean;
+  hasRole: (role: string) => boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -20,30 +28,65 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    let mounted = true;
+
     const initAuth = async () => {
       try {
-        if (tokenStorage.hasToken()) {
-          const profile = await authService.me();
+        const token = tokenStorage.getAccessToken();
+        if (!token) {
+          return;
+        }
+
+        if (isTokenExpired(token) && tokenStorage.getRefreshToken()) {
+          await authService.refreshToken();
+        }
+
+        const profile = await authService.me();
+        if (mounted) {
           setUser(profile);
         }
       } catch (error) {
         console.error("Failed to restore session:", error);
+        tokenStorage.clearTokens();
+        if (mounted) {
+          setUser(null);
+        }
       } finally {
-        setIsLoading(false);
+        if (mounted) {
+          setIsLoading(false);
+        }
       }
     };
 
     initAuth();
+
+    return () => {
+      mounted = false;
+    };
   }, []);
 
-  const login = (userData: UserProfile) => {
+  const login = useCallback((userData: UserProfile) => {
     setUser(userData);
-  };
+  }, []);
 
-  const logout = () => {
+  const logout = useCallback(async () => {
+    await authService.logout();
     setUser(null);
-    authService.logout();
-  };
+  }, []);
+
+  const hasPermission = useCallback(
+    (permission: string): boolean => {
+      return user?.permissions?.includes(permission) ?? false;
+    },
+    [user]
+  );
+
+  const hasRole = useCallback(
+    (role: string): boolean => {
+      return user?.roles?.some((r) => r.toUpperCase() === role.toUpperCase()) ?? false;
+    },
+    [user]
+  );
 
   return (
     <AuthContext.Provider
@@ -53,6 +96,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         isLoading,
         login,
         logout,
+        hasPermission,
+        hasRole,
       }}
     >
       {children}

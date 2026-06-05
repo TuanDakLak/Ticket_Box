@@ -167,4 +167,30 @@ export const authService = {
   verifyToken: (): boolean => {
     return tokenStorage.hasToken();
   },
+
+  /**
+   * Verify email using activation token from email link
+   */
+  verifyEmail: async (token: string): Promise<MessageResponse> => {
+    const base = process.env.NEXT_PUBLIC_API_BASE_URL || "/api/proxy";
+    const response = await fetch(
+      `${base}/auth/verify?token=${encodeURIComponent(token)}`,
+      { method: "GET", redirect: "manual" }
+    );
+
+    if (response.status === 302 || response.status === 0 || response.ok) {
+      return { message: "Tài khoản đã được kích hoạt thành công." };
+    }
+
+    let errorData: { message?: string } = {};
+    try {
+      errorData = await response.json();
+    } catch {
+      errorData = { message: "Liên kết xác thực không hợp lệ hoặc đã hết hạn." };
+    }
+
+    throw Object.assign(new Error(errorData.message || "Verification failed"), {
+      response: { data: errorData, status: response.status },
+    });
+  },
 };

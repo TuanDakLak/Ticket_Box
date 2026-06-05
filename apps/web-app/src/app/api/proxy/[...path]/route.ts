@@ -22,10 +22,13 @@ async function forward(request: NextRequest, pathSegments: string[]) {
   headers.delete('connection');
   headers.delete('content-length');
 
+  const pathKey = pathSegments.filter(Boolean).join('/');
+  const isVerifyEndpoint = pathKey === 'auth/verify';
+
   const init: RequestInit = {
     method: request.method,
     headers,
-    redirect: 'follow',
+    redirect: isVerifyEndpoint ? 'manual' : 'follow',
   };
 
   if (request.method !== 'GET' && request.method !== 'HEAD') {

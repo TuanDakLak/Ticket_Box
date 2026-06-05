@@ -4,46 +4,360 @@
 
 @layer base {
   :root {
-    --background: #ffffff;
-    --foreground: #0f172a;
-    
-    --primary: #020617;
+    --background: #f9fafb;
+    --foreground: #1b1c1c;
+    --primary: #0f62fe;
     --primary-foreground: #ffffff;
-    --primary-hover: #1e293b;
-    
+    --primary-hover: #0353e9;
+    --primary-light: #eff6ff;
+    --primary-muted: #dbeafe;
     --muted: #f1f5f9;
     --muted-foreground: #64748b;
-    
-    --border: #e2e8f0;
+    --border: #e5e7eb;
     --input: #e2e8f0;
-    --ring: #020617;
+    --ring: #0f62fe;
+    --error: #ef4444;
+    --surface: #ffffff;
+    --surface-bg: #f9fafb;
   }
-}
 
-@layer base {
   * {
     border-color: var(--border);
   }
+
   body {
-    @apply bg-background text-foreground;
+    background-color: var(--background);
+    color: var(--foreground);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 }
 
 @layer components {
-  .ticketbox-input {
-    @apply flex h-12 w-full rounded-xl border border-input bg-transparent px-4 py-2 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50;
+  /* ── Auth form components ── */
+  .tb-input {
+    display: flex;
+    height: 3rem;
+    width: 100%;
+    border-radius: 0.75rem;
+    border: 1px solid var(--input);
+    background-color: #fff;
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    line-height: 1.5rem;
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+
+  .tb-input::placeholder {
+    color: var(--muted-foreground);
+  }
+
+  .tb-input:focus-visible {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px var(--primary-muted);
+  }
+
+  .tb-input:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+
+  .tb-input-error {
+    border-color: var(--error);
+  }
+
+  .tb-input-error:focus-visible {
+    border-color: var(--error);
+    box-shadow: 0 0 0 2px #fecaca;
+  }
+
+  .tb-input-icon {
+    display: flex;
+    height: 3rem;
+    width: 100%;
+    border-radius: 0.75rem;
+    border: 1px solid var(--input);
+    background-color: #fff;
+    padding: 0.75rem 1rem 0.75rem 2.75rem;
+    font-size: 1rem;
+    line-height: 1.5rem;
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+
+  .tb-input-icon::placeholder {
+    color: var(--muted-foreground);
+  }
+
+  .tb-input-icon:focus-visible {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px var(--primary-muted);
+  }
+
+  .tb-input-icon:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+
+  .tb-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--foreground);
+  }
+
+  .tb-btn-primary {
+    display: inline-flex;
+    height: 3rem;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: 0.75rem;
+    background-color: var(--primary);
+    padding: 0 1.5rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #fff;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+    transition: background-color 0.15s, box-shadow 0.15s, transform 0.1s;
+  }
+
+  .tb-btn-primary:hover:not(:disabled) {
+    background-color: var(--primary-hover);
+    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+  }
+
+  .tb-btn-primary:active:not(:disabled) {
+    transform: scale(0.98);
+  }
+
+  .tb-btn-primary:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--primary);
+  }
+
+  .tb-btn-primary:disabled {
+    pointer-events: none;
+    opacity: 0.5;
+  }
+
+  .tb-btn-outline {
+    display: inline-flex;
+    height: 3rem;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: 0.75rem;
+    border: 1px solid var(--input);
+    background-color: #fff;
+    padding: 0 1.5rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--foreground);
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    transition: background-color 0.15s, transform 0.1s;
+  }
+
+  .tb-btn-outline:hover:not(:disabled) {
+    background-color: var(--muted);
+  }
+
+  .tb-btn-outline:active:not(:disabled) {
+    transform: scale(0.98);
+  }
+
+  .tb-btn-outline:disabled {
+    pointer-events: none;
+    opacity: 0.5;
+  }
+
+  .tb-btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--muted-foreground);
+    transition: color 0.15s;
+  }
+
+  .tb-btn-ghost:hover {
+    color: var(--primary);
+  }
+
+  .tb-card {
+    border-radius: 0.75rem;
+    border: 1px solid var(--border);
+    background-color: #fff;
+    padding: 2rem;
+    box-shadow: 0 4px 20px rgb(0 0 0 / 0.05);
+    transition: box-shadow 0.2s;
+  }
+
+  .tb-card:hover {
+    box-shadow: 0 10px 30px rgb(15 98 254 / 0.12);
+  }
+
+  .tb-auth-mesh {
+    background-color: var(--surface-bg);
+    background-image:
+      radial-gradient(at 0% 0%, rgb(15 98 254 / 0.08) 0, transparent 50%),
+      radial-gradient(at 100% 0%, rgb(48 19 95 / 0.06) 0, transparent 50%);
+  }
+
+  .tb-divider {
+    position: relative;
+    display: flex;
+    align-items: center;
+    padding: 0.5rem 0;
+  }
+
+  .tb-divider::before,
+  .tb-divider::after {
+    content: "";
+    height: 1px;
+    flex: 1;
+    background-color: var(--border);
+  }
+
+  .tb-divider span {
+    padding: 0 1rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--muted-foreground);
+  }
+
+  /* ── Legacy layout classes (dashboard, catalog, home) ── */
+  .auth-page {
+    min-height: 100vh;
+    background-color: var(--surface-bg);
+  }
+
+  .ticketbox-shell {
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 80rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .ticketbox-nav {
+    background-color: #fff;
+  }
+
+  .ticketbox-card {
+    border-radius: 1.75rem;
+    border: 1px solid var(--border);
+    background-color: #fff;
+    box-shadow: 0 12px 40px rgb(15 23 42 / 0.06);
+  }
+
+  .ticketbox-panel {
+    border-radius: 1.75rem;
+    border: 1px solid var(--border);
+    background-color: #fff;
+    box-shadow: 0 12px 40px rgb(15 23 42 / 0.06);
+  }
+
+  .ticketbox-badge {
+    display: inline-block;
+    border-radius: 9999px;
+    background-color: var(--primary-light);
+    padding: 0.25rem 0.75rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--primary);
+  }
+
+  .ticketbox-muted {
+    color: var(--muted-foreground);
   }
 
   .ticketbox-label {
-    @apply mb-2 block text-sm font-semibold text-foreground;
+    display: block;
+    margin-bottom: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+  }
+
+  .ticketbox-input {
+    display: flex;
+    height: 3rem;
+    width: 100%;
+    border-radius: 0.75rem;
+    border: 1px solid var(--input);
+    background-color: transparent;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+
+  .ticketbox-input:focus-visible {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px var(--primary-muted);
   }
 
   .ticketbox-button-primary {
-    @apply inline-flex h-12 items-center justify-center rounded-xl bg-primary px-6 py-2 text-sm font-semibold text-primary-foreground shadow transition-colors hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.75rem;
+    background-color: var(--primary);
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #fff;
+    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+    transition: background-color 0.15s;
   }
-  
+
+  .ticketbox-button-primary:hover {
+    background-color: var(--primary-hover);
+  }
+
+  .ticketbox-button-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.75rem;
+    border: 1px solid var(--border);
+    background-color: #fff;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--foreground);
+    transition: background-color 0.15s;
+  }
+
+  .ticketbox-button-secondary:hover {
+    background-color: var(--muted);
+  }
+
   .ticketbox-button-outline {
-    @apply inline-flex h-12 items-center justify-center rounded-xl border border-input bg-transparent px-6 py-2 text-sm font-semibold text-foreground shadow-sm transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50;
+    display: inline-flex;
+    height: 3rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.75rem;
+    border: 1px solid var(--input);
+    background-color: transparent;
+    padding: 0 1.5rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    transition: background-color 0.15s;
+  }
+
+  .ticketbox-button-outline:hover {
+    background-color: var(--muted);
   }
 }

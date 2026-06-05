@@ -1,25 +1,32 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useState } from "react";
-import { ArrowLeft, ArrowRight, KeyRound, Loader2, MailCheck } from "lucide-react";
+import { useSearchParams } from "next/navigation";
+import { ArrowLeft, Loader2, Mail, MailCheck } from "lucide-react";
 import { AuthCardLayout } from "@/components/auth/auth-card-layout";
 import { AuthAlert } from "@/components/auth/auth-alert";
 import { authService } from "@/services/auth.service";
 import { getErrorMessage } from "@/utils/error.utils";
 
-export default function ForgotPasswordPage() {
+export default function ResendVerificationClient() {
+  const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+
+  useEffect(() => {
+    const prefill = searchParams?.get("email");
+    if (prefill) setEmail(prefill);
+  }, [searchParams]);
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
     try {
-      await authService.forgotPassword(email);
+      await authService.resendVerification(email);
       setSuccess(true);
     } catch (err: unknown) {
       setError(getErrorMessage(err));
@@ -35,10 +42,10 @@ export default function ForgotPasswordPage() {
           <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-green-50">
             <MailCheck className="h-10 w-10 text-success" />
           </div>
-          <h1 className="text-2xl font-bold">Kiểm tra email</h1>
+          <h1 className="text-2xl font-bold">Email đã được gửi</h1>
           <p className="mt-3 text-muted-foreground">
-            Nếu tài khoản tồn tại với <strong className="text-foreground">{email}</strong>, bạn sẽ
-            nhận được liên kết khôi phục mật khẩu trong vài phút.
+            Nếu tài khoản tồn tại, liên kết xác thực mới đã được gửi đến{" "}
+            <strong className="text-foreground">{email}</strong>.
           </p>
           <Link href="/login" className="tb-btn-primary mt-8">
             Về trang đăng nhập
@@ -52,12 +59,12 @@ export default function ForgotPasswordPage() {
     <AuthCardLayout>
       <div className="tb-card">
         <div className="mb-8 text-center">
-          <div className="mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-primary-light">
-            <KeyRound className="h-12 w-12 text-primary" />
+          <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-primary-light">
+            <Mail className="h-10 w-10 text-primary" />
           </div>
-          <h1 className="text-2xl font-bold">Quên mật khẩu?</h1>
+          <h1 className="text-2xl font-bold">Gửi lại email xác thực</h1>
           <p className="mt-2 text-muted-foreground">
-            Nhập email của bạn, chúng tôi sẽ gửi liên kết khôi phục.
+            Nhập email đã đăng ký để nhận liên kết kích hoạt tài khoản.
           </p>
         </div>
 
@@ -76,7 +83,7 @@ export default function ForgotPasswordPage() {
               id="email"
               type="email"
               className="tb-input"
-              placeholder="Nhập email của bạn"
+              placeholder="name@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -84,17 +91,14 @@ export default function ForgotPasswordPage() {
             />
           </div>
 
-          <button type="submit" className="tb-btn-primary group" disabled={loading || !email}>
+          <button type="submit" className="tb-btn-primary" disabled={loading || !email}>
             {loading ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" />
                 Đang gửi...
               </>
             ) : (
-              <>
-                Gửi liên kết khôi phục
-                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-              </>
+              "Gửi email xác thực"
             )}
           </button>
         </form>

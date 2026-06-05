@@ -1,29 +1,44 @@
 "use client";
 
 import Link from "next/link";
-import { useAuth } from "@/hooks/useAuth";
+import { ShieldX } from "lucide-react";
+import { AuthCardLayout } from "@/components/auth/auth-card-layout";
+import { useAuth } from "@/context/AuthContext";
 
 export default function AccessDeniedPage() {
   const { isAuthenticated } = useAuth();
 
   return (
-    <main className="auth-page flex items-center justify-center px-4 py-12">
-      <div className="ticketbox-panel max-w-xl p-8 text-center">
-        <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-rose-100 text-4xl text-rose-600">
-          403
+    <AuthCardLayout>
+      <div className="tb-card text-center transition-transform hover:-translate-y-1">
+        <div className="relative mx-auto mb-6 flex h-24 w-24 items-center justify-center">
+          <div className="absolute inset-0 rounded-full bg-error/10 blur-xl" />
+          <div className="relative flex h-24 w-24 items-center justify-center rounded-full bg-red-50">
+            <ShieldX className="h-12 w-12 text-error" />
+          </div>
         </div>
-        <h1 className="mt-6 text-4xl font-black text-slate-900">Access denied</h1>
-        <p className="ticketbox-muted mt-3">This route uses the same auth guard pattern future checkout and admin concept screens will rely on.</p>
 
-        <div className="mt-8 flex flex-wrap justify-center gap-3">
+        <p className="text-5xl font-black text-error/20">403</p>
+        <h1 className="mt-2 text-3xl font-bold">Truy cập bị từ chối</h1>
+        <p className="mt-3 text-muted-foreground">
+          Bạn không có quyền hoặc vai trò cần thiết để truy cập trang này.
+        </p>
+
+        <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
           {isAuthenticated ? (
-            <Link href="/dashboard" className="ticketbox-button-primary px-5 py-3">Back to dashboard</Link>
+            <Link href="/dashboard" className="tb-btn-primary sm:w-auto">
+              Về Dashboard
+            </Link>
           ) : (
-            <Link href="/login" className="ticketbox-button-primary px-5 py-3">Go to login</Link>
+            <Link href="/login" className="tb-btn-primary sm:w-auto">
+              Đăng nhập
+            </Link>
           )}
-          <Link href="/" className="ticketbox-button-secondary px-5 py-3">Back home</Link>
+          <Link href="/" className="tb-btn-outline sm:w-auto">
+            Về trang chủ
+          </Link>
         </div>
       </div>
-    </main>
+    </AuthCardLayout>
   );
 }

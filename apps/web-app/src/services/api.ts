@@ -72,7 +72,7 @@ export async function fetchClient<T>(
         if (isRefreshRequest || _retry) {
           tokenStorage.clearTokens();
           if (typeof window !== "undefined") {
-            window.location.href = "/login";
+            window.location.href = "/session-expired";
           }
           throw new FetchError("Unauthorized", response, errorData);
         }
@@ -103,7 +103,7 @@ export async function fetchClient<T>(
             tokenStorage.clearTokens();
             processQueue(err, null);
             if (typeof window !== "undefined") {
-              window.location.href = "/login";
+              window.location.href = "/session-expired";
             }
             throw err;
           } finally {
