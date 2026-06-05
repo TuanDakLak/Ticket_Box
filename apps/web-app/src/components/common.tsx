@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { siteNavigation, siteName } from "@/lib/constants";
+import { Search } from "lucide-react";
 
 type ButtonProps = {
   children: ReactNode;
@@ -234,10 +235,13 @@ export function SiteShell({
           </nav>
           <div className="flex items-center gap-3">
             <div className="hidden items-center gap-2 rounded-full border border-outline-variant bg-surface px-4 py-2 text-sm text-on-surface-variant lg:flex">
-              <span className="material-symbols-outlined text-[18px]">
-                search
-              </span>
-              <span>Search artists, venues</span>
+              <Search size={18} className="text-gray-500" />
+
+              <input
+                type="text"
+                placeholder="Search artists, venues"
+                className="w-full bg-transparent text-sm outline-none"
+              />
             </div>
             {action}
           </div>

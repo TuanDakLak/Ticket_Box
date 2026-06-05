@@ -16,6 +16,7 @@ import {
   tickets,
 } from "@/lib/mock-data";
 import { Badge, Button, Card, SectionHeading, Tabs } from "@/components/common";
+import { ArrowRight } from "lucide-react";
 
 export function HeroCarousel() {
   return (
@@ -35,10 +36,7 @@ export function HeroCarousel() {
           </p>
           <div className="flex flex-wrap gap-3">
             <Button href="/concerts/sonic-pulse" variant="secondary">
-              Buy Tickets{" "}
-              <span className="material-symbols-outlined text-[18px]">
-                arrow_forward
-              </span>
+              Buy Tickets <ArrowRight size={18} />
             </Button>
             <Button
               href="/support"
@@ -152,10 +150,7 @@ export function ConcertCard({
               href={`/concerts/${concert.id}`}
               className="inline-flex items-center gap-1 text-sm font-semibold text-primary"
             >
-              View details{" "}
-              <span className="material-symbols-outlined text-[18px]">
-                arrow_forward
-              </span>
+              View details <ArrowRight size={18} />
             </Link>
           </div>
         </div>
