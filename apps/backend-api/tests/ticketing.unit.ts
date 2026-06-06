@@ -288,3 +288,25 @@ test('reserveTicket throws ERR_NOT_INITIALIZED if category is not found in DB du
     );
 });
 
+test('reserveTicket throws ServiceUnavailableException when Redis runLuaScript throws an error (Redis is down)', async () => {
+    const { service, redisService } = createService();
+
+    redisService.runLuaScript.mockRejectedValue(new Error('Redis connection lost'));
+
+    await assert.rejects(
+        async () => {
+            await service.reserveTicket('user-1', {
+                concert_id: 'concert-1',
+                category_id: 'category-1',
+                quantity: 2,
+            });
+        },
+        (err: any) => {
+            assert.equal(err.name, 'ServiceUnavailableException');
+            assert.equal(err.message, 'Booking service temporarily unavailable. Please try again.');
+            return true;
+        }
+    );
+});
+
+

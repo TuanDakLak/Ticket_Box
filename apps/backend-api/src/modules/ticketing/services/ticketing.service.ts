@@ -138,57 +138,9 @@ export class TicketingService implements OnModuleInit {
         const userKey = `user:${userId}:reservations`;
 
         // Step 1: Atomically deduct tickets on Redis
-        let result = await this.redisService.runLuaScript(
-            RESERVE_TICKET_LUA,
-            [categoryKey, userKey],
-            [quantity.toString(), category_id, '100']
-        );
-
-        if (!Array.isArray(result) || result.length === 0) {
-            throw new BadRequestException('Unexpected response from reservation engine');
-        }
-
-        let status = result[0];
-
-        // Lazy Seeding: If Redis is not initialized, calculate and seed from DB, then retry
-        if (status === 'ERR_NOT_INITIALIZED') {
-            this.logger.log(`[Lazy Seeding] Category ${category_id} not found in Redis. Seeding from DB...`);
-            const category = await this.prisma.ticketCategory.findUnique({
-                where: { id: category_id },
-            });
-            if (!category) {
-                throw new BadRequestException('ERR_NOT_INITIALIZED');
-            }
-
-            // Count sold tickets (where ticket entries exist)
-            const soldCount = await this.prisma.ticket.count({
-                where: { category_id },
-            });
-
-            // Count pending unexpired tickets
-            const pendingOrders = await this.prisma.order.findMany({
-                where: {
-                    status: 'PENDING',
-                    expires_at: {
-                        gt: new Date(),
-                    },
-                },
-            });
-
-            let pendingCount = 0;
-            for (const order of pendingOrders) {
-                const metadata = order.ticket_metadata as any;
-                if (metadata && metadata.category_id === category_id) {
-                    pendingCount += metadata.quantity || 0;
-                }
-            }
-
-            const available = Math.max(0, category.total_quantity - (soldCount + pendingCount));
-            this.logger.log(`[Lazy Seeding] Category ${category_id}: total=${category.total_quantity}, sold=${soldCount}, pending=${pendingCount}. Seeding available=${available}`);
-
-            await this.seedCategoryInventory(category_id, available, category.max_per_user);
-
-            // Retry reservation on Redis
+        let result;
+        let status;
+        try {
             result = await this.redisService.runLuaScript(
                 RESERVE_TICKET_LUA,
                 [categoryKey, userKey],
@@ -198,21 +150,79 @@ export class TicketingService implements OnModuleInit {
             if (!Array.isArray(result) || result.length === 0) {
                 throw new BadRequestException('Unexpected response from reservation engine');
             }
+
             status = result[0];
-        }
 
-        if (status === 'ERR_NOT_INITIALIZED') {
-            throw new BadRequestException('ERR_NOT_INITIALIZED');
-        }
-        if (status === 'ERR_NO_TICKET') {
-            throw new BadRequestException('ERR_NO_TICKET');
-        }
-        if (status === 'ERR_LIMIT_EXCEEDED') {
-            throw new BadRequestException('ERR_LIMIT_EXCEEDED');
-        }
+            // Lazy Seeding: If Redis is not initialized, calculate and seed from DB, then retry
+            if (status === 'ERR_NOT_INITIALIZED') {
+                this.logger.log(`[Lazy Seeding] Category ${category_id} not found in Redis. Seeding from DB...`);
+                const category = await this.prisma.ticketCategory.findUnique({
+                    where: { id: category_id },
+                });
+                if (!category) {
+                    throw new BadRequestException('ERR_NOT_INITIALIZED');
+                }
 
-        if (status !== 'OK') {
-            throw new BadRequestException('Unknown reservation error');
+                // Count sold tickets (where ticket entries exist)
+                const soldCount = await this.prisma.ticket.count({
+                    where: { category_id },
+                });
+
+                // Count pending unexpired tickets
+                const pendingOrders = await this.prisma.order.findMany({
+                    where: {
+                        status: 'PENDING',
+                        expires_at: {
+                            gt: new Date(),
+                        },
+                    },
+                });
+
+                let pendingCount = 0;
+                for (const order of pendingOrders) {
+                    const metadata = order.ticket_metadata as any;
+                    if (metadata && metadata.category_id === category_id) {
+                        pendingCount += metadata.quantity || 0;
+                    }
+                }
+
+                const available = Math.max(0, category.total_quantity - (soldCount + pendingCount));
+                this.logger.log(`[Lazy Seeding] Category ${category_id}: total=${category.total_quantity}, sold=${soldCount}, pending=${pendingCount}. Seeding available=${available}`);
+
+                await this.seedCategoryInventory(category_id, available, category.max_per_user);
+
+                // Retry reservation on Redis
+                result = await this.redisService.runLuaScript(
+                    RESERVE_TICKET_LUA,
+                    [categoryKey, userKey],
+                    [quantity.toString(), category_id, '100']
+                );
+
+                if (!Array.isArray(result) || result.length === 0) {
+                    throw new BadRequestException('Unexpected response from reservation engine');
+                }
+                status = result[0];
+            }
+
+            if (status === 'ERR_NOT_INITIALIZED') {
+                throw new BadRequestException('ERR_NOT_INITIALIZED');
+            }
+            if (status === 'ERR_NO_TICKET') {
+                throw new BadRequestException('ERR_NO_TICKET');
+            }
+            if (status === 'ERR_LIMIT_EXCEEDED') {
+                throw new BadRequestException('ERR_LIMIT_EXCEEDED');
+            }
+
+            if (status !== 'OK') {
+                throw new BadRequestException('Unknown reservation error');
+            }
+        } catch (err) {
+            if (err instanceof BadRequestException) {
+                throw err;
+            }
+            this.logger.error('[Redis Error] Failed to complete atomic reservation or lazy seeding on Redis', err);
+            throw new ServiceUnavailableException('Booking service temporarily unavailable. Please try again.');
         }
 
         const remaining = parseInt(result[1], 10);
