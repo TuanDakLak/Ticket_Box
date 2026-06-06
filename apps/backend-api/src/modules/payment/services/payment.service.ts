@@ -17,6 +17,7 @@ import { PaymentWebhookRequestDto } from '../dtos/payment-webhook-request.dto';
 import { PaymentWebhookResponseDto } from '../dtos/payment-webhook-response.dto';
 import { PaymentTicketBreakdownDto } from '../dtos/payment-ticket-breakdown.dto';
 import { PaymentGatewayClient } from './gateway/payment-gateway.client';
+import { TicketingService } from '../../ticketing/services/ticketing.service';
 
 type IdempotencyCacheEntry =
     | {
@@ -59,6 +60,7 @@ export class PaymentService {
         private readonly prisma: PrismaService,
         private readonly redisService: RedisService,
         private readonly paymentGatewayClient: PaymentGatewayClient,
+        private readonly ticketingService: TicketingService,
     ) { }
 
     async processPayment(
@@ -214,9 +216,18 @@ export class PaymentService {
     }
 
     async handleWebhook(
-        dto: PaymentWebhookRequestDto,
+        dto: any,
     ): Promise<PaymentWebhookResponseDto> {
-        await this.paymentGatewayClient.verifyWebhookSignature(PaymentMethod.PAYOS, dto);
+        // If the webhook call is empty, doesn't have a signature (e.g. ping/verify checks), return success immediately
+        if (!dto || Object.keys(dto).length === 0 || !dto.signature) {
+            return new PaymentWebhookResponseDto({
+                order_status: 'PENDING',
+                payment_status: 'SUCCESS',
+                ticket_count: 0,
+                message: 'Webhook confirmed',
+                ticket_ids: [],
+            });
+        }
 
         // If this is a webhook confirmation request from PayOS, return success immediately
         if (dto.desc === 'confirm webhook' || dto.data?.description === 'confirm webhook' || !dto.data?.paymentLinkId) {
@@ -228,6 +239,8 @@ export class PaymentService {
                 ticket_ids: [],
             });
         }
+
+        await this.paymentGatewayClient.verifyWebhookSignature(PaymentMethod.PAYOS, dto);
 
         const transaction = await this.prisma.paymentTransaction.findFirst({
             where: {
@@ -247,7 +260,14 @@ export class PaymentService {
         });
 
         if (!transaction) {
-            throw new NotFoundException('Payment transaction not found');
+            this.logger.warn(`Webhook received for unknown transaction: ${dto.data.paymentLinkId}`);
+            return new PaymentWebhookResponseDto({
+                order_status: 'PENDING',
+                payment_status: 'FAILED',
+                ticket_count: 0,
+                message: 'Transaction not found (ignored)',
+                ticket_ids: [],
+            });
         }
 
         if (dto.code !== '00') { // 00 means success in PayOS
@@ -261,12 +281,9 @@ export class PaymentService {
                         }) as Prisma.JsonObject,
                     },
                 });
-
-                await tx.order.update({
-                    where: { id: transaction.order_id },
-                    data: { status: 'CANCELLED' },
-                });
             });
+
+            await this.handlePaymentFailed(transaction.order_id);
 
             return new PaymentWebhookResponseDto({
                 order_status: 'CANCELLED',
@@ -437,7 +454,13 @@ export class PaymentService {
             return [];
         }
 
-        const candidate = (value as Record<string, unknown>).ticket_breakdown;
+        const record = value as Record<string, unknown>;
+
+        if (typeof record.category_id === 'string' && typeof record.quantity === 'number' && record.quantity > 0) {
+            return [{ category_id: record.category_id, quantity: record.quantity }];
+        }
+
+        const candidate = record.ticket_breakdown;
         if (!Array.isArray(candidate)) {
             return [];
         }
@@ -622,5 +645,24 @@ export class PaymentService {
             error: String(payload.message ?? 'failed'),
             failed_at: new Date().toISOString(),
         } satisfies IdempotencyCacheEntry, this.idempotencyTtlSeconds);
+    }
+
+    public async handlePaymentFailed(orderId: string): Promise<void> {
+        const order = await this.prisma.order.findUnique({ where: { id: orderId } });
+        if (!order || order.status !== 'PENDING') return;
+
+        await this.prisma.order.update({
+            where: { id: orderId },
+            data: { status: 'CANCELLED' },
+        });
+
+        const breakdown = this.extractTicketBreakdown(order.ticket_metadata ?? null);
+        for (const item of breakdown) {
+            await this.ticketingService.rollbackCategoryInventory(
+                order.user_id,
+                item.category_id,
+                item.quantity
+            );
+        }
     }
 }

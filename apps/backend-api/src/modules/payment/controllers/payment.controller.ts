@@ -17,6 +17,7 @@ import {
     ApiOperation,
     ApiTags,
     ApiUnauthorizedResponse,
+    ApiBearerAuth,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../../shared/guards/jwt-auth.guard';
 import { UseGuards } from '@nestjs/common';
@@ -36,6 +37,7 @@ export class PaymentController {
     @Post('process')
     @UseGuards(JwtAuthGuard)
     @UseInterceptors(PaymentIdempotencyInterceptor)
+    @ApiBearerAuth()
     @ApiOperation({ summary: 'Process a payment request' })
     @ApiHeader({ name: 'Idempotency-Key', required: true, description: 'UUID v4 idempotency key for duplicate prevention' })
     @ApiCreatedResponse({ type: PaymentProcessResponseDto })
@@ -55,7 +57,7 @@ export class PaymentController {
     @ApiCreatedResponse({ type: PaymentWebhookResponseDto })
     @ApiBadRequestResponse({ description: 'Validation failed or signature mismatch' })
     async handleWebhook(
-        @Body() dto: PaymentWebhookRequestDto,
+        @Body() dto: any,
     ) {
         return this.paymentService.handleWebhook(dto);
     }
