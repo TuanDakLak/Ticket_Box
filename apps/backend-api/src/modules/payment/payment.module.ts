@@ -9,9 +9,10 @@ import { RolesGuard } from '../../shared/guards/roles.guard';
 import { PaymentGatewayClient } from './services/gateway/payment-gateway.client';
 import { PayOsStrategy } from './services/gateway/payos.strategy';
 import { PaymentIdempotencyInterceptor } from './interceptors/payment-idempotency.interceptor';
+import { TicketingModule } from '../ticketing/ticketing.module';
 
 @Module({
-    imports: [RedisModule],
+    imports: [RedisModule, TicketingModule],
     providers: [
         PrismaService,
         PaymentService,

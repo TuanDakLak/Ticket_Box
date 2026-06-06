@@ -1,29 +1,49 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsBoolean, IsObject, IsString } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import {
+    IsBoolean,
+    IsDefined,
+    IsNotEmpty,
+    IsObject,
+    IsOptional,
+    IsString,
+} from 'class-validator';
 
-export enum PaymentWebhookOutcome {
-    SUCCESS = 'SUCCESS',
-    FAILED = 'FAILED',
+export interface WebhookData {
+    orderCode?: number;
+    amount?: number;
+    transactionDateTime?: string;
+    paymentLinkId?: string;
+    ticket_breakdown?: any;
+    [key: string]: unknown;
 }
 
 export class PaymentWebhookRequestDto {
-    @ApiProperty()
+    @ApiPropertyOptional({ example: '00' })
+    @IsOptional()
     @IsString()
-    code!: string;
+    code?: string;
 
-    @ApiProperty()
+    @ApiPropertyOptional({ example: 'success' })
+    @IsOptional()
     @IsString()
-    desc!: string;
+    desc?: string;
 
-    @ApiProperty()
+    @ApiPropertyOptional({ example: true })
+    @IsOptional()
     @IsBoolean()
-    success!: boolean;
+    success?: boolean;
 
-    @ApiProperty()
+    @ApiProperty({
+        description: 'Webhook payload (free-form object)',
+        type: Object,
+        additionalProperties: true,
+    })
+    @IsDefined()
     @IsObject()
-    data!: Record<string, any>;
+    data!: WebhookData;
 
-    @ApiProperty()
+    @ApiProperty({ description: 'Webhook signature' })
     @IsString()
+    @IsNotEmpty()
     signature!: string;
 }

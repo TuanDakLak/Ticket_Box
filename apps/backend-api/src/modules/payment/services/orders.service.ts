@@ -9,6 +9,8 @@ import { OrderListItemDto } from '../dtos/order-list-item.dto';
 import { OrderDetailDto } from '../dtos/order-detail.dto';
 import { OrderTicketDto } from '../dtos/order-ticket.dto';
 import { OrderPaymentTransactionDto } from '../dtos/order-payment-transaction.dto';
+import { TicketingService } from '../../ticketing/services/ticketing.service';
+import { BadRequestException } from '@nestjs/common';
 
 type OrderListRow = {
     id: string;
@@ -46,7 +48,10 @@ type OrderDetailRow = OrderListRow & {
 
 @Injectable()
 export class OrdersService {
-    constructor(private readonly prisma: PrismaService) { }
+    constructor(
+        private readonly prisma: PrismaService,
+        private readonly ticketingService: TicketingService,
+    ) { }
 
     async getOrderHistory(userId: string, query: OrderListQueryDto): Promise<OrderListResponseDto> {
         const page = query.page ?? 1;
@@ -287,5 +292,44 @@ export class OrdersService {
 
     private isUuid(value: string): boolean {
         return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value);
+    }
+
+    async cancelOrder(userId: string, orderId: string): Promise<OrderDetailDto> {
+        const order = await this.prisma.order.findFirst({
+            where: { id: orderId, user_id: userId },
+        });
+
+        if (!order) {
+            throw new NotFoundException('Order not found');
+        }
+
+        if (order.status !== 'PENDING') {
+            throw new BadRequestException(`Order cannot be cancelled in ${order.status} state`);
+        }
+
+        await this.prisma.order.update({
+            where: { id: orderId },
+            data: { status: 'CANCELLED' },
+        });
+
+        const metadata = order.ticket_metadata as Record<string, unknown> | null;
+        if (metadata) {
+            let breakdown: Array<{ category_id: string; quantity: number }> = [];
+            if (Array.isArray(metadata.ticket_breakdown)) {
+                breakdown = metadata.ticket_breakdown as any;
+            } else if (typeof metadata.category_id === 'string' && typeof metadata.quantity === 'number') {
+                breakdown = [{ category_id: metadata.category_id, quantity: metadata.quantity }];
+            }
+
+            for (const item of breakdown) {
+                await this.ticketingService.rollbackCategoryInventory(
+                    order.user_id,
+                    item.category_id,
+                    item.quantity
+                );
+            }
+        }
+
+        return this.getOrderDetail(userId, orderId);
     }
 }
