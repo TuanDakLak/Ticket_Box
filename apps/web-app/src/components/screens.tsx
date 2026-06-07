@@ -121,7 +121,7 @@ export function HeroCarousel() {
               href={
                 featuredConcert
                   ? `/concerts/${featuredConcert.id}`
-                  : "/concerts"
+                  : "/catalog"
               }
               variant="secondary"
             >
