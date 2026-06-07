@@ -1,18 +1,39 @@
 import { Button, Card, SectionHeading, SiteShell } from "@/components/common";
 import { ConcertDetailHero, TicketTierCard } from "@/components/screens";
-import { concerts, ticketTiers } from "@/lib/mock-data";
+import { getConcertById, formatConcertCurrency } from "@/services/concert.service";
 
-export default function ConcertDetailPage({
+export default async function ConcertDetailPage({
   params,
 }: {
-  params: { id: string };
+   params: Promise<{ id: string }>;
 }) {
-  const concert = concerts.find((item) => item.id === params.id) ?? concerts[0];
+  const { id } = await params;
+
+  let concert;
+  try {
+    concert = await getConcertById(id);
+  } catch (error) {
+    return (
+      <SiteShell active="/">
+        <section className="mx-auto w-full max-w-7xl px-4 py-12 text-center">
+          <Card className="p-8 space-y-4">
+            <h1 className="text-2xl font-bold text-rose-600">Error Loading Concert</h1>
+            <p className="text-slate-600">
+              {error instanceof Error ? error.message : "Failed to load concert details."}
+            </p>
+            <Button href="/" variant="primary">
+              Back to Home
+            </Button>
+          </Card>
+        </section>
+      </SiteShell>
+    );
+  }
 
   return (
     <SiteShell active="/">
       <section className="mx-auto grid w-full max-w-7xl gap-8 px-4 py-12 sm:px-6 lg:px-8">
-        <ConcertDetailHero />
+        <ConcertDetailHero concert={concert} />
         <div className="grid gap-8 lg:grid-cols-[1.2fr_0.8fr]">
           <div className="space-y-8">
             <Card className="p-6">
@@ -51,9 +72,19 @@ export default function ConcertDetailPage({
                 description="Compare standing, priority, and lounge tiers before moving into seat selection."
               />
               <div className="grid gap-4">
-                {ticketTiers.map((tier) => (
-                  <TicketTierCard key={tier.name} {...tier} />
-                ))}
+                {concert.ticketTiers && concert.ticketTiers.length > 0 ? (
+                  concert.ticketTiers.map((tier, index) => (
+                    <TicketTierCard
+                      key={tier.id || tier.name}
+                      name={tier.name}
+                      price={formatConcertCurrency(tier.price)}
+                      note={`Max: ${tier.max_per_user} tickets per user • Total capacity: ${tier.total_quantity} seats`}
+                      highlight={index === 0}
+                    />
+                  ))
+                ) : (
+                  <p className="text-slate-500 text-sm">No ticket tiers available for this concert.</p>
+                )}
               </div>
             </div>
           </div>

@@ -211,12 +211,12 @@ function ConcertsSection() {
                           {concert.price}
                         </p>
                       </div>
-                      <button
-                        type="button"
+                      <Link
+                        href={`/concerts/${concert.id}`}
                         className="rounded-full bg-[#0f62fe]/10 px-4 py-2 text-sm font-semibold text-[#0f62fe] transition hover:bg-[#0f62fe]/15"
                       >
                         View details
-                      </button>
+                      </Link>
                     </div>
                   </article>
                 );

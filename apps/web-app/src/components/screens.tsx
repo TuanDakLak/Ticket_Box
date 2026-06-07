@@ -260,33 +260,38 @@ export function ConcertCard({
   );
 }
 
-export function ConcertDetailHero() {
+export function ConcertDetailHero({ concert }: { concert: ConcertDetailItem }) {
+  const dateTime = formatConcertDateTime(concert.startTime);
+  const date = dateTime.date;
+  const time = dateTime.time;
+
   return (
     <Card className="overflow-hidden border-primary/20 bg-gradient-to-br from-white via-white to-primary/5 p-0">
       <div className="grid gap-0 lg:grid-cols-[1.1fr_0.9fr]">
         <div className="space-y-6 p-6 sm:p-8">
-          <Badge className="bg-primary/10 text-primary">Featured event</Badge>
+          <Badge className="bg-primary/10 text-primary">{concert.status}</Badge>
           <h1 className="font-display text-4xl font-black tracking-tight text-on-surface sm:text-5xl">
-            Sonic Pulse Festival
+            {concert.title}
           </h1>
           <p className="max-w-2xl text-base leading-7 text-on-surface-variant">
-            A high-energy night with layered synth performances, immersive stage
-            design, and a curated premium hospitality experience.
+            {concert.aiBio || concert.description}
           </p>
           <div className="flex flex-wrap gap-3 text-sm text-on-surface-variant">
             <span className="rounded-full bg-surface-low px-4 py-2">
-              Oct 15 · 8:00 PM
+              {date}{time ? ` · ${time}` : ""}
             </span>
             <span className="rounded-full bg-surface-low px-4 py-2">
-              Central Stadium
+              {concert.venue}
             </span>
-            <span className="rounded-full bg-surface-low px-4 py-2">
-              Jakarta
-            </span>
+            {concert.city && (
+              <span className="rounded-full bg-surface-low px-4 py-2">
+                {concert.city}
+              </span>
+            )}
           </div>
           <div className="flex flex-wrap gap-3">
-            <Button href="/concerts/sonic-pulse/seats">Select seats</Button>
-            <Button href="/checkout/order-2048" variant="soft">
+            <Button href={`/concerts/${concert.id}/seats`}>Select seats</Button>
+            <Button href={`/concerts/${concert.id}/seats`} variant="soft">
               Reserve now
             </Button>
           </div>
@@ -300,7 +305,7 @@ export function ConcertDetailHero() {
                 </p>
                 <p className="mt-2 text-3xl font-black">2h 14m</p>
               </div>
-              <Badge className="bg-white/15 text-white">Selling fast</Badge>
+              <Badge className="bg-white/15 text-white">{concert.status}</Badge>
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="rounded-2xl bg-white/10 p-4">

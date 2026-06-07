@@ -154,7 +154,13 @@ export async function getConcerts(query: ConcertQuery = {}) {
     params.set("search", query.search.trim());
   }
 
-  const response = await fetch(`/api/proxy/concerts?${params.toString()}`);
+  const isServer = typeof window === 'undefined';
+  const baseUrl = isServer
+    ? (process.env.REMOTE_API_URL || 'https://api.ticketbox.retrobit.io.vn').replace(/\/+$/, '')
+    : '/api/proxy';
+  const url = `${baseUrl}/concerts?${params.toString()}`;
+
+  const response = await fetch(url);
 
   if (!response.ok) {
     throw new Error(`Failed to load concerts (${response.status})`);
@@ -178,7 +184,13 @@ export async function getConcerts(query: ConcertQuery = {}) {
 }
 
 export async function getConcertById(id: string) {
-  const response = await fetch(`/api/proxy/concerts/${id}`);
+  const isServer = typeof window === 'undefined';
+  const baseUrl = isServer
+    ? (process.env.REMOTE_API_URL || 'https://api.ticketbox.retrobit.io.vn').replace(/\/+$/, '')
+    : '/api/proxy';
+  const url = `${baseUrl}/concerts/${id}`;
+
+  const response = await fetch(url);
 
   if (!response.ok) {
     throw new Error(`Failed to load concert (${response.status})`);
