@@ -133,10 +133,10 @@ function ConcertsSection() {
             {loading
               ? "Loading concerts..."
               : error
-              ? "Concert data unavailable"
-              : meta.totalItems === 0
-              ? "No concerts found"
-              : `Showing ${startItem}-${endItem} of ${meta.totalItems} concerts`}
+                ? "Concert data unavailable"
+                : meta.totalItems === 0
+                  ? "No concerts found"
+                  : `Showing ${startItem}-${endItem} of ${meta.totalItems} concerts`}
           </p>
           <p>
             Page {meta.currentPage} of {totalPages}
@@ -152,83 +152,73 @@ function ConcertsSection() {
         <div className="mt-6 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
           {loading
             ? Array.from({ length: 6 }, (_, index) => (
-                <div
-                  key={index}
-                  className="animate-pulse rounded-[28px] border border-slate-200 bg-white p-5 shadow-[0_14px_40px_rgba(15,23,42,0.05)]"
-                >
-                  <div className="h-4 w-24 rounded-full bg-slate-100" />
-                  <div className="mt-4 h-6 w-3/4 rounded-full bg-slate-100" />
-                  <div className="mt-3 h-4 w-full rounded-full bg-slate-100" />
-                  <div className="mt-2 h-4 w-5/6 rounded-full bg-slate-100" />
-                  <div className="mt-6 h-10 w-full rounded-2xl bg-slate-100" />
-                </div>
-              ))
+              <div
+                key={index}
+                className="animate-pulse rounded-[28px] border border-slate-200 bg-white p-5 shadow-[0_14px_40px_rgba(15,23,42,0.05)]"
+              >
+                <div className="h-4 w-24 rounded-full bg-slate-100" />
+                <div className="mt-4 h-6 w-3/4 rounded-full bg-slate-100" />
+                <div className="mt-3 h-4 w-full rounded-full bg-slate-100" />
+                <div className="mt-2 h-4 w-5/6 rounded-full bg-slate-100" />
+                <div className="mt-6 h-10 w-full rounded-2xl bg-slate-100" />
+              </div>
+            ))
             : items.map((concert) => {
-                return (
-                  <article
-                    key={concert.id}
-                    className="group rounded-[28px] border border-slate-200 bg-white p-5 shadow-[0_14px_40px_rgba(15,23,42,0.05)] transition hover:-translate-y-1 hover:shadow-[0_18px_50px_rgba(15,23,42,0.08)]"
-                  >
-                    <div className="flex items-start justify-between gap-3">
-                      <div>
-                        <p className={`ticketbox-badge w-fit border ${
-                          concert.status?.toUpperCase() === "PUBLISHED"
-                            ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
-                            : concert.status?.toUpperCase() === "COMING_SOON"
-                            ? "bg-amber-500/10 text-amber-600 border-amber-500/20"
-                            : concert.status?.toUpperCase() === "COMPLETED"
+              return (
+                <article
+                  key={concert.id}
+                  className="group rounded-[28px] border border-slate-200 bg-white p-5 shadow-[0_14px_40px_rgba(15,23,42,0.05)] transition hover:-translate-y-1 hover:shadow-[0_18px_50px_rgba(15,23,42,0.08)]"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className={`ticketbox-badge w-fit border ${concert.status?.toUpperCase() === "PUBLISHED"
+                        ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
+                        : concert.status?.toUpperCase() === "COMING_SOON"
+                          ? "bg-amber-500/10 text-amber-600 border-amber-500/20"
+                          : concert.status?.toUpperCase() === "COMPLETED"
                             ? "bg-slate-500/10 text-slate-600 border-slate-500/20"
                             : "bg-slate-500/10 text-slate-600 border-slate-500/20"
                         }`}>
-                          {concert.status}
-                        </p>
-                        <h3 className="mt-3 text-xl font-black tracking-tight text-slate-900">
-                          {concert.title}
-                        </h3>
-                      </div>
-                      {concert.mapUrl ? (
-                        <a
-                          href={concert.mapUrl}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="rounded-full border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:border-[#0f62fe] hover:text-[#0f62fe]"
-                        >
-                          SVG map
-                        </a>
-                      ) : null}
+                        {concert.status}
+                      </p>
+                      <h3 className="mt-3 text-xl font-black tracking-tight text-slate-900">
+                        {concert.title}
+                      </h3>
                     </div>
 
-                    <div className="mt-4 space-y-2 text-sm text-slate-600">
-                      <p>{concert.venue}</p>
-                      <p>{concert.city || "Unknown city"}</p>
-                      <p>
-                        {concert.date} at {concert.time}
+                  </div>
+
+                  <div className="mt-4 space-y-2 text-sm text-slate-600">
+                    <p>{concert.venue}</p>
+                    <p>{concert.city || "Unknown city"}</p>
+                    <p>
+                      {concert.date} at {concert.time}
+                    </p>
+                  </div>
+
+                  <p className="mt-4 max-h-[4.5rem] overflow-hidden text-sm leading-6 text-slate-500">
+                    {concert.description}
+                  </p>
+
+                  <div className="mt-5 flex items-center justify-between gap-4">
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">
+                        Concert
+                      </p>
+                      <p className="mt-1 text-sm font-semibold text-slate-900">
+                        {concert.price}
                       </p>
                     </div>
-
-                    <p className="mt-4 max-h-[4.5rem] overflow-hidden text-sm leading-6 text-slate-500">
-                      {concert.description}
-                    </p>
-
-                    <div className="mt-5 flex items-center justify-between gap-4">
-                      <div>
-                        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">
-                          Concert
-                        </p>
-                        <p className="mt-1 text-sm font-semibold text-slate-900">
-                          {concert.price}
-                        </p>
-                      </div>
-                      <Link
-                        href={`/concerts/${concert.id}`}
-                        className="rounded-full bg-[#0f62fe]/10 px-4 py-2 text-sm font-semibold text-[#0f62fe] transition hover:bg-[#0f62fe]/15"
-                      >
-                        View details
-                      </Link>
-                    </div>
-                  </article>
-                );
-              })}
+                    <Link
+                      href={`/concerts/${concert.id}`}
+                      className="rounded-full bg-[#0f62fe]/10 px-4 py-2 text-sm font-semibold text-[#0f62fe] transition hover:bg-[#0f62fe]/15"
+                    >
+                      View details
+                    </Link>
+                  </div>
+                </article>
+              );
+            })}
         </div>
 
         {totalPages > 1 ? (
@@ -262,11 +252,10 @@ function ConcertsSection() {
                     type="button"
                     onClick={() => setPage(pageNumber)}
                     disabled={loading}
-                    className={`min-w-[2.5rem] rounded-full px-4 py-2 text-sm font-semibold transition ${
-                      pageNumber === page
-                        ? "bg-primary text-white"
-                        : "border border-slate-200 text-slate-700 hover:border-primary hover:text-primary"
-                    } disabled:cursor-not-allowed disabled:opacity-50`}
+                    className={`min-w-[2.5rem] rounded-full px-4 py-2 text-sm font-semibold transition ${pageNumber === page
+                      ? "bg-primary text-white"
+                      : "border border-slate-200 text-slate-700 hover:border-primary hover:text-primary"
+                      } disabled:cursor-not-allowed disabled:opacity-50`}
                   >
                     {pageNumber}
                   </button>

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   activityTimeline,
   checkoutPayments,
@@ -92,8 +93,8 @@ export function HeroCarousel() {
   const description = loading
     ? "We are loading the latest concert from the database."
     : featuredConcert?.aiBio ||
-      featuredConcert?.description ||
-      "No featured concert is available right now.";
+    featuredConcert?.description ||
+    "No featured concert is available right now.";
   const ticketTier = featuredConcert?.ticketTiers?.[0];
   const priceLabel = ticketTier
     ? `${ticketTier.name} • ${formatConcertCurrency(ticketTier.price)}`
@@ -185,16 +186,6 @@ export function HeroCarousel() {
             <div className="rounded-2xl bg-white/10 p-4">
               <p className="text-sm leading-6 text-white/80">{description}</p>
             </div>
-            {featuredConcert?.mapUrl ? (
-              <a
-                href={featuredConcert.mapUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex w-fit items-center gap-2 rounded-full border border-white/20 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/10"
-              >
-                Open SVG map <ArrowRight size={16} />
-              </a>
-            ) : null}
           </div>
         </Card>
       </div>
@@ -295,6 +286,138 @@ export function SeatMapSvg({ className = "" }: { className?: string }) {
   );
 }
 
+export function InteractiveTicketSelector({ concert }: { concert: ConcertDetailItem }) {
+  const router = useRouter();
+  const [selectedIdx, setSelectedIdx] = useState(0);
+  const [quantity, setQuantity] = useState(1);
+
+  const tiers = concert.ticketTiers ?? [];
+  const selectedTier = tiers[selectedIdx];
+  const maxQty = selectedTier ? selectedTier.max_per_user : 1;
+
+  useEffect(() => {
+    setQuantity(1);
+  }, [selectedIdx]);
+
+  const handleConfirm = () => {
+    if (!selectedTier) return;
+    const priceStr = String(selectedTier.price);
+    const params = new URLSearchParams({
+      title: concert.title || "",
+      tierName: selectedTier.name || "",
+      price: priceStr,
+      qty: String(quantity),
+      date: concert.date || "",
+      venue: concert.venue || "",
+    });
+    router.push(`/checkout/order-2048?${params.toString()}`);
+  };
+
+  return (
+    <Card className="overflow-hidden border-0 shadow-lg bg-white">
+      <div className="p-8">
+        <SectionHeading
+          eyebrow="TICKET TIERS"
+          title="Choose your experience"
+          description="Select from standing, priority, or lounge access."
+        />
+
+        <div className="mt-8 space-y-3">
+          {tiers.length > 0 ? (
+            tiers.map((tier, index) => {
+              const isSelected = selectedIdx === index;
+              return (
+                <div
+                  key={tier.id || tier.name}
+                  onClick={() => setSelectedIdx(index)}
+                  className={`p-5 cursor-pointer rounded-[20px] border-2 transition-all duration-200 ${
+                    isSelected
+                      ? "border-primary bg-primary/5 shadow-sm scale-[1.01]"
+                      : "border-outline-variant/60 bg-surface hover:border-primary/30"
+                  }`}
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="space-y-2">
+                      <p className="text-sm font-semibold uppercase tracking-[0.2em] text-on-surface-variant font-bold">
+                        {tier.name}
+                      </p>
+                      <p className="text-xs leading-6 text-on-surface-variant">
+                        Max: {tier.max_per_user} tickets per user • Total capacity: {tier.total_quantity} seats
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-2xl font-black text-on-surface">
+                        {formatConcertCurrency(tier.price)}
+                      </div>
+                      {index === 0 && (
+                        <Badge className="mt-2 bg-primary text-on-primary">
+                          Recommended
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            })
+          ) : (
+            <p className="text-sm text-gray-500">No ticket tiers available.</p>
+          )}
+        </div>
+
+        {selectedTier && (
+          <div className="mt-8 border-t border-gray-100 pt-6 space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-semibold text-gray-900">Select Quantity</p>
+                <p className="text-xs text-gray-500 mt-1">Limit: {maxQty} tickets per user</p>
+              </div>
+              <div className="flex items-center gap-4 bg-gray-50 border border-gray-200 rounded-xl p-1">
+                <button
+                  type="button"
+                  disabled={quantity <= 1}
+                  onClick={() => setQuantity(q => Math.max(1, q - 1))}
+                  className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-white text-lg font-bold text-gray-700 disabled:opacity-30 disabled:pointer-events-none transition-colors"
+                >
+                  −
+                </button>
+                <span className="w-8 text-center font-bold text-gray-900 text-lg">
+                  {quantity}
+                </span>
+                <button
+                  type="button"
+                  disabled={quantity >= maxQty}
+                  onClick={() => setQuantity(q => Math.min(maxQty, q + 1))}
+                  className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-white text-lg font-bold text-gray-700 disabled:opacity-30 disabled:pointer-events-none transition-colors"
+                >
+                  +
+                </button>
+              </div>
+            </div>
+
+            <div className="rounded-2xl bg-gray-50 p-4 border border-gray-100">
+              <div className="flex items-center justify-between text-sm text-gray-600 mb-2">
+                <span>Subtotal ({quantity} x {formatConcertCurrency(selectedTier.price)})</span>
+                <span className="font-semibold">{formatConcertCurrency(selectedTier.price * quantity)}</span>
+              </div>
+              <div className="flex items-center justify-between border-t border-gray-200 pt-2 text-base font-bold text-gray-900">
+                <span>Estimated Total</span>
+                <span>{formatConcertCurrency(selectedTier.price * quantity)}</span>
+              </div>
+            </div>
+
+            <button
+              onClick={handleConfirm}
+              className="ticketbox-button-primary w-full justify-center py-4 cursor-pointer"
+            >
+              Confirm and Checkout
+            </button>
+          </div>
+        )}
+      </div>
+    </Card>
+  );
+}
+
 export function ConcertDetailHero({ concert }: { concert: ConcertDetailItem }) {
   const dateTime = formatConcertDateTime(concert.startTime);
   const date = dateTime.date;
@@ -323,12 +446,6 @@ export function ConcertDetailHero({ concert }: { concert: ConcertDetailItem }) {
                 {concert.city}
               </span>
             )}
-          </div>
-          <div className="flex flex-wrap gap-3">
-            <Button href="#ticket-tiers">Select experience</Button>
-            <Button href="/checkout/order-2048" variant="soft">
-              Reserve now
-            </Button>
           </div>
         </div>
         <div className="bg-[radial-gradient(circle_at_top,_rgba(79,70,229,0.35),_transparent_55%),linear-gradient(160deg,_#1f1b4d,_#3525cd_50%,_#712ae2)] p-6 text-white sm:p-8 flex items-center justify-center">
@@ -595,6 +712,32 @@ export function PaymentMethodPicker() {
 }
 
 export function OrderSummaryCard() {
+  const searchParams = useSearchParams();
+  const title = searchParams.get("title") || orderSummary.event;
+  const tierName = searchParams.get("tierName");
+  const price = searchParams.get("price");
+  const qty = searchParams.get("qty");
+  const date = searchParams.get("date") || orderSummary.date;
+  const venue = searchParams.get("venue") || orderSummary.venue;
+
+  let subtotal: string = orderSummary.subtotal;
+  let total: string = orderSummary.total;
+  let fees: string = orderSummary.fees;
+  let seatsText: string = orderSummary.seats;
+
+  if (tierName && price && qty) {
+    const qtyVal = parseInt(qty, 10) || 1;
+    const priceVal = parseFloat(price) || 0;
+    const subtotalVal = priceVal * qtyVal;
+    const feesVal = subtotalVal * 0.05;
+    const totalVal = subtotalVal + feesVal;
+
+    subtotal = formatConcertCurrency(subtotalVal);
+    fees = formatConcertCurrency(feesVal);
+    total = formatConcertCurrency(totalVal);
+    seatsText = `${qtyVal}x ${tierName} Ticket${qtyVal > 1 ? "s" : ""}`;
+  }
+
   return (
     <Card className="space-y-5 p-6 lg:sticky lg:top-24">
       <div className="space-y-1">
@@ -602,29 +745,31 @@ export function OrderSummaryCard() {
           Order summary
         </p>
         <h3 className="font-display text-2xl font-bold text-on-surface">
-          {orderSummary.event}
+          {title}
         </h3>
       </div>
       <div className="space-y-4 rounded-2xl bg-surface-low p-4 text-sm text-on-surface-variant">
-        <p>{orderSummary.date}</p>
-        <p>{orderSummary.venue}</p>
-        <p>{orderSummary.seats}</p>
+        <p>{date}</p>
+        <p>{venue}</p>
+        <p>{seatsText}</p>
       </div>
       <div className="space-y-3 text-sm text-on-surface-variant">
         <div className="flex items-center justify-between">
           <span>Subtotal</span>
-          <span>{orderSummary.subtotal}</span>
+          <span>{subtotal}</span>
         </div>
         <div className="flex items-center justify-between">
-          <span>Fees</span>
-          <span>{orderSummary.fees}</span>
+          <span>Fees (5% Booking Fee)</span>
+          <span>{fees}</span>
         </div>
         <div className="flex items-center justify-between border-t border-outline-variant pt-3 text-base font-semibold text-on-surface">
           <span>Total</span>
-          <span>{orderSummary.total}</span>
+          <span>{total}</span>
         </div>
       </div>
-      <Button className="w-full">Pay {orderSummary.total}</Button>
+      <Button href="/checkout/order-2048/processing" className="w-full justify-center">
+        Pay {total}
+      </Button>
       <div className="rounded-2xl bg-primary/5 p-4 text-sm text-on-surface-variant">
         Reservation expires in{" "}
         <span className="font-semibold text-primary">{orderSummary.timer}</span>
