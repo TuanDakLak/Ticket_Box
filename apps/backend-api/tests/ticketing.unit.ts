@@ -41,18 +41,19 @@ function createService() {
 test('reserveTicket returns SUCCESS with order_id when Lua script returns OK and RabbitMQ publish succeeds', async () => {
     const { service, redisService, rabbitMqService } = createService();
 
-    redisService.runLuaScript.mockResolvedValue(['OK', '8', '2']);
+    redisService.runLuaScript.mockResolvedValue(['OK', 'category-1', '8']);
 
     const result = await service.reserveTicket('user-1', {
         concert_id: 'concert-1',
-        category_id: 'category-1',
-        quantity: 2,
+        items: [
+            { category_id: 'category-1', quantity: 2 }
+        ],
     });
 
     // Verify Redis Lua script was called
     assert.equal(redisService.runLuaScript.mock.calls.length, 1);
-    assert.deepEqual(redisService.runLuaScript.mock.calls[0][1], ['category:category-1', 'user:user-1:reservations']);
-    assert.deepEqual(redisService.runLuaScript.mock.calls[0][2], ['2', 'category-1', '100']);
+    assert.deepEqual(redisService.runLuaScript.mock.calls[0][1], ['user:user-1:reservations']);
+    assert.deepEqual(redisService.runLuaScript.mock.calls[0][2], ['1', 'category-1', '2', '100']);
 
     // Verify RabbitMQ publish was called with correct exchange
     assert.equal(rabbitMqService.publish.mock.calls.length, 1);
@@ -63,16 +64,15 @@ test('reserveTicket returns SUCCESS with order_id when Lua script returns OK and
     const publishedPayload = rabbitMqService.publish.mock.calls[0][2];
     assert.equal(publishedPayload.userId, 'user-1');
     assert.equal(publishedPayload.concertId, 'concert-1');
-    assert.equal(publishedPayload.categoryId, 'category-1');
-    assert.equal(publishedPayload.quantity, 2);
+    assert.deepEqual(publishedPayload.items, [{ categoryId: 'category-1', quantity: 2 }]);
     assert.ok(publishedPayload.orderId); // UUID should be present
 
     // Verify result contains order_id
     assert.equal(result.status, 'SUCCESS');
     assert.equal(result.order_id, publishedPayload.orderId);
-    assert.equal(result.category_id, 'category-1');
-    assert.equal(result.quantity, 2);
-    assert.equal(result.remaining, 8);
+    assert.deepEqual(result.items, [
+        { category_id: 'category-1', quantity: 2, remaining: 8 }
+    ]);
 });
 
 test('reserveTicket rolls back Redis and throws ServiceUnavailableException when RabbitMQ publish fails', async () => {
@@ -80,7 +80,7 @@ test('reserveTicket rolls back Redis and throws ServiceUnavailableException when
 
     // First call: reserve succeeds on Redis
     redisService.runLuaScript
-        .mockResolvedValueOnce(['OK', '8', '2'])  // reserve success
+        .mockResolvedValueOnce(['OK', 'category-1', '8'])  // reserve success
         .mockResolvedValueOnce(['ROLLED_BACK']);   // rollback
 
     // RabbitMQ publish fails
@@ -90,8 +90,9 @@ test('reserveTicket rolls back Redis and throws ServiceUnavailableException when
         async () => {
             await service.reserveTicket('user-1', {
                 concert_id: 'concert-1',
-                category_id: 'category-1',
-                quantity: 2,
+                items: [
+                    { category_id: 'category-1', quantity: 2 }
+                ],
             });
         },
         (err: any) => {
@@ -103,21 +104,22 @@ test('reserveTicket rolls back Redis and throws ServiceUnavailableException when
     // Verify rollback Lua script was called (second runLuaScript call)
     assert.equal(redisService.runLuaScript.mock.calls.length, 2);
     // Verify rollback keys and args
-    assert.deepEqual(redisService.runLuaScript.mock.calls[1][1], ['category:category-1', 'user:user-1:reservations']);
-    assert.deepEqual(redisService.runLuaScript.mock.calls[1][2], ['2', 'category-1']);
+    assert.deepEqual(redisService.runLuaScript.mock.calls[1][1], ['user:user-1:reservations']);
+    assert.deepEqual(redisService.runLuaScript.mock.calls[1][2], ['1', 'category-1', '2']);
 });
 
 test('reserveTicket throws BadRequestException when inventory is not initialized', async () => {
     const { service, redisService } = createService();
 
-    redisService.runLuaScript.mockResolvedValue(['ERR_NOT_INITIALIZED']);
+    redisService.runLuaScript.mockResolvedValue(['ERR_NOT_INITIALIZED', 'category-1']);
 
     await assert.rejects(
         async () => {
             await service.reserveTicket('user-1', {
                 concert_id: 'concert-1',
-                category_id: 'category-1',
-                quantity: 2,
+                items: [
+                    { category_id: 'category-1', quantity: 2 }
+                ],
             });
         },
         (err: any) => {
@@ -131,14 +133,15 @@ test('reserveTicket throws BadRequestException when inventory is not initialized
 test('reserveTicket throws BadRequestException when tickets are depleted', async () => {
     const { service, redisService } = createService();
 
-    redisService.runLuaScript.mockResolvedValue(['ERR_NO_TICKET', '0']);
+    redisService.runLuaScript.mockResolvedValue(['ERR_NO_TICKET', 'category-1', '0']);
 
     await assert.rejects(
         async () => {
             await service.reserveTicket('user-1', {
                 concert_id: 'concert-1',
-                category_id: 'category-1',
-                quantity: 2,
+                items: [
+                    { category_id: 'category-1', quantity: 2 }
+                ],
             });
         },
         (err: any) => {
@@ -152,14 +155,15 @@ test('reserveTicket throws BadRequestException when tickets are depleted', async
 test('reserveTicket throws BadRequestException when user limit is exceeded', async () => {
     const { service, redisService } = createService();
 
-    redisService.runLuaScript.mockResolvedValue(['ERR_LIMIT_EXCEEDED', '2']);
+    redisService.runLuaScript.mockResolvedValue(['ERR_LIMIT_EXCEEDED', 'category-1', '2']);
 
     await assert.rejects(
         async () => {
             await service.reserveTicket('user-1', {
                 concert_id: 'concert-1',
-                category_id: 'category-1',
-                quantity: 2,
+                items: [
+                    { category_id: 'category-1', quantity: 2 }
+                ],
             });
         },
         (err: any) => {
@@ -203,7 +207,7 @@ test('getCategoryInventory parses values correctly', async () => {
     });
 });
 
-test('rollbackCategoryInventory calls rollback Lua script with correct keys and args', async () => {
+test('rollbackCategoryInventory calls rollback Lua script with correct keys and args (legacy)', async () => {
     const { service, redisService } = createService();
 
     redisService.runLuaScript.mockResolvedValue(['ROLLED_BACK']);
@@ -211,8 +215,23 @@ test('rollbackCategoryInventory calls rollback Lua script with correct keys and 
     await service.rollbackCategoryInventory('user-1', 'category-1', 3);
 
     assert.equal(redisService.runLuaScript.mock.calls.length, 1);
-    assert.deepEqual(redisService.runLuaScript.mock.calls[0][1], ['category:category-1', 'user:user-1:reservations']);
-    assert.deepEqual(redisService.runLuaScript.mock.calls[0][2], ['3', 'category-1']);
+    assert.deepEqual(redisService.runLuaScript.mock.calls[0][1], ['user:user-1:reservations']);
+    assert.deepEqual(redisService.runLuaScript.mock.calls[0][2], ['1', 'category-1', '3']);
+});
+
+test('rollbackCategoryInventory batch calls rollback Lua script with correct keys and args', async () => {
+    const { service, redisService } = createService();
+
+    redisService.runLuaScript.mockResolvedValue(['ROLLED_BACK']);
+
+    await service.rollbackCategoryInventory('user-1', [
+        { category_id: 'category-1', quantity: 3 },
+        { category_id: 'category-2', quantity: 2 }
+    ]);
+
+    assert.equal(redisService.runLuaScript.mock.calls.length, 1);
+    assert.deepEqual(redisService.runLuaScript.mock.calls[0][1], ['user:user-1:reservations']);
+    assert.deepEqual(redisService.runLuaScript.mock.calls[0][2], ['2', 'category-1', '3', 'category-2', '2']);
 });
 
 test('reserveTicket performs Lazy Seeding when Redis returns ERR_NOT_INITIALIZED and succeeds on retry', async () => {
@@ -220,8 +239,8 @@ test('reserveTicket performs Lazy Seeding when Redis returns ERR_NOT_INITIALIZED
 
     // 1st Lua call: ERR_NOT_INITIALIZED, 2nd Lua call: OK
     redisService.runLuaScript
-        .mockResolvedValueOnce(['ERR_NOT_INITIALIZED'])
-        .mockResolvedValueOnce(['OK', '8', '2']);
+        .mockResolvedValueOnce(['ERR_NOT_INITIALIZED', 'category-1'])
+        .mockResolvedValueOnce(['OK', 'category-1', '8']);
 
     mockPrisma.ticketCategory.findUnique.mockResolvedValue({
         id: 'category-1',
@@ -242,8 +261,9 @@ test('reserveTicket performs Lazy Seeding when Redis returns ERR_NOT_INITIALIZED
 
     const result = await service.reserveTicket('user-1', {
         concert_id: 'concert-1',
-        category_id: 'category-1',
-        quantity: 2,
+        items: [
+            { category_id: 'category-1', quantity: 2 }
+        ],
     });
 
     // Check that Redis runLuaScript was called twice (once initial, once after seeding)
@@ -263,21 +283,24 @@ test('reserveTicket performs Lazy Seeding when Redis returns ERR_NOT_INITIALIZED
     });
 
     assert.equal(result.status, 'SUCCESS');
-    assert.equal(result.remaining, 8);
+    assert.deepEqual(result.items, [
+        { category_id: 'category-1', quantity: 2, remaining: 8 }
+    ]);
 });
 
 test('reserveTicket throws ERR_NOT_INITIALIZED if category is not found in DB during lazy seeding', async () => {
     const { service, redisService, mockPrisma } = createService();
 
-    redisService.runLuaScript.mockResolvedValue(['ERR_NOT_INITIALIZED']);
+    redisService.runLuaScript.mockResolvedValue(['ERR_NOT_INITIALIZED', 'category-1']);
     mockPrisma.ticketCategory.findUnique.mockResolvedValue(null); // not found
 
     await assert.rejects(
         async () => {
             await service.reserveTicket('user-1', {
                 concert_id: 'concert-1',
-                category_id: 'category-1',
-                quantity: 2,
+                items: [
+                    { category_id: 'category-1', quantity: 2 }
+                ],
             });
         },
         (err: any) => {
@@ -297,8 +320,9 @@ test('reserveTicket throws ServiceUnavailableException when Redis runLuaScript t
         async () => {
             await service.reserveTicket('user-1', {
                 concert_id: 'concert-1',
-                category_id: 'category-1',
-                quantity: 2,
+                items: [
+                    { category_id: 'category-1', quantity: 2 }
+                ],
             });
         },
         (err: any) => {

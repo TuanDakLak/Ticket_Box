@@ -6,52 +6,74 @@ import { RabbitMqService } from '../../../shared/rabbitmq';
 import { ReserveTicketDto } from '../dtos/reserve-ticket.dto';
 
 const RESERVE_TICKET_LUA = `
-local category_key = KEYS[1]
-local user_key = KEYS[2]
-local quantity = tonumber(ARGV[1])
-local category_id = ARGV[2]
-local fallback_max_per_user = tonumber(ARGV[3])
+local user_key = KEYS[1]
+local num_items = tonumber(ARGV[1])
 
--- 1. Check if category exists
-local exists = redis.call('EXISTS', category_key)
-if exists == 0 then
-    return {"ERR_NOT_INITIALIZED"}
+-- 1. Check all categories first (Validation Phase)
+for i = 1, num_items do
+    local idx = 1 + (i - 1) * 3
+    local category_id = ARGV[idx + 1]
+    local quantity = tonumber(ARGV[idx + 2])
+    local fallback_max_per_user = tonumber(ARGV[idx + 3])
+    
+    local category_key = "category:" .. category_id
+    
+    -- Check if category exists
+    local exists = redis.call('EXISTS', category_key)
+    if exists == 0 then
+        return {"ERR_NOT_INITIALIZED", category_id}
+    end
+    
+    -- Check available tickets
+    local available = tonumber(redis.call('HGET', category_key, 'available') or "0")
+    if available < quantity then
+        return {"ERR_NO_TICKET", category_id, tostring(available)}
+    end
+    
+    -- Check user limit
+    local current_reserved = tonumber(redis.call('HGET', user_key, category_id) or "0")
+    local limit = tonumber(redis.call('HGET', category_key, 'max_per_user') or tostring(fallback_max_per_user))
+    
+    if current_reserved + quantity > limit then
+        return {"ERR_LIMIT_EXCEEDED", category_id, tostring(current_reserved)}
+    end
 end
 
--- 2. Get available tickets
-local available = tonumber(redis.call('HGET', category_key, 'available') or "0")
-if available < quantity then
-    return {"ERR_NO_TICKET", tostring(available)}
+-- 2. Deduct and increment (Execution Phase)
+local remaining_list = {}
+for i = 1, num_items do
+    local idx = 1 + (i - 1) * 3
+    local category_id = ARGV[idx + 1]
+    local quantity = tonumber(ARGV[idx + 2])
+    
+    local category_key = "category:" .. category_id
+    
+    local new_available = redis.call('HINCRBY', category_key, 'available', -quantity)
+    redis.call('HINCRBY', user_key, category_id, quantity)
+    
+    table.insert(remaining_list, category_id)
+    table.insert(remaining_list, tostring(new_available))
 end
 
--- 3. Check user limit
-local current_reserved = tonumber(redis.call('HGET', user_key, category_id) or "0")
-local limit = tonumber(redis.call('HGET', category_key, 'max_per_user') or tostring(fallback_max_per_user))
-
-if current_reserved + quantity > limit then
-    return {"ERR_LIMIT_EXCEEDED", tostring(current_reserved)}
-end
-
--- 4. Deduct and increment
-redis.call('HINCRBY', category_key, 'available', -quantity)
-redis.call('HINCRBY', user_key, category_id, quantity)
-
-return {"OK", tostring(available - quantity), tostring(current_reserved + quantity)}
+return {"OK", unpack(remaining_list)}
 `;
 
 const ROLLBACK_TICKET_LUA = `
-local category_key = KEYS[1]
-local user_key = KEYS[2]
-local quantity = tonumber(ARGV[1])
-local category_id = ARGV[2]
+local user_key = KEYS[1]
+local num_items = tonumber(ARGV[1])
 
--- 1. Restore available tickets
-redis.call('HINCRBY', category_key, 'available', quantity)
-
--- 2. Decrement user reservations
-local new_val = redis.call('HINCRBY', user_key, category_id, -quantity)
-if new_val <= 0 then
-    redis.call('HDEL', user_key, category_id)
+for i = 1, num_items do
+    local idx = 1 + (i - 1) * 2
+    local category_id = ARGV[idx + 1]
+    local quantity = tonumber(ARGV[idx + 2])
+    
+    local category_key = "category:" .. category_id
+    
+    redis.call('HINCRBY', category_key, 'available', quantity)
+    local new_val = redis.call('HINCRBY', user_key, category_id, -quantity)
+    if new_val <= 0 then
+        redis.call('HDEL', user_key, category_id)
+    end
 end
 
 return {"ROLLED_BACK"}
@@ -133,75 +155,84 @@ export class TicketingService implements OnModuleInit {
     }
 
     async reserveTicket(userId: string, dto: ReserveTicketDto) {
-        const { concert_id, category_id, quantity } = dto;
-        const categoryKey = `category:${category_id}`;
+        const { concert_id, items } = dto;
         const userKey = `user:${userId}:reservations`;
 
+        const args: string[] = [items.length.toString()];
+        for (const item of items) {
+            args.push(item.category_id, item.quantity.toString(), '100');
+        }
+
         // Step 1: Atomically deduct tickets on Redis
-        let result;
-        let status;
+        let result: any = [];
+        let status: string = '';
         try {
-            result = await this.redisService.runLuaScript(
-                RESERVE_TICKET_LUA,
-                [categoryKey, userKey],
-                [quantity.toString(), category_id, '100']
-            );
+            let retryCount = 0;
+            const maxRetries = items.length + 1;
 
-            if (!Array.isArray(result) || result.length === 0) {
-                throw new BadRequestException('Unexpected response from reservation engine');
-            }
-
-            status = result[0];
-
-            // Lazy Seeding: If Redis is not initialized, calculate and seed from DB, then retry
-            if (status === 'ERR_NOT_INITIALIZED') {
-                this.logger.log(`[Lazy Seeding] Category ${category_id} not found in Redis. Seeding from DB...`);
-                const category = await this.prisma.ticketCategory.findUnique({
-                    where: { id: category_id },
-                });
-                if (!category) {
-                    throw new BadRequestException('ERR_NOT_INITIALIZED');
-                }
-
-                // Count sold tickets (where ticket entries exist)
-                const soldCount = await this.prisma.ticket.count({
-                    where: { category_id },
-                });
-
-                // Count pending unexpired tickets
-                const pendingOrders = await this.prisma.order.findMany({
-                    where: {
-                        status: 'PENDING',
-                        expires_at: {
-                            gt: new Date(),
-                        },
-                    },
-                });
-
-                let pendingCount = 0;
-                for (const order of pendingOrders) {
-                    const metadata = order.ticket_metadata as any;
-                    if (metadata && metadata.category_id === category_id) {
-                        pendingCount += metadata.quantity || 0;
-                    }
-                }
-
-                const available = Math.max(0, category.total_quantity - (soldCount + pendingCount));
-                this.logger.log(`[Lazy Seeding] Category ${category_id}: total=${category.total_quantity}, sold=${soldCount}, pending=${pendingCount}. Seeding available=${available}`);
-
-                await this.seedCategoryInventory(category_id, available, category.max_per_user);
-
-                // Retry reservation on Redis
+            while (retryCount < maxRetries) {
                 result = await this.redisService.runLuaScript(
                     RESERVE_TICKET_LUA,
-                    [categoryKey, userKey],
-                    [quantity.toString(), category_id, '100']
+                    [userKey],
+                    args
                 );
 
                 if (!Array.isArray(result) || result.length === 0) {
                     throw new BadRequestException('Unexpected response from reservation engine');
                 }
+
                 status = result[0];
+
+                // Lazy Seeding: If Redis is not initialized, calculate and seed from DB, then retry
+                if (status === 'ERR_NOT_INITIALIZED') {
+                    const failedCategoryId = result[1];
+                    this.logger.log(`[Lazy Seeding] Category ${failedCategoryId} not found in Redis. Seeding from DB...`);
+                    const category = await this.prisma.ticketCategory.findUnique({
+                        where: { id: failedCategoryId },
+                    });
+                    if (!category) {
+                        throw new BadRequestException('ERR_NOT_INITIALIZED');
+                    }
+
+                    // Count sold tickets
+                    const soldCount = await this.prisma.ticket.count({
+                        where: { category_id: failedCategoryId },
+                    });
+
+                    // Count pending unexpired tickets
+                    const pendingOrders = await this.prisma.order.findMany({
+                        where: {
+                            status: 'PENDING',
+                            expires_at: {
+                                gt: new Date(),
+                            },
+                        },
+                    });
+
+                    let pendingCount = 0;
+                    for (const order of pendingOrders) {
+                        const metadata = order.ticket_metadata as any;
+                        if (metadata) {
+                            if (metadata.category_id === failedCategoryId) {
+                                pendingCount += metadata.quantity || 0;
+                            } else if (Array.isArray(metadata.ticket_breakdown)) {
+                                for (const breakItem of metadata.ticket_breakdown) {
+                                    if (breakItem.category_id === failedCategoryId) {
+                                        pendingCount += breakItem.quantity || 0;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    const available = Math.max(0, category.total_quantity - (soldCount + pendingCount));
+                    this.logger.log(`[Lazy Seeding] Category ${failedCategoryId}: total=${category.total_quantity}, sold=${soldCount}, pending=${pendingCount}. Seeding available=${available}`);
+
+                    await this.seedCategoryInventory(failedCategoryId, available, category.max_per_user);
+                    retryCount++;
+                } else {
+                    break;
+                }
             }
 
             if (status === 'ERR_NOT_INITIALIZED') {
@@ -225,7 +256,10 @@ export class TicketingService implements OnModuleInit {
             throw new ServiceUnavailableException('Booking service temporarily unavailable. Please try again.');
         }
 
-        const remaining = parseInt(result[1], 10);
+        const remainingMap: Record<string, number> = {};
+        for (let i = 1; i < result.length; i += 2) {
+            remainingMap[result[i]] = parseInt(result[i + 1], 10);
+        }
         const orderId = randomUUID();
 
         // Step 2: Publish event to RabbitMQ (with Redis rollback on failure)
@@ -234,38 +268,67 @@ export class TicketingService implements OnModuleInit {
                 orderId,
                 userId,
                 concertId: concert_id,
-                categoryId: category_id,
-                quantity,
+                items: items.map(item => ({
+                    categoryId: item.category_id,
+                    quantity: item.quantity,
+                })),
             });
         } catch (err) {
             // Rollback Redis if RabbitMQ publish fails
             this.logger.error(`[Reservation Rollback] RabbitMQ publish failed for order ${orderId}, rolling back Redis`, err);
-            await this.rollbackCategoryInventory(userId, category_id, quantity);
+            await this.rollbackCategoryInventory(userId, items);
             throw new ServiceUnavailableException('Booking service temporarily unavailable. Please try again.');
         }
 
         return {
             status: 'SUCCESS',
             order_id: orderId,
-            category_id,
-            quantity,
-            remaining,
+            items: items.map(item => ({
+                category_id: item.category_id,
+                quantity: item.quantity,
+                remaining: remainingMap[item.category_id] ?? 0,
+            })),
         };
     }
 
-    async rollbackCategoryInventory(userId: string, categoryId: string, quantity: number): Promise<void> {
-        const categoryKey = `category:${categoryId}`;
+    async rollbackCategoryInventory(
+        userId: string,
+        items: string | Array<{ categoryId?: string; category_id?: string; quantity: number }>,
+        quantity?: number
+    ): Promise<void> {
         const userKey = `user:${userId}:reservations`;
+        let normalizedItems: Array<{ category_id: string; quantity: number }> = [];
+
+        if (typeof items === 'string') {
+            normalizedItems.push({
+                category_id: items,
+                quantity: quantity || 0,
+            });
+        } else if (Array.isArray(items)) {
+            normalizedItems = items.map(item => ({
+                category_id: item.category_id || item.categoryId || '',
+                quantity: item.quantity,
+            })).filter(item => item.category_id !== '');
+        }
+
+        if (normalizedItems.length === 0) {
+            return;
+        }
+
+        const args: string[] = [normalizedItems.length.toString()];
+        for (const item of normalizedItems) {
+            args.push(item.category_id, item.quantity.toString());
+        }
 
         try {
             await this.redisService.runLuaScript(
                 ROLLBACK_TICKET_LUA,
-                [categoryKey, userKey],
-                [quantity.toString(), categoryId]
+                [userKey],
+                args
             );
-            this.logger.log(`[Rollback] Restored ${quantity} ticket(s) for category ${categoryId}, user ${userId}`);
+            this.logger.log(`[Rollback] Restored tickets for user ${userId}: ${JSON.stringify(normalizedItems)}`);
         } catch (err) {
-            this.logger.error(`[Rollback Failed] Could not restore tickets for category ${categoryId}, user ${userId}`, err);
+            this.logger.error(`[Rollback Failed] Could not restore tickets for user ${userId}`, err);
         }
     }
 
