@@ -1,3 +1,16 @@
+import {
+  Armchair,
+  Download,
+  UserCog,
+  Ticket,
+  Shield,
+  Landmark,
+  CreditCard,
+  MessageCircle,
+  Mail,
+  Phone,
+} from "lucide-react";
+
 export type Concert = {
   id: string;
   title: string;
@@ -206,25 +219,25 @@ export const supportCategories = [
     title: "Ordering & Tickets",
     description:
       "Purchase tickets, transfer ownership, and manage delivery methods.",
-    icon: "confirmation_number",
+    icon: Ticket,
   },
   {
     title: "Account & Security",
     description:
       "Reset passwords, enable two-factor authentication, and secure your profile.",
-    icon: "shield",
+    icon: Shield,
   },
   {
     title: "Events & Venues",
     description:
       "Parking details, accessibility guidance, and venue-specific information.",
-    icon: "stadium",
+    icon: Landmark,
   },
   {
     title: "Payments",
     description:
       "Refund status, failed card attempts, and supported payment methods.",
-    icon: "payments",
+    icon: CreditCard,
   },
 ] as const;
 
@@ -234,20 +247,20 @@ export const supportContacts = [
     description:
       "Best for urgent order issues and entry problems during an event.",
     action: "Start chat",
-    icon: "chat_bubble",
+    icon: MessageCircle,
   },
   {
     title: "Email support",
     description:
       "Detailed help for refunds, ticket transfers, or account changes.",
     action: "Send email",
-    icon: "mail",
+    icon: Mail,
   },
   {
     title: "Call hotline",
     description: "Priority line for venue check-in and payment verification.",
     action: "Call now",
-    icon: "call",
+    icon: Phone,
   },
 ] as const;
 
@@ -257,20 +270,20 @@ export const activityTimeline = [
     description:
       "Added a new recovery email and refreshed password on the account.",
     time: "Today, 09:40",
-    icon: "manage_accounts",
+    icon: UserCog,
   },
   {
     title: "Tickets downloaded",
     description:
       "Saved two QR passes to mobile wallet for the upcoming weekend show.",
     time: "Yesterday, 18:20",
-    icon: "download",
+    icon: Download,
   },
   {
     title: "Seat upgrade confirmed",
     description: "Moved from General Admission to VIP Lounge for Sonic Pulse.",
     time: "Oct 02",
-    icon: "event_seat",
+    icon: Armchair,
   },
 ] as const;
 

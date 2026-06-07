@@ -1,10 +1,11 @@
-//test push CI
+"use client";
+
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import {
   activityTimeline,
   checkoutPayments,
   concerts,
-  heroConcert,
   orderConfirmed,
   orderSummary,
   profileStats,
@@ -18,8 +19,88 @@ import {
 } from "@/lib/mock-data";
 import { Badge, Button, Card, SectionHeading, Tabs } from "@/components/common";
 import { ArrowRight } from "lucide-react";
+import {
+  formatConcertCurrency,
+  formatConcertDateTime,
+  getConcertById,
+  getConcerts,
+  type ConcertDetailItem,
+} from "@/services/concert.service";
+import { Search } from "lucide-react";
 
 export function HeroCarousel() {
+  const [featuredConcert, setFeaturedConcert] =
+    useState<ConcertDetailItem | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let isActive = true;
+
+    const loadFeaturedConcert = async () => {
+      try {
+        const response = await getConcerts({ page: 1, limit: 1 });
+
+        if (!isActive) {
+          return;
+        }
+
+        const firstConcert = response.items[0];
+
+        if (!firstConcert) {
+          setFeaturedConcert(null);
+          return;
+        }
+
+        const detail = await getConcertById(firstConcert.id);
+
+        if (!isActive) {
+          return;
+        }
+
+        setFeaturedConcert(detail);
+      } catch {
+        if (!isActive) {
+          return;
+        }
+
+        setFeaturedConcert(null);
+      } finally {
+        if (isActive) {
+          setLoading(false);
+        }
+      }
+    };
+
+    void loadFeaturedConcert();
+
+    return () => {
+      isActive = false;
+    };
+  }, []);
+
+  const title = loading
+    ? "Loading featured concert..."
+    : (featuredConcert?.title ?? "No featured concert available");
+  const badge = featuredConcert?.status ?? "Featured event";
+  const dateTime = featuredConcert
+    ? formatConcertDateTime(featuredConcert.startTime)
+    : { date: "TBA", time: "" };
+  const date = dateTime.date;
+  const time = dateTime.time;
+  const venue = featuredConcert?.venue ?? "Awaiting venue";
+  const city = featuredConcert?.city ?? "Awaiting city";
+  const description = loading
+    ? "We are loading the latest concert from the database."
+    : featuredConcert?.aiBio ||
+      featuredConcert?.description ||
+      "No featured concert is available right now.";
+  const ticketTier = featuredConcert?.ticketTiers?.[0];
+  const priceLabel = ticketTier
+    ? `${ticketTier.name} • ${formatConcertCurrency(ticketTier.price)}`
+    : featuredConcert
+      ? "Ticket tiers unavailable"
+      : "Loading...";
+
   return (
     <section className="relative overflow-hidden bg-surface text-white">
       <div className="hero-shimmer absolute inset-0 opacity-95" />
@@ -27,17 +108,24 @@ export function HeroCarousel() {
       <div className="relative mx-auto grid w-full max-w-7xl gap-10 px-4 py-16 sm:px-6 lg:grid-cols-[1.2fr_0.8fr] lg:px-8 lg:py-20">
         <div className="max-w-3xl space-y-6">
           <Badge className="border border-white/20 bg-white/10 text-white">
-            {heroConcert.badge}
+            {badge}
           </Badge>
           <h1 className="font-display text-4xl font-black tracking-tight sm:text-5xl lg:text-6xl">
-            Neon Nights World Tour
+            {title}
           </h1>
           <p className="max-w-2xl text-base leading-7 text-white/80 sm:text-lg">
-            {heroConcert.subtitle}
+            {description}
           </p>
           <div className="flex flex-wrap gap-3">
-            <Button href="/concerts/sonic-pulse" variant="secondary">
-              Buy Tickets <ArrowRight size={18} />
+            <Button
+              href={
+                featuredConcert
+                  ? `/concerts/${featuredConcert.id}`
+                  : "/concerts"
+              }
+              variant="secondary"
+            >
+              {loading ? "Loading..." : "Buy Tickets"} <ArrowRight size={18} />
             </Button>
             <Button
               href="/support"
@@ -48,18 +136,12 @@ export function HeroCarousel() {
             </Button>
           </div>
           <div className="flex flex-wrap gap-3 text-sm text-white/75">
-            <span className="rounded-full bg-white/10 px-4 py-2">
-              {heroConcert.date}
-            </span>
-            <span className="rounded-full bg-white/10 px-4 py-2">
-              {heroConcert.time}
-            </span>
-            <span className="rounded-full bg-white/10 px-4 py-2">
-              {heroConcert.venue}
-            </span>
-            <span className="rounded-full bg-white/10 px-4 py-2">
-              {heroConcert.city}
-            </span>
+            <span className="rounded-full bg-white/10 px-4 py-2">{date}</span>
+            {time ? (
+              <span className="rounded-full bg-white/10 px-4 py-2">{time}</span>
+            ) : null}
+            <span className="rounded-full bg-white/10 px-4 py-2">{venue}</span>
+            <span className="rounded-full bg-white/10 px-4 py-2">{city}</span>
           </div>
         </div>
         <Card className="border-white/15 bg-white/10 p-5 text-white backdrop-blur-xl">
@@ -70,31 +152,49 @@ export function HeroCarousel() {
                   Featured tour
                 </p>
                 <h2 className="mt-2 font-display text-2xl font-bold">
-                  {heroConcert.title}
+                  {title}
                 </h2>
               </div>
-              <Badge className="bg-white/15 text-white">Selling fast</Badge>
+              <Badge className="bg-white/15 text-white">{badge}</Badge>
             </div>
-            <div className="grid gap-3 rounded-2xl bg-white/10 p-4 sm:grid-cols-2">
+            <div className="grid gap-3 rounded-2xl bg-white/10 p-4 sm:grid-cols-3">
               <div>
                 <p className="text-xs uppercase tracking-[0.2em] text-white/65">
-                  Date
+                  Start time
                 </p>
-                <p className="mt-1 text-lg font-semibold">Oct 15</p>
+                <p className="mt-1 text-lg font-semibold">
+                  {date}
+                  {time ? ` • ${time}` : ""}
+                </p>
               </div>
               <div>
                 <p className="text-xs uppercase tracking-[0.2em] text-white/65">
                   Price
                 </p>
-                <p className="mt-1 text-lg font-semibold">From $49</p>
+                <p className="mt-1 text-lg font-semibold">{priceLabel}</p>
+              </div>
+              <div>
+                <p className="text-xs uppercase tracking-[0.2em] text-white/65">
+                  Max / user
+                </p>
+                <p className="mt-1 text-lg font-semibold">
+                  {ticketTier?.max_per_user ?? "N/A"}
+                </p>
               </div>
             </div>
             <div className="rounded-2xl bg-white/10 p-4">
-              <p className="text-sm leading-6 text-white/80">
-                Priority access, lounge upgrades, and selected floor seats are
-                still available for tonight's release.
-              </p>
+              <p className="text-sm leading-6 text-white/80">{description}</p>
             </div>
+            {featuredConcert?.mapUrl ? (
+              <a
+                href={featuredConcert.mapUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex w-fit items-center gap-2 rounded-full border border-white/20 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/10"
+              >
+                Open SVG map <ArrowRight size={16} />
+              </a>
+            ) : null}
           </div>
         </Card>
       </div>
@@ -735,7 +835,7 @@ export function ActivityTimeline() {
             className="flex gap-4 rounded-2xl bg-surface-low p-4"
           >
             <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
-              <span className="material-symbols-outlined">{item.icon}</span>
+              <item.icon className="h-5 w-5" />
             </div>
             <div className="flex-1">
               <div className="flex items-center justify-between gap-4">
@@ -773,12 +873,12 @@ export function SupportHero() {
           </p>
           <div className="flex flex-wrap gap-3 rounded-3xl bg-white/10 p-3 backdrop-blur">
             <div className="flex min-w-[240px] flex-1 items-center gap-3 rounded-2xl bg-white px-4 py-3 text-on-surface shadow-lg">
-              <span className="material-symbols-outlined text-primary">
-                search
-              </span>
-              <span className="text-sm text-on-surface-variant">
-                Search for FAQs, guides, or order help...
-              </span>
+              <Search className="h-4 w-4 text-primary" />
+              <input
+                type="text"
+                placeholder="Search for FAQs, guides, or order help..."
+                className="flex-1 bg-transparent text-sm text-on-surface-variant outline-none placeholder:text-on-surface-variant/60"
+              />
             </div>
             <Button variant="secondary">Search</Button>
           </div>
@@ -794,9 +894,7 @@ export function SupportGrid() {
       {supportCategories.map((item) => (
         <Card key={item.title} className="card-lift p-6">
           <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-            <span className="material-symbols-outlined text-[28px]">
-              {item.icon}
-            </span>
+            <item.icon className="h-5 w-5 text-primary" />
           </div>
           <h3 className="font-display text-2xl font-bold text-on-surface">
             {item.title}
@@ -830,7 +928,7 @@ export function SupportContacts() {
             className="card-lift flex flex-col items-start gap-4 p-6 text-left"
           >
             <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary">
-              <span className="material-symbols-outlined">{contact.icon}</span>
+              <contact.icon className="h-5 w-5" />
             </div>
             <div>
               <h3 className="font-display text-2xl font-bold text-on-surface">

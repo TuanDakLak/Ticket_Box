@@ -234,15 +234,7 @@ export function SiteShell({
             ))}
           </nav>
           <div className="flex items-center gap-3">
-            <div className="hidden items-center gap-2 rounded-full border border-outline-variant bg-surface px-4 py-2 text-sm text-on-surface-variant lg:flex">
-              <Search size={18} className="text-gray-500" />
-
-              <input
-                type="text"
-                placeholder="Search artists, venues"
-                className="w-full bg-transparent text-sm outline-none"
-              />
-            </div>
+            
             {action}
           </div>
         </div>
