@@ -260,6 +260,41 @@ export function ConcertCard({
   );
 }
 
+export function SeatMapSvg({ className = "" }: { className?: string }) {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" width="100%" height="100%" className={className}>
+      <style>{`
+        .zone {
+          cursor: pointer;
+          transition: fill 0.2s ease, opacity 0.2s ease;
+          stroke: #ffffff;
+          stroke-width: 2;
+        }
+        .zone:hover {
+          opacity: 0.8;
+          stroke: #00ff00;
+          stroke-width: 3;
+        }
+      `}</style>
+
+      <rect x="250" y="20" width="300" height="40" fill="#333333" rx="5" />
+      <text x="400" y="45" fill="#ffffff" fontFamily="Arial" fontSize="16" fontWeight="bold" textAnchor="middle">STAGE</text>
+
+      <rect id="zone-svip-01" className="zone" x="250" y="90" width="300" height="80" fill="#ff007f" rx="8" />
+      <text x="400" y="135" fill="#ffffff" fontFamily="Arial" fontSize="18" fontWeight="bold" textAnchor="middle" pointerEvents="none">SUPER VIP (SVIP)</text>
+
+      <polygon id="zone-vip-left" className="zone" points="80,190 230,190 230,290 120,290" fill="#ffaa00" />
+      <text x="160" y="245" fill="#ffffff" fontFamily="Arial" fontSize="16" fontWeight="bold" textAnchor="middle" pointerEvents="none">VIP LEFT</text>
+
+      <polygon id="zone-vip-right" className="zone" points="570,190 720,190 680,290 570,290" fill="#ffaa00" />
+      <text x="640" y="245" fill="#ffffff" fontFamily="Arial" fontSize="16" fontWeight="bold" textAnchor="middle" pointerEvents="none">VIP RIGHT</text>
+
+      <rect id="zone-ga-01" className="zone" x="250" y="190" width="300" height="100" fill="#007bff" rx="8" />
+      <text x="400" y="245" fill="#ffffff" fontFamily="Arial" fontSize="18" fontWeight="bold" textAnchor="middle" pointerEvents="none">STANDARD (GA)</text>
+    </svg>
+  );
+}
+
 export function ConcertDetailHero({ concert }: { concert: ConcertDetailItem }) {
   const dateTime = formatConcertDateTime(concert.startTime);
   const date = dateTime.date;
@@ -290,41 +325,18 @@ export function ConcertDetailHero({ concert }: { concert: ConcertDetailItem }) {
             )}
           </div>
           <div className="flex flex-wrap gap-3">
-            <Button href={`/concerts/${concert.id}/seats`}>Select seats</Button>
-            <Button href={`/concerts/${concert.id}/seats`} variant="soft">
+            <Button href="#ticket-tiers">Select experience</Button>
+            <Button href="/checkout/order-2048" variant="soft">
               Reserve now
             </Button>
           </div>
         </div>
-        <div className="bg-[radial-gradient(circle_at_top,_rgba(79,70,229,0.35),_transparent_55%),linear-gradient(160deg,_#1f1b4d,_#3525cd_50%,_#712ae2)] p-6 text-white sm:p-8">
-          <div className="flex h-full flex-col justify-between rounded-3xl border border-white/15 bg-white/10 p-5 backdrop-blur-xl">
-            <div className="flex items-center justify-between gap-4">
-              <div>
-                <p className="text-xs uppercase tracking-[0.22em] text-white/70">
-                  Release window
-                </p>
-                <p className="mt-2 text-3xl font-black">2h 14m</p>
-              </div>
-              <Badge className="bg-white/15 text-white">{concert.status}</Badge>
-            </div>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="rounded-2xl bg-white/10 p-4">
-                <p className="text-xs uppercase tracking-[0.2em] text-white/65">
-                  Peak demand
-                </p>
-                <p className="mt-2 text-2xl font-black">98%</p>
-              </div>
-              <div className="rounded-2xl bg-white/10 p-4">
-                <p className="text-xs uppercase tracking-[0.2em] text-white/65">
-                  Remaining
-                </p>
-                <p className="mt-2 text-2xl font-black">1,240</p>
-              </div>
-            </div>
-            <div className="rounded-2xl bg-white/10 p-4 text-sm leading-6 text-white/80">
-              Premium floor, balcony, and lounge tiers are all still visible in
-              the checkout path.
-            </div>
+        <div className="bg-[radial-gradient(circle_at_top,_rgba(79,70,229,0.35),_transparent_55%),linear-gradient(160deg,_#1f1b4d,_#3525cd_50%,_#712ae2)] p-6 text-white sm:p-8 flex items-center justify-center">
+          <div className="w-full max-w-md rounded-3xl border border-white/15 bg-white/10 p-5 backdrop-blur-xl flex flex-col items-center">
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-white/70 mb-4 self-start">
+              Seat Map Preview
+            </p>
+            <SeatMapSvg className="w-full h-auto" />
           </div>
         </div>
       </div>
@@ -337,14 +349,16 @@ export function TicketTierCard({
   price,
   note,
   highlight = false,
+  href,
 }: {
   name: string;
   price: string;
   note: string;
   highlight?: boolean;
+  href?: string;
 }) {
-  return (
-    <Card className={`p-5 ${highlight ? "border-primary bg-primary/5" : ""}`}>
+  const cardContent = (
+    <Card className={`p-5 card-lift transition-all duration-200 ${href ? "cursor-pointer hover:border-primary/50" : ""} ${highlight ? "border-primary bg-primary/5" : ""}`}>
       <div className="flex items-start justify-between gap-4">
         <div className="space-y-2">
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-on-surface-variant">
@@ -363,6 +377,16 @@ export function TicketTierCard({
       </div>
     </Card>
   );
+
+  if (href) {
+    return (
+      <Link href={href} className="block no-underline">
+        {cardContent}
+      </Link>
+    );
+  }
+
+  return cardContent;
 }
 
 export function VenueMap() {

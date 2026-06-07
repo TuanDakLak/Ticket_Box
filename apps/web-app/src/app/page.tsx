@@ -171,7 +171,15 @@ function ConcertsSection() {
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div>
-                        <p className="ticketbox-badge w-fit bg-slate-100 text-slate-700">
+                        <p className={`ticketbox-badge w-fit border ${
+                          concert.status?.toUpperCase() === "PUBLISHED"
+                            ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
+                            : concert.status?.toUpperCase() === "COMING_SOON"
+                            ? "bg-amber-500/10 text-amber-600 border-amber-500/20"
+                            : concert.status?.toUpperCase() === "COMPLETED"
+                            ? "bg-slate-500/10 text-slate-600 border-slate-500/20"
+                            : "bg-slate-500/10 text-slate-600 border-slate-500/20"
+                        }`}>
                           {concert.status}
                         </p>
                         <h3 className="mt-3 text-xl font-black tracking-tight text-slate-900">

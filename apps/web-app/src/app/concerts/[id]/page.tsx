@@ -42,8 +42,8 @@ export default async function ConcertDetailPage({
                 title={concert.title}
                 description={concert.description}
                 action={
-                  <Button href={`/concerts/${concert.id}/seats`} variant="soft">
-                    Select seats
+                  <Button href="#ticket-tiers" variant="soft">
+                    Select experience
                   </Button>
                 }
               />
@@ -65,7 +65,7 @@ export default async function ConcertDetailPage({
                 ))}
               </div>
             </Card>
-            <div className="space-y-4">
+            <div id="ticket-tiers" className="space-y-4 scroll-mt-24">
               <SectionHeading
                 eyebrow="Ticket tiers"
                 title="Choose the experience"
@@ -80,6 +80,7 @@ export default async function ConcertDetailPage({
                       price={formatConcertCurrency(tier.price)}
                       note={`Max: ${tier.max_per_user} tickets per user • Total capacity: ${tier.total_quantity} seats`}
                       highlight={index === 0}
+                      href="/checkout/order-2048"
                     />
                   ))
                 ) : (
@@ -110,8 +111,8 @@ export default async function ConcertDetailPage({
                 checkout starts.
               </p>
             </div>
-            <Button href={`/concerts/${concert.id}/seats`} className="w-full">
-              Continue to seats
+            <Button href="/checkout/order-2048" className="w-full">
+              Proceed to checkout
             </Button>
           </Card>
         </div>
