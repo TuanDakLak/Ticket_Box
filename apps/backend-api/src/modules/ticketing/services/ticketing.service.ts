@@ -233,7 +233,6 @@ export class TicketingService implements OnModuleInit {
                 } else {
                     break;
                 }
-            }
 
             if (status === 'ERR_NOT_INITIALIZED') {
                 throw new BadRequestException('ERR_NOT_INITIALIZED');
