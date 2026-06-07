@@ -47,6 +47,11 @@ export class CreateConcertDto {
   @IsString()
   svg_map_url?: string;
 
+  @ApiPropertyOptional({ example: 'https://cdn.ticketbox.local/posters/anh-trai-say-hi.png' })
+  @IsOptional()
+  @IsString()
+  poster_url?: string;
+
   @ApiProperty({ enum: ConcertStatus, example: ConcertStatus.PUBLISHED })
   @IsEnum(ConcertStatus)
   status!: ConcertStatus;
