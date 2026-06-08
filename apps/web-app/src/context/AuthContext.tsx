@@ -1,0 +1,69 @@
+"use client";
+
+import React, { createContext, useContext, useEffect, useState } from "react";
+import { UserProfile } from "@/types/auth.types";
+import { authService } from "@/services/auth.service";
+import { tokenStorage } from "@/utils/token.utils";
+
+interface AuthContextType {
+  user: UserProfile | null;
+  isAuthenticated: boolean;
+  isLoading: boolean;
+  login: (user: UserProfile) => void;
+  logout: () => Promise<void>;
+}
+
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const [user, setUser] = useState<UserProfile | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const initAuth = async () => {
+      try {
+        if (tokenStorage.hasToken()) {
+          const profile = await authService.me();
+          setUser(profile);
+        }
+      } catch (error) {
+        console.error("Failed to restore session:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    initAuth();
+  }, []);
+
+  const login = (userData: UserProfile) => {
+    setUser(userData);
+  };
+
+  const logout = async () => {
+    await authService.logout();
+    setUser(null);
+  };
+
+  return (
+    <AuthContext.Provider
+      value={{
+        user,
+        isAuthenticated: !!user,
+        isLoading,
+        login,
+        logout,
+      }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
+}
+
+export function useAuth() {
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error("useAuth must be used within an AuthProvider");
+  }
+  return context;
+}
