@@ -52,10 +52,10 @@ jane@example.com,Jane Doe,Standard
 
   // Invoke private method
   await (consumer as any).handleGuestImport({
-    jobId: 'test-job-id',
-    concertId: 'test-concert-id',
+    jobId: 'd3b07384-d113-49c3-a5f1-30efbd8572e0',
+    concertId: '9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d',
     filePath: testCsvPath,
-    userId: 'test-user-id',
+    userId: '1e14930d-dfd4-46df-bc44-3c66f7f6f1a8',
   });
 
   // Verify DB raw execution was called for insertion
@@ -69,7 +69,7 @@ jane@example.com,Jane Doe,Standard
   
   // Params should contain: ID, concertId, email, name, category, is_scanned for 2 users (total 12 items)
   assert.equal(queryParams.length, 12);
-  assert.equal(queryParams[1], 'test-concert-id');
+  assert.equal(queryParams[1], '9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d');
   assert.equal(queryParams[2], 'john@example.com');
   assert.equal(queryParams[3], 'John Doe');
   assert.equal(queryParams[4], 'VIP');
@@ -82,12 +82,12 @@ jane@example.com,Jane Doe,Standard
   assert.ok(updates.length >= 3); // PROCESSING, progress updates, COMPLETED
 
   // First update should set status to PROCESSING
-  assert.equal(updates[0][0].where.id, 'test-job-id');
+  assert.equal(updates[0][0].where.id, 'd3b07384-d113-49c3-a5f1-30efbd8572e0');
   assert.equal(updates[0][0].data.status, 'PROCESSING');
 
   // Last update should set status to COMPLETED and results details
   const lastUpdate = updates[updates.length - 1][0];
-  assert.equal(lastUpdate.where.id, 'test-job-id');
+  assert.equal(lastUpdate.where.id, 'd3b07384-d113-49c3-a5f1-30efbd8572e0');
   assert.equal(lastUpdate.data.status, 'COMPLETED');
   assert.equal(lastUpdate.data.progress_percentage, 100);
   assert.equal(lastUpdate.data.result_data.processed, 2);
@@ -122,10 +122,10 @@ john@example.com,John Doe Refined,Premium
 
   // Invoke private method
   await (consumer as any).handleGuestImport({
-    jobId: 'test-job-id-2',
-    concertId: 'test-concert-id',
+    jobId: 'd3b07384-d113-49c3-a5f1-30efbd8572e1',
+    concertId: '9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d',
     filePath: testCsvPath,
-    userId: 'test-user-id',
+    userId: '1e14930d-dfd4-46df-bc44-3c66f7f6f1a8',
   });
 
   // Verify DB raw execution was called
@@ -144,8 +144,9 @@ john@example.com,John Doe Refined,Premium
 });
 
 test('WorkerController.getJobStatus returns job when it exists', async () => {
+  const targetJobId = 'd3b07384-d113-49c3-a5f1-30efbd8572e2';
   const mockJob = {
-    id: 'test-job-id',
+    id: targetJobId,
     status: 'COMPLETED',
     progress_percentage: 100,
   };
@@ -157,14 +158,33 @@ test('WorkerController.getJobStatus returns job when it exists', async () => {
   const mockRabbitMq = {} as any;
 
   const controller = new WorkerController(mockPrisma, mockRabbitMq);
-  const result = await controller.getJobStatus('test-job-id');
+  const result = await controller.getJobStatus(targetJobId);
 
   assert.deepEqual(result, mockJob);
   assert.equal(mockPrisma.backgroundJob.findUnique.mock.calls.length, 1);
-  assert.equal(mockPrisma.backgroundJob.findUnique.mock.calls[0][0].where.id, 'test-job-id');
+  assert.equal(mockPrisma.backgroundJob.findUnique.mock.calls[0][0].where.id, targetJobId);
+});
+
+test('WorkerController.getJobStatus throws BadRequestException when job ID format is invalid', async () => {
+  const mockPrisma = {} as any;
+  const mockRabbitMq = {} as any;
+
+  const controller = new WorkerController(mockPrisma, mockRabbitMq);
+
+  await assert.rejects(
+    async () => {
+      await controller.getJobStatus('test-job-id');
+    },
+    (err: any) => {
+      assert.equal(err.message, 'Invalid job ID format. Expected UUID, found: test-job-id');
+      assert.equal(err.status, 400);
+      return true;
+    }
+  );
 });
 
 test('WorkerController.getJobStatus throws NotFoundException when job does not exist', async () => {
+  const nonExistentJobId = 'd3b07384-d113-49c3-a5f1-30efbd8572e3';
   const mockPrisma = {
     backgroundJob: {
       findUnique: fn().mockResolvedValue(null),
@@ -176,10 +196,10 @@ test('WorkerController.getJobStatus throws NotFoundException when job does not e
 
   await assert.rejects(
     async () => {
-      await controller.getJobStatus('non-existent-id');
+      await controller.getJobStatus(nonExistentJobId);
     },
     (err: any) => {
-      assert.equal(err.message, 'Background job with ID non-existent-id not found');
+      assert.equal(err.message, `Background job with ID ${nonExistentJobId} not found`);
       assert.equal(err.status, 404);
       return true;
     }
@@ -187,7 +207,8 @@ test('WorkerController.getJobStatus throws NotFoundException when job does not e
 });
 
 test('WorkerController.getGuestList returns paginated list and metadata', async () => {
-  const mockConcert = { id: 'test-concert-id', name: 'Test Concert' };
+  const targetConcertId = '9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d';
+  const mockConcert = { id: targetConcertId, name: 'Test Concert' };
   const mockGuests = [
     { id: '1', email: 'a@test.com', full_name: 'A', ticket_category: 'VIP', is_scanned: false },
     { id: '2', email: 'b@test.com', full_name: 'B', ticket_category: 'GA', is_scanned: true },
@@ -205,7 +226,7 @@ test('WorkerController.getGuestList returns paginated list and metadata', async 
   const mockRabbitMq = {} as any;
 
   const controller = new WorkerController(mockPrisma, mockRabbitMq);
-  const result = await controller.getGuestList('test-concert-id', {
+  const result = await controller.getGuestList(targetConcertId, {
     page: 1,
     limit: 10,
     search: 'test',
@@ -225,7 +246,26 @@ test('WorkerController.getGuestList returns paginated list and metadata', async 
   assert.equal(mockPrisma.guestList.findMany.mock.calls.length, 1);
 });
 
+test('WorkerController.getGuestList throws BadRequestException when concert ID format is invalid', async () => {
+  const mockPrisma = {} as any;
+  const mockRabbitMq = {} as any;
+
+  const controller = new WorkerController(mockPrisma, mockRabbitMq);
+
+  await assert.rejects(
+    async () => {
+      await controller.getGuestList('test-concert-id', {});
+    },
+    (err: any) => {
+      assert.equal(err.message, 'Invalid concert ID format. Expected UUID, found: test-concert-id');
+      assert.equal(err.status, 400);
+      return true;
+    }
+  );
+});
+
 test('WorkerController.getGuestList throws NotFoundException when concert does not exist', async () => {
+  const nonExistentConcertId = '9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6e';
   const mockPrisma = {
     concert: {
       findUnique: fn().mockResolvedValue(null),
@@ -237,10 +277,10 @@ test('WorkerController.getGuestList throws NotFoundException when concert does n
 
   await assert.rejects(
     async () => {
-      await controller.getGuestList('non-existent-concert-id', {});
+      await controller.getGuestList(nonExistentConcertId, {});
     },
     (err: any) => {
-      assert.equal(err.message, 'Concert with ID non-existent-concert-id not found');
+      assert.equal(err.message, `Concert with ID ${nonExistentConcertId} not found`);
       assert.equal(err.status, 404);
       return true;
     }

@@ -32,7 +32,7 @@ import { RolesGuard } from '../../../shared/guards/roles.guard';
 import { Roles } from '../../../shared/decorators/roles.decorator';
 import { PrismaService } from '../../../shared/prisma.service';
 import { RabbitMqService } from '../../../shared/rabbitmq';
-import { IsUUID, IsNotEmpty, IsOptional, IsString, IsBoolean } from 'class-validator';
+import { IsUUID, IsNotEmpty, IsOptional, IsString, IsBoolean, isUUID } from 'class-validator';
 import { PaginationDto } from '../../../shared/dtos/pagination.dto';
 import { Transform } from 'class-transformer';
 
@@ -193,6 +193,9 @@ export class WorkerController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get background job status and progress' })
   async getJobStatus(@Param('id') id: string) {
+    if (!isUUID(id)) {
+      throw new BadRequestException(`Invalid job ID format. Expected UUID, found: ${id}`);
+    }
     const job = await this.prisma.backgroundJob.findUnique({
       where: { id },
     });
@@ -211,6 +214,9 @@ export class WorkerController {
     @Param('concertId') concertId: string,
     @Query() query: GuestListQueryDto,
   ) {
+    if (!isUUID(concertId)) {
+      throw new BadRequestException(`Invalid concert ID format. Expected UUID, found: ${concertId}`);
+    }
     const concert = await this.prisma.concert.findUnique({
       where: { id: concertId },
     });
