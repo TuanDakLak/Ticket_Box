@@ -1,7 +1,10 @@
+"use client";
+
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { siteNavigation, siteName } from "@/lib/constants";
 import { Search } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
 
 type ButtonProps = {
   children: ReactNode;
@@ -215,6 +218,9 @@ export function SiteShell({
   active?: string;
   action?: ReactNode;
 }) {
+  const { user, isAuthenticated } = useAuth();
+  const isAdmin = user?.roles?.includes("Admin") || (user as any)?.role === "Admin";
+
   return (
     <div className="flex min-h-screen flex-col">
       <header className="sticky top-0 z-50 border-b border-outline-variant/60 bg-background/90 backdrop-blur-xl">
@@ -234,7 +240,15 @@ export function SiteShell({
             ))}
           </nav>
           <div className="flex items-center gap-3">
-            
+            {isAuthenticated && isAdmin && (
+              <Link
+                href="/admin/dashboard"
+                className="ticketbox-button-secondary px-4 py-2 text-sm flex items-center gap-1.5"
+              >
+                <span className="material-symbols-outlined text-[18px]">dashboard</span>
+                Admin
+              </Link>
+            )}
             {action}
           </div>
         </div>

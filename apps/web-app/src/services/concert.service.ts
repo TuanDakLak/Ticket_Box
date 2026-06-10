@@ -1,3 +1,5 @@
+import apiClient from "./api";
+
 export interface ConcertApiItem {
   id: string;
   name: string;
@@ -211,4 +213,33 @@ export function formatConcertCurrency(value: number) {
     currency: "VND",
     maximumFractionDigits: 0,
   }).format(value);
+}
+
+export interface CreateConcertDto {
+  name: string;
+  description: string;
+  location: string;
+  ai_bio: string;
+  start_time: string;
+  svg_map_url: string;
+  poster_url: string;
+  status: string;
+  ticket_categories: Array<{
+    name: string;
+    price: number;
+    total_quantity: number;
+    max_per_user: number;
+  }>;
+}
+
+export async function createConcert(body: CreateConcertDto) {
+  return apiClient.post<any>("/concerts", body);
+}
+
+export async function updateConcert(id: string, body: Partial<CreateConcertDto>) {
+  return apiClient.patch<any>(`/concerts/${id}`, body);
+}
+
+export async function deleteConcert(id: string) {
+  return apiClient.delete<any>(`/concerts/${id}`);
 }
