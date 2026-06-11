@@ -66,6 +66,13 @@ export class RabbitMqService implements OnModuleInit, OnModuleDestroy {
         await channel.assertQueue('order.expired.queue', { durable: true });
         await channel.bindQueue('order.expired.queue', 'order.dlx.exchange', 'order.expired');
 
+        // Guest list import exchange
+        await channel.assertExchange('guest.import.exchange', 'direct', { durable: true });
+
+        // Guest list import queue
+        await channel.assertQueue('guest.import.queue', { durable: true });
+        await channel.bindQueue('guest.import.queue', 'guest.import.exchange', 'guest.import');
+
         this.logger.log('[RabbitMQ] Topology asserted: exchanges, queues, and bindings ready');
     }
 
