@@ -22,6 +22,9 @@ export class ConcertEntity {
   @ApiPropertyOptional({ example: 'https://cdn.ticketbox.local/maps/anh-trai-say-hi.svg' })
   svg_map_url?: string | null;
 
+  @ApiPropertyOptional({ example: 'https://cdn.ticketbox.local/posters/anh-trai-say-hi.jpg' })
+  poster_url?: string | null;
+
   @ApiProperty({ example: 'PUBLISHED' })
   status!: string;
 

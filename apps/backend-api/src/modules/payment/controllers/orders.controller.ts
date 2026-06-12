@@ -7,6 +7,7 @@ import {
     UseGuards,
     UsePipes,
     ValidationPipe,
+    Post,
 } from '@nestjs/common';
 import {
     ApiBearerAuth,
@@ -14,6 +15,7 @@ import {
     ApiOkResponse,
     ApiOperation,
     ApiTags,
+    ApiBadRequestResponse,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../../shared/guards/jwt-auth.guard';
 import { RolesGuard } from '../../../shared/guards/roles.guard';
@@ -64,5 +66,14 @@ export class OrdersController {
     @ApiNotFoundResponse({ description: 'Order not found' })
     async getOrderById(@Req() req: any, @Param('id') id: string) {
         return this.ordersService.getOrderDetail(req.user.sub, id);
+    }
+
+    @Post(':id/cancel')
+    @ApiOperation({ summary: 'Cancel a pending order and release reserved tickets' })
+    @ApiOkResponse({ type: OrderDetailDto })
+    @ApiNotFoundResponse({ description: 'Order not found' })
+    @ApiBadRequestResponse({ description: 'Order cannot be cancelled' })
+    async cancelOrder(@Req() req: any, @Param('id') id: string) {
+        return this.ordersService.cancelOrder(req.user.sub, id);
     }
 }
