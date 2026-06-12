@@ -14,6 +14,7 @@ type ConcertListRow = {
   location: string;
   start_time: Date;
   svg_map_url: string | null;
+  poster_url: string | null;
   status: string;
 };
 
@@ -71,6 +72,7 @@ export class ConcertRepository {
           location: true,
           start_time: true,
           svg_map_url: true,
+          poster_url: true,
           status: true,
         },
         orderBy: { start_time: 'desc' },
@@ -105,6 +107,7 @@ export class ConcertRepository {
         ai_bio: payload.ai_bio ?? null,
         start_time: new Date(payload.start_time),
         svg_map_url: payload.svg_map_url ?? null,
+        poster_url: payload.poster_url ?? null,
         status: payload.status,
         ticket_categories: {
           create: payload.ticket_categories.map((category) => ({
@@ -131,6 +134,7 @@ export class ConcertRepository {
         ai_bio: payload.ai_bio ?? undefined,
         start_time: payload.start_time ? new Date(payload.start_time) : undefined,
         svg_map_url: payload.svg_map_url ?? undefined,
+        poster_url: payload.poster_url ?? undefined,
         status: payload.status,
       },
       include: { ticket_categories: true },
@@ -170,6 +174,7 @@ export class ConcertRepository {
       ai_bio: concert.ai_bio ?? null,
       start_time: concert.start_time,
       svg_map_url: concert.svg_map_url ?? null,
+      poster_url: concert.poster_url ?? null,
       status: concert.status,
       ticketTiers,
     });
@@ -183,6 +188,7 @@ export class ConcertRepository {
       location: concert.location,
       start_time: concert.start_time,
       svg_map_url: concert.svg_map_url ?? null,
+      poster_url: concert.poster_url ?? null,
       status: concert.status,
     });
   }

@@ -69,6 +69,7 @@ export class ConcertService {
     const created = await this.concertRepo.create(payload);
     await this.invalidateConcertListCaches();
     await this.redisService.setJson(this.getConcertDetailCacheKey(created.id), created, this.cacheTtlSeconds);
+    await this.warmUpConcertRedisCache(created, true);
     return created;
   }
 
@@ -79,6 +80,7 @@ export class ConcertService {
     const updated = await this.concertRepo.update(id, payload);
     await this.redisService.setJson(this.getConcertDetailCacheKey(id), updated, this.cacheTtlSeconds);
     await this.invalidateConcertListCaches();
+    await this.warmUpConcertRedisCache(updated, false);
     return updated;
   }
 
@@ -92,6 +94,28 @@ export class ConcertService {
     await this.redisService.setJson(this.getConcertDetailCacheKey(id), deleted, this.cacheTtlSeconds);
     await this.invalidateConcertListCaches();
     return deleted;
+  }
+
+  private async warmUpConcertRedisCache(concert: ConcertResponseDto, isNew = false) {
+    if (concert.status === 'PUBLISHED' && concert.ticketTiers) {
+      const client = this.redisService.getClient();
+      if (client && client.isOpen) {
+        for (const tier of concert.ticketTiers) {
+          const key = `category:${tier.id}`;
+          if (isNew) {
+            await client.hSet(key, {
+              available: tier.total_quantity.toString(),
+              max_per_user: tier.max_per_user.toString(),
+            });
+            this.logger.log(`[Redis Warmup] Automatically initialized category ${tier.id} for new concert ${concert.name}`);
+          } else {
+            // For updates: delete key so the next reservation triggers a correct Lazy Seeding recalculation
+            await client.del(key);
+            this.logger.log(`[Redis Warmup] Evicted category ${tier.id} for updated concert ${concert.name} to force lazy recalculation`);
+          }
+        }
+      }
+    }
   }
 
   private getConcertListCacheKey(

@@ -9,7 +9,7 @@ RUN npm ci
 FROM deps AS build
 COPY . .
 RUN npm run prisma:generate
-RUN npm run build
+RUN npm run build:api
 
 FROM node:22-alpine AS runtime  
 WORKDIR /app

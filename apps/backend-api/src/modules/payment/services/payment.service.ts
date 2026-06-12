@@ -1,34 +1,48 @@
 import {
     BadRequestException,
+    ConflictException,
     Injectable,
     Logger,
     NotFoundException,
     ServiceUnavailableException,
-    UnauthorizedException,
 } from '@nestjs/common';
-import { createHmac, randomUUID, createHash } from 'crypto';
+import { randomUUID, createHash } from 'crypto';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../../shared/prisma.service';
 import { RedisService } from '../../../shared/redis';
 import { CreatePaymentDto } from '../dtos/create-payment.dto';
 import { PaymentMethod } from '../dtos/payment-method.enum';
 import { PaymentProcessResponseDto } from '../dtos/payment-process-response.dto';
-import { PaymentWebhookRequestDto, PaymentWebhookOutcome } from '../dtos/payment-webhook-request.dto';
+import { PaymentWebhookRequestDto } from '../dtos/payment-webhook-request.dto';
 import { PaymentWebhookResponseDto } from '../dtos/payment-webhook-response.dto';
 import { PaymentTicketBreakdownDto } from '../dtos/payment-ticket-breakdown.dto';
+import { PaymentGatewayClient } from './gateway/payment-gateway.client';
+import { TicketingService } from '../../ticketing/services/ticketing.service';
+
+type IdempotencyCacheEntry =
+    | {
+        state: 'IN_PROGRESS';
+        order_id: string;
+        payment_method: PaymentMethod;
+        created_at: string;
+    }
+    | {
+        state: 'COMPLETED';
+        response: PaymentProcessResponseDto;
+        completed_at: string;
+    }
+    | {
+        state: 'FAILED';
+        response: PaymentProcessResponseDto;
+        error: string;
+        failed_at: string;
+    };
 
 type CircuitState = {
     status: 'CLOSED' | 'OPEN' | 'HALF_OPEN';
     openedAt: number | null;
     recentOutcomes: Array<{ at: number; ok: boolean }>;
     halfOpenProbes: number;
-};
-
-type GatewayResult = {
-    profile: 'SUCCESS' | 'ERROR' | 'TIMEOUT';
-    provider_transaction_id: string;
-    redirect_url: string | null;
-    raw: Record<string, unknown>;
 };
 
 @Injectable()
@@ -45,6 +59,8 @@ export class PaymentService {
     constructor(
         private readonly prisma: PrismaService,
         private readonly redisService: RedisService,
+        private readonly paymentGatewayClient: PaymentGatewayClient,
+        private readonly ticketingService: TicketingService,
     ) { }
 
     async processPayment(
@@ -58,19 +74,20 @@ export class PaymentService {
         }
 
         const cacheKey = this.getIdempotencyCacheKey(normalizedKey);
-        const cached = await this.redisService.getJson<PaymentProcessResponseDto>(cacheKey);
-        if (cached?.payment_transaction_id) {
-            return new PaymentProcessResponseDto(cached);
+        const cached = await this.redisService.getJson<IdempotencyCacheEntry | PaymentProcessResponseDto>(cacheKey);
+        const cachedResponse = this.extractCompletedResponse(cached);
+        if (cachedResponse) {
+            return cachedResponse;
         }
 
         const reserved = await this.redisService.setIfAbsentJson(
             cacheKey,
             {
-                status: 'IN_PROGRESS',
+                state: 'IN_PROGRESS',
                 order_id: dto.order_id,
                 payment_method: dto.payment_method,
                 created_at: new Date().toISOString(),
-            },
+            } as unknown as IdempotencyCacheEntry,
             this.idempotencyTtlSeconds,
         );
 
@@ -79,6 +96,8 @@ export class PaymentService {
             if (existing) {
                 return existing;
             }
+
+            throw new ConflictException('Payment request is already in progress');
         }
 
         const order = await this.prisma.order.findFirst({
@@ -112,18 +131,9 @@ export class PaymentService {
             where: { idempotency_key: normalizedKey },
         });
         if (existingTransaction) {
-            const mapped = this.mapProcessTransaction(existingTransaction, normalizedKey, 'CLOSED', null, 'SUCCESS');
-            await this.redisService.setJson(cacheKey, mapped, this.idempotencyTtlSeconds);
+            const mapped = this.mapProcessTransaction(existingTransaction, normalizedKey, 'CLOSED', null, null, null, 'SUCCESS');
+            await this.persistIdempotencyCompletion(cacheKey, mapped);
             return mapped;
-        }
-
-        try {
-            this.assertCircuitAvailable(dto.payment_method);
-        } catch (error) {
-            await this.persistIdempotencyFailure(cacheKey, normalizedKey, {
-                message: error instanceof Error ? error.message : 'Payment gateway unavailable',
-            });
-            throw error;
         }
 
         const paymentTransaction = await this.prisma.paymentTransaction.create({
@@ -143,21 +153,27 @@ export class PaymentService {
         });
 
         try {
-            const gatewayResult = await this.executeMockGateway(order.id, dto.payment_method, Number(order.total_amount));
-            this.recordCircuitOutcome(dto.payment_method, true);
+            const gatewayResult = await this.paymentGatewayClient.createPaymentSession(dto.payment_method, {
+                orderId: order.id,
+                amount: Number(order.total_amount),
+                userId,
+                idempotencyKey: normalizedKey,
+            });
 
             const payload = this.mapProcessTransaction(
                 paymentTransaction,
                 normalizedKey,
-                this.getCircuitState(dto.payment_method).status,
-                gatewayResult.redirect_url,
-                gatewayResult.profile,
+                this.paymentGatewayClient.getCircuitState(dto.payment_method),
+                gatewayResult.checkoutUrl,
+                gatewayResult.qrCode ?? null,
+                gatewayResult.accountName ?? null,
+                gatewayResult.outcome,
             );
 
             await this.prisma.paymentTransaction.update({
                 where: { id: paymentTransaction.id },
                 data: {
-                    transaction_id_3rd_party: gatewayResult.provider_transaction_id,
+                    transaction_id_3rd_party: gatewayResult.providerTransactionId,
                     raw_response: {
                         process: gatewayResult.raw,
                         order_snapshot: {
@@ -169,11 +185,9 @@ export class PaymentService {
                 },
             });
 
-            await this.redisService.setJson(cacheKey, payload, this.idempotencyTtlSeconds);
+            await this.persistIdempotencyCompletion(cacheKey, payload);
             return payload;
         } catch (error) {
-            this.recordCircuitOutcome(dto.payment_method, false);
-
             const failed = await this.prisma.paymentTransaction.update({
                 where: { id: paymentTransaction.id },
                 data: {
@@ -187,26 +201,51 @@ export class PaymentService {
             const response = this.mapProcessTransaction(
                 failed,
                 normalizedKey,
-                this.getCircuitState(dto.payment_method).status,
+                this.paymentGatewayClient.getCircuitState(dto.payment_method),
+                null,
+                null,
                 null,
                 'ERROR',
             );
-            await this.redisService.setJson(cacheKey, response, this.idempotencyTtlSeconds);
+            await this.persistIdempotencyFailure(cacheKey, normalizedKey, {
+                message: error instanceof Error ? error.message : 'Unknown payment gateway error',
+                response,
+            });
             throw new ServiceUnavailableException(response);
         }
     }
 
     async handleWebhook(
-        dto: PaymentWebhookRequestDto,
-        signature: string | undefined,
+        dto: any,
     ): Promise<PaymentWebhookResponseDto> {
-        this.verifyWebhookSignature(dto, signature);
+        // If the webhook call is empty, doesn't have a signature (e.g. ping/verify checks), return success immediately
+        if (!dto || Object.keys(dto).length === 0 || !dto.signature) {
+            return new PaymentWebhookResponseDto({
+                order_status: 'PENDING',
+                payment_status: 'SUCCESS',
+                ticket_count: 0,
+                message: 'Webhook confirmed',
+                ticket_ids: [],
+            });
+        }
+
+        // If this is a webhook confirmation request from PayOS, return success immediately
+        if (dto.desc === 'confirm webhook' || dto.data?.description === 'confirm webhook' || !dto.data?.paymentLinkId) {
+            return new PaymentWebhookResponseDto({
+                order_status: 'PENDING',
+                payment_status: 'SUCCESS',
+                ticket_count: 0,
+                message: 'Webhook confirmed',
+                ticket_ids: [],
+            });
+        }
+
+        await this.paymentGatewayClient.verifyWebhookSignature(PaymentMethod.PAYOS, dto);
 
         const transaction = await this.prisma.paymentTransaction.findFirst({
             where: {
-                idempotency_key: dto.idempotency_key,
-                order_id: dto.order_id,
-                payment_method: dto.payment_method,
+                transaction_id_3rd_party: String(dto.data.paymentLinkId),
+                payment_method: PaymentMethod.PAYOS,
             },
             include: {
                 order: {
@@ -221,27 +260,30 @@ export class PaymentService {
         });
 
         if (!transaction) {
-            throw new NotFoundException('Payment transaction not found');
+            this.logger.warn(`Webhook received for unknown transaction: ${dto.data.paymentLinkId}`);
+            return new PaymentWebhookResponseDto({
+                order_status: 'PENDING',
+                payment_status: 'FAILED',
+                ticket_count: 0,
+                message: 'Transaction not found (ignored)',
+                ticket_ids: [],
+            });
         }
 
-        if (dto.outcome === PaymentWebhookOutcome.FAILED) {
+        if (dto.code !== '00') { // 00 means success in PayOS
             await this.prisma.$transaction(async (tx) => {
                 await tx.paymentTransaction.update({
                     where: { id: transaction.id },
                     data: {
                         status: 'FAILED',
-                        transaction_id_3rd_party: dto.transaction_id_3rd_party,
                         raw_response: this.mergeTelemetry(transaction.raw_response, {
-                            webhook: this.buildWebhookTelemetry(dto, signature),
+                            webhook: this.buildWebhookTelemetry(dto, dto.signature),
                         }) as Prisma.JsonObject,
                     },
                 });
-
-                await tx.order.update({
-                    where: { id: transaction.order_id },
-                    data: { status: 'CANCELLED' },
-                });
             });
+
+            await this.handlePaymentFailed(transaction.order_id);
 
             return new PaymentWebhookResponseDto({
                 order_status: 'CANCELLED',
@@ -257,9 +299,9 @@ export class PaymentService {
                 where: { id: transaction.id },
                 data: {
                     status: 'SUCCESS',
-                    transaction_id_3rd_party: dto.transaction_id_3rd_party,
+                    transaction_id_3rd_party: String(dto.data.paymentLinkId),
                     raw_response: this.mergeTelemetry(transaction.raw_response, {
-                        webhook: this.buildWebhookTelemetry(dto, signature),
+                        webhook: this.buildWebhookTelemetry(dto, dto.signature),
                     }) as Prisma.JsonObject,
                 },
             });
@@ -281,9 +323,9 @@ export class PaymentService {
                 where: { id: transaction.id },
                 data: {
                     status: 'SUCCESS',
-                    transaction_id_3rd_party: dto.transaction_id_3rd_party,
+                    transaction_id_3rd_party: String(dto.data.paymentLinkId),
                     raw_response: this.mergeTelemetry(transaction.raw_response, {
-                        webhook: this.buildWebhookTelemetry(dto, signature),
+                        webhook: this.buildWebhookTelemetry(dto, dto.signature),
                     }) as Prisma.JsonObject,
                 },
             });
@@ -325,9 +367,10 @@ export class PaymentService {
         idempotencyKey: string,
         cacheKey: string,
     ): Promise<PaymentProcessResponseDto | null> {
-        const cached = await this.redisService.getJson<PaymentProcessResponseDto>(cacheKey);
-        if (cached?.payment_transaction_id) {
-            return new PaymentProcessResponseDto(cached);
+        const cached = await this.redisService.getJson<IdempotencyCacheEntry | PaymentProcessResponseDto>(cacheKey);
+        const cachedResponse = this.extractCompletedResponse(cached);
+        if (cachedResponse) {
+            return cachedResponse;
         }
 
         const existingTransaction = await this.prisma.paymentTransaction.findUnique({
@@ -337,16 +380,18 @@ export class PaymentService {
             return null;
         }
 
-        const result = this.mapProcessTransaction(existingTransaction, idempotencyKey, this.getCircuitState(existingTransaction.payment_method as PaymentMethod).status, null, 'SUCCESS');
-        await this.redisService.setJson(cacheKey, result, this.idempotencyTtlSeconds);
+        const result = this.mapProcessTransaction(existingTransaction, idempotencyKey, this.paymentGatewayClient.getCircuitState(existingTransaction.payment_method as PaymentMethod), null, null, null, 'SUCCESS');
+        await this.persistIdempotencyCompletion(cacheKey, result);
         return result;
     }
 
     private mapProcessTransaction(
         transaction: { id: string; order_id: string; payment_method: string; status: string; idempotency_key: string },
         idempotencyKey: string,
-        circuitBreakerState: CircuitState['status'],
+        circuitBreakerState: ReturnType<PaymentGatewayClient['getCircuitState']>,
         checkoutUrl: string | null,
+        qrCode: string | null,
+        accountName: string | null,
         gatewayStatus: string,
     ): PaymentProcessResponseDto {
         return new PaymentProcessResponseDto({
@@ -356,9 +401,27 @@ export class PaymentService {
             status: transaction.status,
             gateway_status: gatewayStatus,
             checkout_url: checkoutUrl,
+            qr_code: qrCode,
+            account_name: accountName,
             idempotency_key: idempotencyKey,
             circuit_breaker_state: circuitBreakerState,
         });
+    }
+
+    private extractCompletedResponse(value: IdempotencyCacheEntry | PaymentProcessResponseDto | null): PaymentProcessResponseDto | null {
+        if (!value) {
+            return null;
+        }
+
+        if ('payment_transaction_id' in value) {
+            return new PaymentProcessResponseDto(value as PaymentProcessResponseDto);
+        }
+
+        if ('state' in value && value.state === 'COMPLETED' && value.response) {
+            return new PaymentProcessResponseDto(value.response);
+        }
+
+        return null;
     }
 
     private resolveTicketBreakdown(
@@ -368,7 +431,7 @@ export class PaymentService {
             concert: { ticket_categories: Array<{ id: string; name: string }> };
         },
     ): PaymentTicketBreakdownDto[] {
-        const fromWebhook = dto.ticket_breakdown ?? [];
+        const fromWebhook = dto.data?.ticket_breakdown ?? [];
         if (fromWebhook.length > 0) {
             return fromWebhook;
         }
@@ -391,7 +454,13 @@ export class PaymentService {
             return [];
         }
 
-        const candidate = (value as Record<string, unknown>).ticket_breakdown;
+        const record = value as Record<string, unknown>;
+
+        if (typeof record.category_id === 'string' && typeof record.quantity === 'number' && record.quantity > 0) {
+            return [{ category_id: record.category_id, quantity: record.quantity }];
+        }
+
+        const candidate = record.ticket_breakdown;
         if (!Array.isArray(candidate)) {
             return [];
         }
@@ -448,19 +517,17 @@ export class PaymentService {
         };
     }
 
-    private verifyWebhookSignature(dto: PaymentWebhookRequestDto, signature: string | undefined): void {
-        const secret = process.env.PAYMENT_WEBHOOK_SECRET ?? 'ticketbox-mock-webhook-secret';
-        if (!signature) {
-            throw new UnauthorizedException('Missing webhook signature');
-        }
 
-        const expected = createHmac('sha256', secret)
-            .update(this.stableStringify(dto))
-            .digest('hex');
 
-        if (expected !== signature) {
-            throw new UnauthorizedException('Invalid webhook signature');
-        }
+    private async persistIdempotencyCompletion(
+        cacheKey: string,
+        response: PaymentProcessResponseDto,
+    ): Promise<void> {
+        await this.redisService.setJson(cacheKey, {
+            state: 'COMPLETED',
+            response,
+            completed_at: new Date().toISOString(),
+        } satisfies IdempotencyCacheEntry, this.idempotencyTtlSeconds);
     }
 
     private stableStringify(value: unknown): string {
@@ -557,53 +624,6 @@ export class PaymentService {
         }
     }
 
-    private async executeMockGateway(orderId: string, paymentMethod: PaymentMethod, amount: number): Promise<GatewayResult> {
-        const state = this.getCircuitState(paymentMethod);
-        if (state.status === 'HALF_OPEN') {
-            state.halfOpenProbes += 1;
-        }
-
-        const roll = Math.random();
-        const profile = roll < 0.7 ? 'SUCCESS' : roll < 0.9 ? 'ERROR' : 'TIMEOUT';
-        const latencyMs = profile === 'TIMEOUT' ? 2500 : 150 + Math.floor(Math.random() * 450);
-        const provider_transaction_id = randomUUID();
-        const redirect_url = `https://mock-gateway.ticketbox.local/pay/${provider_transaction_id}`;
-        const telemetry = {
-            order_id: orderId,
-            payment_method: paymentMethod,
-            amount,
-            profile,
-            latency_ms: latencyMs,
-            provider_transaction_id,
-            redirect_url,
-        };
-
-        await new Promise<void>((resolve) => {
-            setTimeout(() => resolve(), latencyMs);
-        });
-
-        if (profile === 'ERROR') {
-            throw new ServiceUnavailableException({
-                message: 'Mock gateway error',
-                telemetry,
-            });
-        }
-
-        if (profile === 'TIMEOUT') {
-            throw new ServiceUnavailableException({
-                message: 'Mock gateway timeout',
-                telemetry,
-            });
-        }
-
-        return {
-            profile,
-            provider_transaction_id,
-            redirect_url,
-            raw: telemetry,
-        };
-    }
-
     private async persistIdempotencyFailure(
         cacheKey: string,
         idempotencyKey: string,
@@ -619,6 +639,30 @@ export class PaymentService {
             idempotency_key: idempotencyKey,
             circuit_breaker_state: 'OPEN',
         });
-        await this.redisService.setJson(cacheKey, { ...response, error: payload.message ?? 'failed' }, this.idempotencyTtlSeconds);
+        await this.redisService.setJson(cacheKey, {
+            state: 'FAILED',
+            response,
+            error: String(payload.message ?? 'failed'),
+            failed_at: new Date().toISOString(),
+        } satisfies IdempotencyCacheEntry, this.idempotencyTtlSeconds);
+    }
+
+    public async handlePaymentFailed(orderId: string): Promise<void> {
+        const order = await this.prisma.order.findUnique({ where: { id: orderId } });
+        if (!order || order.status !== 'PENDING') return;
+
+        await this.prisma.order.update({
+            where: { id: orderId },
+            data: { status: 'CANCELLED' },
+        });
+
+        const breakdown = this.extractTicketBreakdown(order.ticket_metadata ?? null);
+        for (const item of breakdown) {
+            await this.ticketingService.rollbackCategoryInventory(
+                order.user_id,
+                item.category_id,
+                item.quantity
+            );
+        }
     }
 }
