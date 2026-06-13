@@ -666,11 +666,7 @@ export function PaymentMethodPicker() {
           >
             <div className="flex items-center justify-between gap-4">
               <div className="flex items-center gap-4">
-                <span
-                  className={`material-symbols-outlined text-[24px] ${payment.selected ? "text-primary" : "text-on-surface-variant"}`}
-                >
-                  {payment.icon}
-                </span>
+                <payment.icon size={20} className="text-gray-600" />
                 <div>
                   <p className="text-sm font-semibold text-on-surface">
                     {payment.label}
