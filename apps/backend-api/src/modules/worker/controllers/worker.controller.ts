@@ -35,6 +35,7 @@ import { RabbitMqService } from '../../../shared/rabbitmq';
 import { IsUUID, IsNotEmpty, IsOptional, IsString, IsBoolean, isUUID } from 'class-validator';
 import { PaginationDto } from '../../../shared/dtos/pagination.dto';
 import { Transform } from 'class-transformer';
+import { WorkerService } from '../services/worker.service';
 
 export class ImportCsvDto {
   @IsUUID()
@@ -75,7 +76,67 @@ export class WorkerController {
   constructor(
     private readonly prisma: PrismaService,
     private readonly rabbitMqService: RabbitMqService,
+    private readonly workerService: WorkerService,
   ) {}
+
+  @Post('generate-bio')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN', 'ORGANIZER')
+  @ApiBearerAuth()
+  @ApiConsumes('multipart/form-data')
+  @ApiOperation({ summary: 'Generate concert AI biography from PDF press kit (Admin/Organizer)' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      required: ['concert_id', 'file'],
+      properties: {
+        concert_id: {
+          type: 'string',
+          format: 'uuid',
+          description: 'The target concert ID (UUID)',
+        },
+        file: {
+          type: 'string',
+          format: 'binary',
+          description: 'The artist PDF press kit',
+        },
+      },
+    },
+  })
+  @UseInterceptors(FileInterceptor('file'))
+  async generateBio(
+    @Req() req: any,
+    @Body('concert_id') concertId: string,
+    @UploadedFile() file: any,
+  ) {
+    if (!concertId) {
+      throw new BadRequestException('concert_id is required');
+    }
+    // Simple UUID validation
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!uuidRegex.test(concertId)) {
+      throw new BadRequestException('concert_id must be a valid UUID');
+    }
+
+    if (!file) {
+      throw new BadRequestException('No file uploaded');
+    }
+
+    // Validate file is a PDF
+    const isPdfMime = file.mimetype === 'application/pdf';
+    const isPdfExt = file.originalname?.toLowerCase().endsWith('.pdf');
+    if (!isPdfMime && !isPdfExt) {
+      throw new BadRequestException('Invalid file type. Only PDF files are allowed.');
+    }
+
+    // Call service to start async generation
+    const job = await this.workerService.generateBioJob(req.user.sub, concertId, file);
+
+    return {
+      job_id: job.id,
+      status: job.status,
+    };
+  }
 
   @Post('import-csv')
   @UseGuards(JwtAuthGuard, RolesGuard)
