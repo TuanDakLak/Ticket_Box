@@ -73,6 +73,11 @@ export class RabbitMqService implements OnModuleInit, OnModuleDestroy {
         await channel.assertQueue('guest.import.queue', { durable: true });
         await channel.bindQueue('guest.import.queue', 'guest.import.exchange', 'guest.import');
 
+        // AI Biography Exchange and Queue
+        await channel.assertExchange('ai.bio.exchange', 'direct', { durable: true });
+        await channel.assertQueue('ai.bio.queue', { durable: true });
+        await channel.bindQueue('ai.bio.queue', 'ai.bio.exchange', 'ai.bio');
+
         this.logger.log('[RabbitMQ] Topology asserted: exchanges, queues, and bindings ready');
     }
 
