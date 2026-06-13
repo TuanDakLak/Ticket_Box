@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { Button } from "@/components/common";
 import {
   CustomerInfoForm,
@@ -27,15 +28,17 @@ export default function CheckoutPage() {
           <div className="flex flex-wrap gap-3">
             <Button href="/checkout/order-2048/processing">Pay now</Button>
             <Button
-              href="/concerts/sonic-pulse/seats"
+              href="/"
               variant="ghost"
               className="border border-outline-variant"
             >
-              Back to seats
+              Back to Home
             </Button>
           </div>
         </div>
-        <OrderSummaryCard />
+        <Suspense fallback={<div className="p-6 border rounded-3xl bg-white shadow">Loading summary...</div>}>
+          <OrderSummaryCard />
+        </Suspense>
       </div>
     </section>
   );
