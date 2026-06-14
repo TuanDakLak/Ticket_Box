@@ -8,12 +8,8 @@ import {
 
 import { authApi } from '@/features/auth/api/auth-api';
 import type {
-  ApiMessageResponse,
   AuthResponse,
-  RegisterFormValues,
-  RegisterResponse,
   User,
-  VerifyEmailResponse,
 } from '@/features/auth/types/auth.types';
 import { resolveAuthRoute } from '@/features/auth/utils/resolve-auth-route';
 import { setApiAccessToken } from '@/lib/api';
@@ -28,13 +24,7 @@ export type AuthContextValue = {
   isSubmitting: boolean;
   initialRoute: typeof routes.login | typeof routes.pendingApproval | typeof routes.staffHome;
   login: (email: string, password: string) => Promise<typeof routes.pendingApproval | typeof routes.staffHome>;
-  register: (values: RegisterFormValues) => Promise<RegisterResponse>;
   logout: () => Promise<void>;
-  forgotPassword: (email: string) => Promise<ApiMessageResponse>;
-  verifyEmail: (token: string) => Promise<VerifyEmailResponse>;
-  resetPassword: (token: string, newPassword: string) => Promise<ApiMessageResponse>;
-  resendVerification: (email: string) => Promise<ApiMessageResponse>;
-  changePassword: (oldPassword: string, newPassword: string) => Promise<ApiMessageResponse>;
 };
 
 export const AuthContext = createContext<AuthContextValue | null>(null);
@@ -114,14 +104,6 @@ export function AuthProvider({ children }: PropsWithChildren) {
           setIsSubmitting(false);
         }
       },
-      async register(values) {
-        setIsSubmitting(true);
-        try {
-          return await authApi.register(values.fullName, values.email, values.password);
-        } finally {
-          setIsSubmitting(false);
-        }
-      },
       async logout() {
         setIsSubmitting(true);
         try {
@@ -130,46 +112,6 @@ export function AuthProvider({ children }: PropsWithChildren) {
           // Ignore logout API failures and clear the local session anyway.
         } finally {
           await clearSession();
-          setIsSubmitting(false);
-        }
-      },
-      async forgotPassword(email) {
-        setIsSubmitting(true);
-        try {
-          return await authApi.forgotPassword(email);
-        } finally {
-          setIsSubmitting(false);
-        }
-      },
-      async verifyEmail(token) {
-        setIsSubmitting(true);
-        try {
-          return await authApi.verifyEmail(token);
-        } finally {
-          setIsSubmitting(false);
-        }
-      },
-      async resetPassword(token, newPassword) {
-        setIsSubmitting(true);
-        try {
-          return await authApi.resetPassword(token, newPassword);
-        } finally {
-          setIsSubmitting(false);
-        }
-      },
-      async resendVerification(email) {
-        setIsSubmitting(true);
-        try {
-          return await authApi.resendVerification(email);
-        } finally {
-          setIsSubmitting(false);
-        }
-      },
-      async changePassword(oldPassword, newPassword) {
-        setIsSubmitting(true);
-        try {
-          return await authApi.changePassword(oldPassword, newPassword);
-        } finally {
           setIsSubmitting(false);
         }
       },

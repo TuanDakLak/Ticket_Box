@@ -42,11 +42,6 @@ function shouldSkipRefresh(config?: RetryableRequestConfig) {
   const requestUrl = config.url ?? '';
   const publicAuthPaths = [
     '/auth/login',
-    '/auth/register',
-    '/auth/verify',
-    '/auth/forgot-password',
-    '/auth/reset-password',
-    '/auth/resend-verification',
     '/auth/refresh',
   ];
 

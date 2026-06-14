@@ -1,5 +1,5 @@
 import type { User } from '@/features/auth/types/auth.types';
-import { isAudienceOnly, isStaffOrAdmin } from '@/features/auth/utils/role-helpers';
+import { isAudienceOnly, isCheckerOrAdmin } from '@/features/auth/utils/role-helpers';
 import { routes } from '@/lib/routes';
 
 export function resolveAuthRoute(user: User | null) {
@@ -7,7 +7,7 @@ export function resolveAuthRoute(user: User | null) {
     return routes.login;
   }
 
-  if (isStaffOrAdmin(user.roles)) {
+  if (isCheckerOrAdmin(user.roles)) {
     return routes.staffHome;
   }
 

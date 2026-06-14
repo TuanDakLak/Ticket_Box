@@ -24,13 +24,13 @@ export function PendingApprovalScreen() {
         <SurfaceCard>
           <AppText variant="subtitle">What happens next</AppText>
           <AppText tone="muted">
-            Email verification must be complete, and a staff or admin role needs to be assigned before this app opens the staff workspace.
+            This mobile app only allows Checker and Admin accounts. Ask TicketBox to assign the correct role to your account before signing in again.
           </AppText>
           <AppText tone="muted">Current roles: {(user?.roles ?? []).join(', ') || 'Audience'}</AppText>
         </SurfaceCard>
 
         <View style={styles.actions}>
-          <Button label="Audience access only" onPress={() => {}} variant="secondary" disabled />
+          <Button label="Checker role required" onPress={() => {}} variant="secondary" disabled />
           <Button label="Sign out" onPress={logout} loading={isSubmitting} />
         </View>
       </View>

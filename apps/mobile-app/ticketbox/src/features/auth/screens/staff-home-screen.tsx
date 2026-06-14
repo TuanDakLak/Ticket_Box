@@ -18,7 +18,7 @@ export function StaffHomeScreen() {
       <View style={styles.container}>
         <View style={styles.hero}>
           <AppText variant="caption" tone="primary">
-            STAFF AREA
+            CHECKER AREA
           </AppText>
           <AppText variant="title">Welcome back, {user?.fullName?.split(' ')[0] ?? 'staff'}.</AppText>
           <AppText tone="muted">

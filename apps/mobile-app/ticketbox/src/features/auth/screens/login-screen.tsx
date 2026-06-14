@@ -1,16 +1,14 @@
-import { Link, useRouter } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import { AuthShell } from '@/components/ui/auth-shell';
 import { Button } from '@/components/ui/button';
-import { InlineLink } from '@/components/ui/inline-link';
 import { AppText } from '@/components/ui/app-text';
 import { TextInputField } from '@/components/ui/text-input-field';
 import { spacing } from '@/constants/theme';
 import { useAuth } from '@/features/auth/hooks/use-auth';
 import { getErrorMessage } from '@/lib/errors';
-import { routes } from '@/lib/routes';
 
 export function LoginScreen() {
   const router = useRouter();
@@ -32,19 +30,9 @@ export function LoginScreen() {
 
   return (
     <AuthShell
-      eyebrow="Staff access"
+      eyebrow="Checker access"
       title="Sign in to TicketBox"
-      description="Use your TicketBox account to enter the staff workspace and event operations tools."
-      footer={
-        <View style={styles.footerLinks}>
-          <Link href={routes.register} asChild>
-            <InlineLink label="Create account" />
-          </Link>
-          <Link href={routes.resendVerification} asChild>
-            <InlineLink label="Resend verification" />
-          </Link>
-        </View>
-      }
+      description="Sign in with the checker or admin account that TicketBox has already issued for gate operations."
     >
       <View style={styles.form}>
         <TextInputField
@@ -65,9 +53,7 @@ export function LoginScreen() {
         />
         {error ? <AppText tone="danger">{error}</AppText> : null}
         <Button label="Sign in" onPress={onSubmit} loading={isSubmitting} />
-        <Link href={routes.forgotPassword} asChild>
-          <InlineLink label="Forgot password?" />
-        </Link>
+        <AppText tone="muted">Need access help? Contact the TicketBox administrator who issued your staff account.</AppText>
       </View>
     </AuthShell>
   );
@@ -75,11 +61,6 @@ export function LoginScreen() {
 
 const styles = StyleSheet.create({
   form: {
-    gap: spacing.md,
-  },
-  footerLinks: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
     gap: spacing.md,
   },
 });

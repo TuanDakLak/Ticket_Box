@@ -1,4 +1,4 @@
-export type UserRole = 'Audience' | 'Staff' | 'Admin' | string;
+export type UserRole = 'Admin' | 'Organizer' | 'Audience' | 'Checker' | string;
 
 export type User = {
   id: string;
@@ -25,20 +25,4 @@ export type RegisterResponse = {
 
 export type ApiMessageResponse = {
   message: string;
-};
-
-export type VerifyEmailResponse = {
-  message?: string;
-  url?: string;
-};
-
-export type LoginFormValues = {
-  email: string;
-  password: string;
-};
-
-export type RegisterFormValues = {
-  fullName: string;
-  email: string;
-  password: string;
 };
