@@ -27,6 +27,12 @@ import {
   getConcerts,
   type ConcertDetailItem,
 } from "@/services/concert.service";
+import { reserveTickets } from "@/services/ticketing.service";
+import {
+  getCheckoutReservationState,
+  saveCheckoutReservationState,
+  type CheckoutReservationState,
+} from "@/utils/checkout-state.utils";
 import { Search } from "lucide-react";
 
 export function HeroCarousel() {
@@ -290,27 +296,69 @@ export function InteractiveTicketSelector({ concert }: { concert: ConcertDetailI
   const router = useRouter();
   const [selectedIdx, setSelectedIdx] = useState(0);
   const [quantity, setQuantity] = useState(1);
+  const [error, setError] = useState<string | null>(null);
+  const [isReserving, setIsReserving] = useState(false);
 
   const tiers = concert.ticketTiers ?? [];
   const selectedTier = tiers[selectedIdx];
-  const maxQty = selectedTier ? selectedTier.max_per_user : 1;
+  const maxQty = selectedTier ? selectedTier.max_per_user : 0;
 
   useEffect(() => {
     setQuantity(1);
+    setError(null);
   }, [selectedIdx]);
 
-  const handleConfirm = () => {
-    if (!selectedTier) return;
-    const priceStr = String(selectedTier.price);
-    const params = new URLSearchParams({
-      title: concert.title || "",
-      tierName: selectedTier.name || "",
-      price: priceStr,
-      qty: String(quantity),
-      date: concert.date || "",
-      venue: concert.venue || "",
+  useEffect(() => {
+    setQuantity((current) => {
+      if (maxQty <= 0) {
+        return 1;
+      }
+      return Math.min(current, maxQty);
     });
-    router.push(`/checkout/order-2048?${params.toString()}`);
+  }, [maxQty]);
+
+  const handleConfirm = async () => {
+    if (!selectedTier || isReserving || maxQty < 1) return;
+
+    setIsReserving(true);
+    setError(null);
+
+    try {
+      const response = await reserveTickets({
+        concert_id: concert.id,
+        items: [
+          {
+            category_id: selectedTier.id,
+            quantity,
+          },
+        ],
+      });
+
+      saveCheckoutReservationState({
+        orderId: response.order_id,
+        concertId: concert.id,
+        concertTitle: concert.title,
+        venue: concert.venue,
+        date: concert.date,
+        tierId: selectedTier.id,
+        tierName: selectedTier.name,
+        price: selectedTier.price,
+        quantity,
+        remaining: response.items[0]?.remaining ?? 0,
+        reservedAt: new Date().toISOString(),
+        expiresAt: response.expires_at,
+      });
+
+      router.push(`/checkout/${response.order_id}`);
+    } catch (error) {
+      setError(
+        error instanceof Error
+          ? error.message
+          : "Unable to reserve tickets right now."
+      );
+    } finally {
+      setIsReserving(false);
+    }
   };
 
   return (
@@ -369,7 +417,11 @@ export function InteractiveTicketSelector({ concert }: { concert: ConcertDetailI
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-semibold text-gray-900">Select Quantity</p>
-                <p className="text-xs text-gray-500 mt-1">Limit: {maxQty} tickets per user</p>
+                <p className="text-xs text-gray-500 mt-1">
+                  {maxQty > 0
+                    ? `Limit: ${maxQty} tickets per user`
+                    : "Sold out right now"}
+                </p>
               </div>
               <div className="flex items-center gap-4 bg-gray-50 border border-gray-200 rounded-xl p-1">
                 <button
@@ -385,7 +437,7 @@ export function InteractiveTicketSelector({ concert }: { concert: ConcertDetailI
                 </span>
                 <button
                   type="button"
-                  disabled={quantity >= maxQty}
+                  disabled={maxQty < 1 || quantity >= maxQty}
                   onClick={() => setQuantity(q => Math.min(maxQty, q + 1))}
                   className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-white text-lg font-bold text-gray-700 disabled:opacity-30 disabled:pointer-events-none transition-colors"
                 >
@@ -406,11 +458,15 @@ export function InteractiveTicketSelector({ concert }: { concert: ConcertDetailI
             </div>
 
             <button
-              onClick={handleConfirm}
-              className="ticketbox-button-primary w-full justify-center py-4 cursor-pointer"
+              onClick={() => void handleConfirm()}
+              disabled={isReserving || maxQty < 1}
+              className="ticketbox-button-primary w-full justify-center py-4 cursor-pointer disabled:cursor-not-allowed disabled:opacity-60"
             >
-              Confirm and Checkout
+              {isReserving ? "Reserving seats..." : "Confirm and Checkout"}
             </button>
+            {error ? (
+              <p className="text-xs text-rose-600">{error}</p>
+            ) : null}
           </div>
         )}
       </div>
@@ -590,23 +646,6 @@ export function SeatLegendCard() {
   );
 }
 
-export function FloatingCheckoutBar() {
-  return (
-    <Card className="fixed inset-x-4 bottom-4 z-30 border-primary/20 bg-surface/95 p-4 shadow-2xl backdrop-blur md:hidden">
-      <div className="flex items-center justify-between gap-4">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-on-surface-variant">
-            2 seats selected
-          </p>
-          <p className="mt-1 text-sm font-semibold text-on-surface">
-            VIP Lounge · $316 total
-          </p>
-        </div>
-        <Button href="/checkout/order-2048">Checkout</Button>
-      </div>
-    </Card>
-  );
-}
 
 export function CustomerInfoForm() {
   return (
@@ -709,17 +748,55 @@ export function PaymentMethodPicker() {
 
 export function OrderSummaryCard() {
   const searchParams = useSearchParams();
-  const title = searchParams.get("title") || orderSummary.event;
-  const tierName = searchParams.get("tierName");
-  const price = searchParams.get("price");
-  const qty = searchParams.get("qty");
-  const date = searchParams.get("date") || orderSummary.date;
-  const venue = searchParams.get("venue") || orderSummary.venue;
+  const [checkoutState, setCheckoutState] =
+    useState<CheckoutReservationState | null>(null);
+
+  useEffect(() => {
+    const storedState = getCheckoutReservationState();
+    if (storedState) {
+      setCheckoutState(storedState);
+      return;
+    }
+
+    const tierName = searchParams.get("tierName");
+    const price = searchParams.get("price");
+    const qty = searchParams.get("qty");
+
+    if (tierName && price && qty) {
+      setCheckoutState({
+        orderId: searchParams.get("orderId") || orderSummary.orderId,
+        concertId: "",
+        concertTitle: searchParams.get("title") || orderSummary.event,
+        venue: searchParams.get("venue") || orderSummary.venue,
+        date: searchParams.get("date") || orderSummary.date,
+        tierId: "",
+        tierName,
+        price: parseFloat(price) || 0,
+        quantity: parseInt(qty, 10) || 1,
+        remaining: 0,
+        reservedAt: new Date().toISOString(),
+        expiresAt: new Date(Date.now() + 10 * 60 * 1000).toISOString(),
+      });
+      return;
+    }
+
+    setCheckoutState(null);
+  }, [searchParams]);
+
+  const title = checkoutState?.concertTitle || searchParams.get("title") || orderSummary.event;
+  const tierName = checkoutState?.tierName || searchParams.get("tierName");
+  const price = checkoutState ? String(checkoutState.price) : searchParams.get("price");
+  const qty = checkoutState ? String(checkoutState.quantity) : searchParams.get("qty");
+  const date = checkoutState?.date || searchParams.get("date") || orderSummary.date;
+  const venue = checkoutState?.venue || searchParams.get("venue") || orderSummary.venue;
 
   let subtotal: string = orderSummary.subtotal;
   let total: string = orderSummary.total;
   let fees: string = orderSummary.fees;
   let seatsText: string = orderSummary.seats;
+  const payHref = checkoutState
+    ? `/checkout/${checkoutState.orderId}/processing`
+    : "/checkout/order-2048/processing";
 
   if (tierName && price && qty) {
     const qtyVal = parseInt(qty, 10) || 1;
@@ -748,6 +825,15 @@ export function OrderSummaryCard() {
         <p>{date}</p>
         <p>{venue}</p>
         <p>{seatsText}</p>
+        {checkoutState ? (
+          <p className="text-xs text-on-surface-variant">
+            Reservation expires at{" "}
+            {new Date(checkoutState.expiresAt).toLocaleTimeString([], {
+              hour: "numeric",
+              minute: "2-digit",
+            })}
+          </p>
+        ) : null}
       </div>
       <div className="space-y-3 text-sm text-on-surface-variant">
         <div className="flex items-center justify-between">
@@ -763,7 +849,7 @@ export function OrderSummaryCard() {
           <span>{total}</span>
         </div>
       </div>
-      <Button href="/checkout/order-2048/processing" className="w-full justify-center">
+      <Button href={payHref} className="w-full justify-center">
         Pay {total}
       </Button>
       <div className="rounded-2xl bg-primary/5 p-4 text-sm text-on-surface-variant">

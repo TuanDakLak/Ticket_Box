@@ -25,6 +25,7 @@
     "devDependencies": {
         "@eslint/js": "^10.0.1",
         "@faker-js/faker": "^10.4.0",
+        "@tailwindcss/oxide-win32-x64-msvc": "^4.3.1",
         "@types/amqplib": "^0.10.8",
         "@types/bcryptjs": "^2.4.6",
         "@types/cron": "^2.0.1",
