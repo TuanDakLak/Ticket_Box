@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Events Management | TicketBox Admin</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&amp;family=Inter:wght@400;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "inverse-surface": "#2d3133",
+                      "surface": "#f7f9fb",
+                      "surface-bright": "#f7f9fb",
+                      "tertiary": "#41485e",
+                      "on-secondary-fixed": "#25005a",
+                      "inverse-on-surface": "#eff1f3",
+                      "surface-tint": "#4d44e3",
+                      "secondary-container": "#8a4cfc",
+                      "on-surface-variant": "#464555",
+                      "surface-container-highest": "#e0e3e5",
+                      "on-secondary-fixed-variant": "#5a00c6",
+                      "on-primary-fixed-variant": "#3323cc",
+                      "outline": "#777587",
+                      "primary": "#3525cd",
+                      "on-tertiary": "#ffffff",
+                      "on-secondary": "#ffffff",
+                      "primary-container": "#4f46e5",
+                      "on-background": "#191c1e",
+                      "surface-dim": "#d8dadc",
+                      "on-primary-container": "#dad7ff",
+                      "tertiary-container": "#586076",
+                      "tertiary-fixed-dim": "#bec6e0",
+                      "on-tertiary-container": "#d4dbf5",
+                      "error-container": "#ffdad6",
+                      "secondary-fixed": "#eaddff",
+                      "secondary": "#712ae2",
+                      "on-error": "#ffffff",
+                      "outline-variant": "#c7c4d8",
+                      "surface-container-low": "#f2f4f6",
+                      "secondary-fixed-dim": "#d2bbff",
+                      "on-error-container": "#93000a",
+                      "on-secondary-container": "#fffbff",
+                      "error": "#ba1a1a",
+                      "on-tertiary-fixed": "#131b2e",
+                      "surface-variant": "#e0e3e5",
+                      "on-tertiary-fixed-variant": "#3f465c",
+                      "background": "#f7f9fb",
+                      "surface-container-lowest": "#ffffff",
+                      "on-primary-fixed": "#0f0069",
+                      "tertiary-fixed": "#dae2fd",
+                      "inverse-primary": "#c3c0ff",
+                      "primary-fixed-dim": "#c3c0ff",
+                      "on-primary": "#ffffff",
+                      "surface-container": "#eceef0",
+                      "on-surface": "#191c1e",
+                      "primary-fixed": "#e2dfff",
+                      "surface-container-high": "#e6e8ea"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "base": "4px",
+                      "margin-mobile": "16px",
+                      "margin-desktop": "40px",
+                      "container-max": "1280px",
+                      "gutter": "24px"
+              },
+              "fontFamily": {
+                      "headline-md": ["Montserrat"],
+                      "body-lg": ["Inter"],
+                      "display-lg-mobile": ["Montserrat"],
+                      "display-lg": ["Montserrat"],
+                      "label-sm": ["Inter"],
+                      "body-md": ["Inter"]
+              },
+              "fontSize": {
+                      "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                      "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                      "display-lg-mobile": ["32px", {"lineHeight": "40px", "fontWeight": "700"}],
+                      "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                      "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "600"}],
+                      "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}]
+              }
+            },
+          },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .skeleton {
+            background: linear-gradient(90deg, #eceef0 25%, #f7f9fb 50%, #eceef0 75%);
+            background-size: 200% 100%;
+            animation: shimmer 2s infinite;
+        }
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #c7c4d8; border-radius: 10px; }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md selection:bg-primary-container selection:text-on-primary-container">
+<div class="flex min-h-screen">
+<!-- SideNavBar -->
+<aside class="hidden md:flex flex-col h-screen p-4 gap-4 bg-surface-container-lowest dark:bg-surface-container-low border-r border-outline-variant dark:border-outline w-64 fixed left-0 top-0 z-40">
+<div class="flex items-center gap-3 px-2 mb-4">
+<div class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center text-on-primary shadow-lg">
+<span class="material-symbols-outlined" data-icon="confirmation_number">confirmation_number</span>
+</div>
+<div>
+<h1 class="font-headline-md text-headline-md text-primary dark:text-primary-fixed-dim leading-none">TicketBox Admin</h1>
+<p class="font-label-sm text-label-sm text-on-surface-variant opacity-70">Management Suite</p>
+</div>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center gap-3 px-3 py-2 text-on-surface-variant hover:bg-surface-container-high transition-all rounded-lg font-body-md" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+                    Dashboard
+                </a>
+<!-- Active Item: Events -->
+<a class="flex items-center gap-3 px-3 py-2 bg-primary-container text-on-primary-container rounded-lg font-bold scale-[0.98] transition-all font-body-md shadow-sm" href="#">
+<span class="material-symbols-outlined" data-icon="event" style="font-variation-settings: 'FILL' 1;">event</span>
+                    Events
+                </a>
+<a class="flex items-center gap-3 px-3 py-2 text-on-surface-variant hover:bg-surface-container-high transition-all rounded-lg font-body-md" href="#">
+<span class="material-symbols-outlined" data-icon="payments">payments</span>
+                    Revenue
+                </a>
+<a class="flex items-center gap-3 px-3 py-2 text-on-surface-variant hover:bg-surface-container-high transition-all rounded-lg font-body-md" href="#">
+<span class="material-symbols-outlined" data-icon="badge">badge</span>
+                    Staff
+                </a>
+<a class="flex items-center gap-3 px-3 py-2 text-on-surface-variant hover:bg-surface-container-high transition-all rounded-lg font-body-md" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+                    Settings
+                </a>
+</nav>
+<div class="mt-auto pt-4 border-t border-outline-variant">
+<button class="w-full bg-primary hover:bg-primary/90 text-on-primary py-3 px-4 rounded-lg flex items-center justify-center gap-2 font-bold transition-all active:scale-95 mb-4 shadow-md">
+<span class="material-symbols-outlined" data-icon="add_circle">add_circle</span>
+                    Create Event
+                </button>
+<a class="flex items-center gap-3 px-3 py-2 text-on-surface-variant hover:bg-surface-container-high transition-all rounded-lg font-body-md" href="#">
+<span class="material-symbols-outlined" data-icon="help">help</span>
+                    Help Center
+                </a>
+</div>
+</aside>
+<!-- Main Canvas -->
+<main class="flex-1 md:ml-64 px-margin-mobile md:px-margin-desktop py-8 bg-surface">
+<!-- Page Header -->
+<header class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+<div>
+<h2 class="font-display-lg-mobile md:font-headline-md md:text-headline-md text-on-surface mb-1">Events Management</h2>
+<p class="text-on-surface-variant font-body-md">Track, edit, and manage all your upcoming and past ticketed events.</p>
+</div>
+<div class="flex items-center gap-3">
+<button class="hidden md:flex items-center gap-2 px-4 py-2 text-primary border border-outline-variant rounded-lg hover:bg-surface-container transition-all font-bold">
+<span class="material-symbols-outlined" data-icon="download">download</span>
+                        Export List
+                    </button>
+<button class="flex-1 md:flex-none bg-primary hover:bg-primary/90 text-on-primary px-6 py-3 rounded-lg font-bold transition-all active:scale-95 shadow-lg flex items-center justify-center gap-2">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+                        Create Event
+                    </button>
+</div>
+</header>
+<!-- Search and Filter Bar -->
+<section class="bg-surface-container-lowest p-4 rounded-xl shadow-sm mb-6 flex flex-col md:flex-row gap-4 items-center">
+<div class="relative w-full md:flex-1">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-body-md" data-icon="search">search</span>
+<input class="w-full pl-10 pr-4 py-2.5 bg-surface-container-low border-none rounded-lg focus:ring-2 focus:ring-primary/20 text-body-md transition-all" placeholder="Search events by name, ID, or performer..." type="text"/>
+</div>
+<div class="flex items-center gap-2 w-full md:w-auto">
+<select class="flex-1 md:w-40 px-3 py-2.5 bg-surface-container-low border-none rounded-lg text-body-md font-label-sm cursor-pointer">
+<option>All Statuses</option>
+<option>Live</option>
+<option>Draft</option>
+<option>Past</option>
+</select>
+<select class="flex-1 md:w-40 px-3 py-2.5 bg-surface-container-low border-none rounded-lg text-body-md font-label-sm cursor-pointer">
+<option>All Venues</option>
+<option>Main Arena</option>
+<option>Club Sonic</option>
+<option>Open Air Stage</option>
+</select>
+<button class="p-2.5 bg-surface-container-low hover:bg-surface-container text-on-surface-variant rounded-lg transition-all">
+<span class="material-symbols-outlined" data-icon="tune">tune</span>
+</button>
+</div>
+</section>
+<!-- Data Table -->
+<section class="bg-surface-container-lowest rounded-xl shadow-[0px_4px_20px_rgba(15,23,42,0.08)] overflow-hidden">
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="border-b border-outline-variant bg-surface-container-low/50">
+<th class="px-6 py-4 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Event Name</th>
+<th class="px-6 py-4 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Date &amp; Time</th>
+<th class="px-6 py-4 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Venue</th>
+<th class="px-6 py-4 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Tickets Sold</th>
+<th class="px-6 py-4 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider text-center">Status</th>
+<th class="px-6 py-4 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant">
+<!-- Row 1: Live -->
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0">
+<img alt="Neon Pulsar concert" class="w-full h-full object-cover" data-alt="A cinematic close-up of a high-energy music festival at night with vibrant purple and blue laser lights cutting through a haze of smoke. A massive crowd is silhouetted against a bright, glowing stage in a modern corporate-luxury concert setting. The lighting is high-contrast, electric violet, and intensely atmospheric, conveying a premium tech-forward event vibe." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA96Q00R_bgOVwdSaXoQUFh4qVfI9j-ywdZH0M0n3UEcHkvg27Hc-IVfeqDv0zY5rITz7LfLg-PsHR9fs9vCYLfdTAr48gFSFvlNJyw4aYMTmFgn4tN5xZElV5qJh_mOyC71TmCRwrv-jb1WAzhPD1I6c0R12LHOwt6JrVxYEjLIbk9nj2yHFMRzZzrZ2Vw_pevGqUI5SmxPE1-MUNxiSPVF38B0OBBXFGSoYc6d9xUgDg0Ex-TwrOwqrqg3paEsKJJvwFVtnwg9sih"/>
+</div>
+<div>
+<p class="font-bold text-on-surface group-hover:text-primary transition-colors">Neon Pulsar: European Tour</p>
+<p class="text-xs text-on-surface-variant">EV-49202</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<p class="font-body-md text-on-surface">Oct 24, 2024</p>
+<p class="text-xs text-on-surface-variant">20:00 GMT</p>
+</td>
+<td class="px-6 py-4 font-body-md text-on-surface">Grand Arena Central</td>
+<td class="px-6 py-4">
+<div class="flex flex-col gap-1.5">
+<div class="flex justify-between text-xs font-label-sm">
+<span>850/1000</span>
+<span class="text-primary font-bold">85%</span>
+</div>
+<div class="w-32 h-1.5 bg-surface-container rounded-full overflow-hidden">
+<div class="bg-primary h-full rounded-full" style="width: 85%"></div>
+</div>
+</div>
+</td>
+<td class="px-6 py-4 text-center">
+<span class="inline-flex items-center gap-1 px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-bold">
+<span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
+                                        Live
+                                    </span>
+</td>
+<td class="px-6 py-4 text-right">
+<div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="p-2 text-on-surface-variant hover:text-primary hover:bg-primary-fixed rounded-lg transition-all">
+<span class="material-symbols-outlined text-[20px]" data-icon="edit">edit</span>
+</button>
+<button class="p-2 text-on-surface-variant hover:text-primary hover:bg-primary-fixed rounded-lg transition-all">
+<span class="material-symbols-outlined text-[20px]" data-icon="analytics">analytics</span>
+</button>
+<button class="p-2 text-on-surface-variant hover:text-error hover:bg-error-container rounded-lg transition-all">
+<span class="material-symbols-outlined text-[20px]" data-icon="delete">delete</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 2: Draft -->
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0">
+<img alt="Underground Jazz night" class="w-full h-full object-cover" data-alt="A sophisticated indoor jazz club setting with warm, low-key amber lighting and a smoky atmosphere. Polished wooden tables and velvet chairs surround a small, well-lit stage with a grand piano. The image captures a high-end, exclusive evening ambiance with rich textures and deep shadows, maintaining a corporate-modern aesthetic with sharp focus." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAUoGF_4G_OeVWj0tvD4r6BlDjok4w9GropnG81V5qwDG9BLAAsb39eeBXdZkZIFT6wMJwio8eZMD1AyyUZYcdTtMW5ks8sLtIKCFr9oVpzIJcLrstkAfiF5_-wQ0HGOzMlNcCJdntPdIjEZNpI0E7LNGKslxSm5Q6cPJtpAjw5p9noMiFT4mTNspI7AKdn7Kdi9vHGZnsRbwtO0SAfcicCVgKCBmAPojGhsipjR5bDhQ1T_RV-MS0OfG96_EHtmv4htjbSkpUF1dpp"/>
+</div>
+<div>
+<p class="font-bold text-on-surface group-hover:text-primary transition-colors">Midnight Jazz Collective</p>
+<p class="text-xs text-on-surface-variant">EV-49205</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<p class="font-body-md text-on-surface">Nov 12, 2024</p>
+<p class="text-xs text-on-surface-variant">21:30 GMT</p>
+</td>
+<td class="px-6 py-4 font-body-md text-on-surface">Blue Note Lounge</td>
+<td class="px-6 py-4">
+<div class="flex flex-col gap-1.5 text-on-surface-variant italic text-xs">
+                                        Pending On-sale
+                                    </div>
+</td>
+<td class="px-6 py-4 text-center">
+<span class="inline-flex items-center gap-1 px-3 py-1 bg-surface-container text-on-surface-variant rounded-full text-xs font-bold">
+                                        Draft
+                                    </span>
+</td>
+<td class="px-6 py-4 text-right">
+<div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="p-2 text-on-surface-variant hover:text-primary hover:bg-primary-fixed rounded-lg transition-all">
+<span class="material-symbols-outlined text-[20px]" data-icon="edit">edit</span>
+</button>
+<button class="p-2 text-on-surface-variant hover:text-error hover:bg-error-container rounded-lg transition-all">
+<span class="material-symbols-outlined text-[20px]" data-icon="delete">delete</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 3: Past -->
+<tr class="hover:bg-surface-container-low transition-colors group opacity-75 grayscale-[0.5]">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0">
+<img alt="Electronic Summer Fest" class="w-full h-full object-cover" data-alt="An expansive outdoor electronic music festival at dusk with massive LED screens displaying abstract geometric patterns. The stage is a architectural marvel with sharp angles and bright indigo lighting. Thousands of attendees are silhouetted against the vibrant orange and purple sky, creating a high-energy, premium corporate festival look that feels futuristic and clean." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAr_XScU71K7X0VZFMg2J5VzGeIjQ3z7ZDIbPout6Dk_vjJyn-1JCZVGoCF7IbK92kcIl4r30_dof7oXf0wMVpprg23U81qOJVI-Q_SuGLgU_x9tMu40AzaqI3cuO7ajvWs-GsJJpqm8jM1bvu-AqogEs8lRHfq0risqp_Mv2hACWRQFak8EoWaxp8BPRVFr16Z3wU55MqmnGlgJ7K80Q8aBi1OzyzkZtXlLYLiAYWwDwpQdC2m6FFFpW1vz5Lpq7GKabtHNbJ20YcD"/>
+</div>
+<div>
+<p class="font-bold text-on-surface group-hover:text-primary transition-colors">Sonic Bloom: Summer 24</p>
+<p class="text-xs text-on-surface-variant">EV-48110</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<p class="font-body-md text-on-surface">Aug 15, 2024</p>
+<p class="text-xs text-on-surface-variant">14:00 GMT</p>
+</td>
+<td class="px-6 py-4 font-body-md text-on-surface">Skyline Amphitheater</td>
+<td class="px-6 py-4">
+<div class="flex flex-col gap-1.5">
+<div class="flex justify-between text-xs font-label-sm">
+<span>5000/5000</span>
+<span class="text-on-surface-variant font-bold">Sold Out</span>
+</div>
+<div class="w-32 h-1.5 bg-surface-container rounded-full overflow-hidden">
+<div class="bg-on-surface-variant h-full rounded-full" style="width: 100%"></div>
+</div>
+</div>
+</td>
+<td class="px-6 py-4 text-center">
+<span class="inline-flex items-center gap-1 px-3 py-1 bg-surface-variant text-on-surface-variant rounded-full text-xs font-bold">
+                                        Past
+                                    </span>
+</td>
+<td class="px-6 py-4 text-right">
+<div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="p-2 text-on-surface-variant hover:text-primary hover:bg-primary-fixed rounded-lg transition-all">
+<span class="material-symbols-outlined text-[20px]" data-icon="visibility">visibility</span>
+</button>
+<button class="p-2 text-on-surface-variant hover:text-primary hover:bg-primary-fixed rounded-lg transition-all">
+<span class="material-symbols-outlined text-[20px]" data-icon="analytics">analytics</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 4: Live -->
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0">
+<img alt="Corporate Gala" class="w-full h-full object-cover" data-alt="A grand luxury ballroom during a corporate awards gala, featuring high ceilings with crystal chandeliers and a sleek, modern stage setup. The tables are elegantly set with white linens and silver accents. The room is bathed in a professional, soft indigo and white wash, reflecting a high-end corporate luxury event with a clean, tech-forward aesthetic and bright lighting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBn2jGHgMFvS9Xqq-7bdlE1bXfdQN3WykHCPGK2-7zBx0B-WWyBUdezu1SU04e5zIOLkd_UNCT_gn1LZcqPjVqfzMDa4x6wA2ls9bkgDauW4OwQPPiaxsFdo9M0J9PDxcyt2keLvbuTIzj3DM5P2tP3K4DmlvL1wcneSq3IWSGJESRsQhyM3i80P4O3oxlggJ5MZjwVz2PU0tmg3qn2jV5RQgxX2k6kv8zK2gkmGjhlEOtSFC5S5Xeh9PpGiGag-2ChJOzv97E__ht7"/>
+</div>
+<div>
+<p class="font-bold text-on-surface group-hover:text-primary transition-colors">Global Tech Awards 2024</p>
+<p class="text-xs text-on-surface-variant">EV-49331</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<p class="font-body-md text-on-surface">Dec 05, 2024</p>
+<p class="text-xs text-on-surface-variant">19:00 GMT</p>
+</td>
+<td class="px-6 py-4 font-body-md text-on-surface">The Metropolis Hotel</td>
+<td class="px-6 py-4">
+<div class="flex flex-col gap-1.5">
+<div class="flex justify-between text-xs font-label-sm">
+<span>320/450</span>
+<span class="text-primary font-bold">71%</span>
+</div>
+<div class="w-32 h-1.5 bg-surface-container rounded-full overflow-hidden">
+<div class="bg-primary h-full rounded-full" style="width: 71%"></div>
+</div>
+</div>
+</td>
+<td class="px-6 py-4 text-center">
+<span class="inline-flex items-center gap-1 px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-bold">
+<span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
+                                        Live
+                                    </span>
+</td>
+<td class="px-6 py-4 text-right">
+<div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="p-2 text-on-surface-variant hover:text-primary hover:bg-primary-fixed rounded-lg transition-all">
+<span class="material-symbols-outlined text-[20px]" data-icon="edit">edit</span>
+</button>
+<button class="p-2 text-on-surface-variant hover:text-primary hover:bg-primary-fixed rounded-lg transition-all">
+<span class="material-symbols-outlined text-[20px]" data-icon="analytics">analytics</span>
+</button>
+<button class="p-2 text-on-surface-variant hover:text-error hover:bg-error-container rounded-lg transition-all">
+<span class="material-symbols-outlined text-[20px]" data-icon="delete">delete</span>
+</button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Pagination -->
+<div class="px-6 py-4 bg-surface-container-low/50 flex items-center justify-between border-t border-outline-variant">
+<p class="text-xs font-label-sm text-on-surface-variant">Showing 1 to 4 of 24 events</p>
+<div class="flex gap-2">
+<button class="px-3 py-1 border border-outline-variant rounded-md text-xs font-bold hover:bg-surface-container-high transition-all disabled:opacity-50" disabled="">Previous</button>
+<button class="px-3 py-1 bg-primary text-on-primary rounded-md text-xs font-bold shadow-sm">1</button>
+<button class="px-3 py-1 border border-outline-variant rounded-md text-xs font-bold hover:bg-surface-container-high transition-all">2</button>
+<button class="px-3 py-1 border border-outline-variant rounded-md text-xs font-bold hover:bg-surface-container-high transition-all">3</button>
+<button class="px-3 py-1 border border-outline-variant rounded-md text-xs font-bold hover:bg-surface-container-high transition-all">Next</button>
+</div>
+</div>
+</section>
+</main>
+</div>
+<!-- Mobile Nav Bar -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center h-16 pb-safe px-4 bg-surface dark:bg-inverse-surface shadow-[0px_-4px_20px_rgba(15,23,42,0.08)] rounded-t-xl">
+<button class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant">
+<span class="material-symbols-outlined" data-icon="home">home</span>
+<span class="text-label-sm font-label-sm">Home</span>
+</button>
+<button class="flex flex-col items-center justify-center text-primary dark:text-primary-fixed font-bold scale-90 transition-transform duration-150">
+<span class="material-symbols-outlined" data-icon="event" style="font-variation-settings: 'FILL' 1;">event</span>
+<span class="text-label-sm font-label-sm">Events</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant">
+<span class="material-symbols-outlined" data-icon="payments">payments</span>
+<span class="text-label-sm font-label-sm">Sales</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="text-label-sm font-label-sm">Profile</span>
+</button>
+</nav>
+<!-- Floating Action Button (FAB) Mobile -->
+<button class="md:hidden fixed bottom-24 right-6 w-14 h-14 bg-primary text-on-primary rounded-full shadow-2xl flex items-center justify-center active:scale-95 transition-transform z-40">
+<span class="material-symbols-outlined text-[32px]" data-icon="add">add</span>
+</button>
+<script>
+        // Micro-interaction: Active state feedback for table rows
+        document.querySelectorAll('tbody tr').forEach(row => {
+            row.addEventListener('click', () => {
+                row.classList.add('scale-[0.995]');
+                setTimeout(() => row.classList.remove('scale-[0.995]'), 150);
+            });
+        });
+
+        // Simple Search Filter Simulation
+        const searchInput = document.querySelector('input[type="text"]');
+        searchInput.addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase();
+            document.querySelectorAll('tbody tr').forEach(row => {
+                const text = row.innerText.toLowerCase();
+                row.style.display = text.includes(query) ? '' : 'none';
+            });
+        });
+    </script>
+</body></html>

@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>TicketBox Admin - Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;900&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "primary-fixed": "#e2dfff",
+                      "background": "#f7f9fb",
+                      "primary-container": "#4f46e5",
+                      "inverse-on-surface": "#eff1f3",
+                      "outline-variant": "#c7c4d8",
+                      "secondary": "#712ae2",
+                      "surface-tint": "#4d44e3",
+                      "surface-dim": "#d8dadc",
+                      "error": "#ba1a1a",
+                      "surface-container-low": "#f2f4f6",
+                      "surface": "#f7f9fb",
+                      "primary": "#3525cd",
+                      "on-tertiary-fixed-variant": "#3f465c",
+                      "on-primary-fixed-variant": "#3323cc",
+                      "on-error-container": "#93000a",
+                      "surface-variant": "#e0e3e5",
+                      "surface-container-highest": "#e0e3e5",
+                      "tertiary-fixed": "#dae2fd",
+                      "surface-container": "#eceef0",
+                      "outline": "#777587",
+                      "on-secondary": "#ffffff",
+                      "tertiary-fixed-dim": "#bec6e0",
+                      "on-secondary-fixed-variant": "#5a00c6",
+                      "primary-fixed-dim": "#c3c0ff",
+                      "secondary-fixed-dim": "#d2bbff",
+                      "error-container": "#ffdad6",
+                      "secondary-container": "#8a4cfc",
+                      "on-secondary-fixed": "#25005a",
+                      "on-error": "#ffffff",
+                      "on-background": "#191c1e",
+                      "on-surface": "#191c1e",
+                      "on-tertiary": "#ffffff",
+                      "surface-container-high": "#e6e8ea",
+                      "on-primary-container": "#dad7ff",
+                      "surface-container-lowest": "#ffffff",
+                      "tertiary-container": "#586076",
+                      "inverse-primary": "#c3c0ff",
+                      "on-surface-variant": "#464555",
+                      "tertiary": "#41485e",
+                      "secondary-fixed": "#eaddff",
+                      "surface-bright": "#f7f9fb",
+                      "on-primary": "#ffffff",
+                      "on-primary-fixed": "#0f0069",
+                      "inverse-surface": "#2d3133",
+                      "on-tertiary-container": "#d4dbf5",
+                      "on-tertiary-fixed": "#131b2e",
+                      "on-secondary-container": "#fffbff"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "gutter": "24px",
+                      "container-max": "1280px",
+                      "margin-desktop": "40px",
+                      "margin-mobile": "16px",
+                      "base": "4px"
+              },
+              "fontFamily": {
+                      "label-sm": [
+                              "Inter"
+                      ],
+                      "display-lg-mobile": [
+                              "Montserrat"
+                      ],
+                      "display-lg": [
+                              "Montserrat"
+                      ],
+                      "headline-md": [
+                              "Montserrat"
+                      ],
+                      "body-md": [
+                              "Inter"
+                      ],
+                      "body-lg": [
+                              "Inter"
+                      ]
+              },
+              "fontSize": {
+                      "label-sm": [
+                              "12px",
+                              {
+                                      "lineHeight": "16px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "display-lg-mobile": [
+                              "32px",
+                              {
+                                      "lineHeight": "40px",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "display-lg": [
+                              "48px",
+                              {
+                                      "lineHeight": "56px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "headline-md": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "body-md": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "body-lg": [
+                              "18px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "400"
+                              }
+                      ]
+              }
+            },
+          }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+          font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .shimmer {
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            background-size: 200% 100%;
+            animation: shimmer 2s infinite;
+        }
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md min-h-screen flex">
+<!-- SideNavBar (from JSON) -->
+<nav class="hidden md:flex flex-col h-screen p-4 gap-4 docked left-0 w-64 bg-surface-container-lowest border-r border-outline-variant flat no shadows shrink-0 sticky top-0 z-40">
+<div class="mb-8">
+<h1 class="font-headline-md text-headline-md text-primary font-black italic">TicketBox Admin</h1>
+<p class="font-label-sm text-label-sm text-on-surface-variant">Management Suite</p>
+</div>
+<button class="bg-primary hover:bg-primary-container text-on-primary font-label-sm text-label-sm py-3 px-4 rounded-lg w-full flex items-center justify-center gap-2 transition-colors active:scale-[0.98]">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">add</span>
+            Create Event
+        </button>
+<ul class="flex flex-col gap-1 mt-6 flex-grow">
+<!-- Active Tab -->
+<li>
+<a class="flex items-center gap-3 px-4 py-3 bg-primary-container text-on-primary-container rounded-lg font-bold font-label-sm text-label-sm transition-all scale-[0.98]" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+                    Dashboard
+                </a>
+</li>
+<!-- Inactive Tabs -->
+<li>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-lg font-label-sm text-label-sm transition-all hover:text-primary" href="#">
+<span class="material-symbols-outlined">event</span>
+                    Events
+                </a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-lg font-label-sm text-label-sm transition-all hover:text-primary" href="#">
+<span class="material-symbols-outlined">payments</span>
+                    Revenue
+                </a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-lg font-label-sm text-label-sm transition-all hover:text-primary" href="#">
+<span class="material-symbols-outlined">badge</span>
+                    Staff
+                </a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-lg font-label-sm text-label-sm transition-all hover:text-primary" href="#">
+<span class="material-symbols-outlined">settings</span>
+                    Settings
+                </a>
+</li>
+</ul>
+<ul class="flex flex-col gap-1 mt-auto border-t border-outline-variant pt-4">
+<li>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-lg font-label-sm text-label-sm transition-all hover:text-primary" href="#">
+<span class="material-symbols-outlined">help</span>
+                    Help Center
+                </a>
+</li>
+</ul>
+</nav>
+<!-- Main Content Canvas -->
+<main class="flex-1 flex flex-col min-h-screen overflow-x-hidden">
+<!-- Header -->
+<header class="h-16 flex items-center justify-between px-margin-mobile md:px-margin-desktop bg-surface sticky top-0 z-30 border-b border-surface-container shadow-sm">
+<!-- Mobile Menu Toggle -->
+<button class="md:hidden text-on-surface-variant p-2">
+<span class="material-symbols-outlined">menu</span>
+</button>
+<h2 class="font-headline-md text-headline-md text-on-background hidden md:block">Overview</h2>
+<div class="flex items-center gap-4 ml-auto">
+<button class="relative text-on-surface-variant hover:text-primary transition-colors p-2 rounded-full hover:bg-surface-container">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-1 right-1 w-2 h-2 bg-error rounded-full border border-surface"></span>
+</button>
+<div class="h-8 w-8 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center font-bold font-label-sm overflow-hidden ring-2 ring-transparent hover:ring-primary transition-all cursor-pointer">
+<img alt="Admin Profile" class="w-full h-full object-cover" data-alt="A close up portrait of a professional male administrator in a clean, brightly lit office setting. The lighting is soft and even, typical of a modern corporate headshot. The color palette is neutral with soft whites and grays, accented by the subject's dark blue shirt. The mood is confident and reliable." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAeJKnUNUm00mY-mEZcRsfL6aHqeJZd9fPG7-4eD9ERG9XtC2E3JB2TU2eo71GGl5aB_FDa_txpsdYv9WzOtFwdurk64BAwavnxYXZD7pFVSv_qUk4sNuefaBGC1YWufhbw-YWkBRzzuzFs3iahpLBNVGvYA51qUDZEAQfqZMNfLyfvdhrvCYZFCvItdPzTH83usJbkOrxpgdxPRyVYMBdzcU6PmYynwchz3zkT-Dr4Ksg9RIR-Cqvkh_3H9rRP-irOf1GN6TsR24yO"/>
+</div>
+</div>
+</header>
+<div class="p-margin-mobile md:p-margin-desktop flex-grow max-w-[1600px] w-full mx-auto space-y-gutter">
+<!-- Metrics Bento Grid -->
+<section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-gutter">
+<!-- Total Concerts -->
+<div class="bg-surface-container-lowest p-6 rounded-xl shadow-[0px_4px_20px_rgba(15,23,42,0.08)] border border-surface-container hover:-translate-y-1 transition-transform duration-300">
+<div class="flex justify-between items-start mb-4">
+<div class="p-2 bg-primary-fixed rounded-lg text-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">stadium</span>
+</div>
+<span class="text-secondary font-label-sm text-label-sm bg-secondary-fixed px-2 py-1 rounded-full flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">trending_up</span> 12%
+                        </span>
+</div>
+<p class="text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wider mb-1">Total Concerts</p>
+<h3 class="font-display-lg text-display-lg-mobile md:text-display-lg text-on-background">24</h3>
+</div>
+<!-- Tickets Sold -->
+<div class="bg-surface-container-lowest p-6 rounded-xl shadow-[0px_4px_20px_rgba(15,23,42,0.08)] border border-surface-container hover:-translate-y-1 transition-transform duration-300 relative overflow-hidden group">
+<div class="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+<div class="flex justify-between items-start mb-4 relative z-10">
+<div class="p-2 bg-tertiary-fixed rounded-lg text-tertiary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">confirmation_number</span>
+</div>
+<span class="text-secondary font-label-sm text-label-sm bg-secondary-fixed px-2 py-1 rounded-full flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">trending_up</span> 8.4%
+                        </span>
+</div>
+<p class="text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wider mb-1 relative z-10">Tickets Sold</p>
+<h3 class="font-display-lg text-display-lg-mobile md:text-display-lg text-on-background relative z-10">12.4k</h3>
+</div>
+<!-- Revenue -->
+<div class="bg-surface-container-lowest p-6 rounded-xl shadow-[0px_4px_20px_rgba(15,23,42,0.08)] border border-surface-container hover:-translate-y-1 transition-transform duration-300">
+<div class="flex justify-between items-start mb-4">
+<div class="p-2 bg-primary-fixed rounded-lg text-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">payments</span>
+</div>
+<span class="text-secondary font-label-sm text-label-sm bg-secondary-fixed px-2 py-1 rounded-full flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">trending_up</span> 22%
+                        </span>
+</div>
+<p class="text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wider mb-1">Revenue</p>
+<h3 class="font-display-lg text-display-lg-mobile md:text-display-lg text-on-background">$1.2M</h3>
+</div>
+<!-- Active Users -->
+<div class="bg-surface-container-lowest p-6 rounded-xl shadow-[0px_4px_20px_rgba(15,23,42,0.08)] border border-surface-container hover:-translate-y-1 transition-transform duration-300">
+<div class="flex justify-between items-start mb-4">
+<div class="p-2 bg-tertiary-fixed rounded-lg text-tertiary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">group</span>
+</div>
+<span class="text-secondary font-label-sm text-label-sm bg-secondary-fixed px-2 py-1 rounded-full flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">trending_up</span> 5.1%
+                        </span>
+</div>
+<p class="text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wider mb-1">Active Users</p>
+<h3 class="font-display-lg text-display-lg-mobile md:text-display-lg text-on-background">45k</h3>
+</div>
+</section>
+<!-- Main Layout Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-gutter">
+<!-- Chart Area (Spans 2 columns on large screens) -->
+<section class="lg:col-span-2 bg-surface-container-lowest rounded-xl shadow-[0px_4px_20px_rgba(15,23,42,0.08)] border border-surface-container p-6 flex flex-col min-h-[400px]">
+<div class="flex justify-between items-center mb-6">
+<div>
+<h3 class="font-headline-md text-headline-md text-on-background">Recent Event Performance</h3>
+<p class="text-on-surface-variant font-body-md text-sm mt-1">Ticket sales velocity across top venues</p>
+</div>
+<div class="flex gap-2">
+<button class="px-3 py-1.5 border border-outline-variant rounded-lg font-label-sm text-label-sm text-on-surface-variant hover:bg-surface-container hover:text-primary transition-colors">Week</button>
+<button class="px-3 py-1.5 bg-primary-fixed text-primary rounded-lg font-label-sm text-label-sm transition-colors">Month</button>
+</div>
+</div>
+<!-- Faux Chart Area -->
+<div class="flex-grow flex items-end gap-2 relative mt-4 pb-8 border-b border-surface-container">
+<!-- Y-axis labels -->
+<div class="absolute left-0 top-0 h-full flex flex-col justify-between text-on-surface-variant font-label-sm text-[10px] pb-8 w-8 text-right pr-2">
+<span>10k</span>
+<span>7.5k</span>
+<span>5k</span>
+<span>2.5k</span>
+<span>0</span>
+</div>
+<!-- Grid Lines -->
+<div class="absolute left-8 right-0 top-0 h-full flex flex-col justify-between pb-8 pointer-events-none">
+<div class="w-full border-t border-dashed border-outline-variant/30 h-0"></div>
+<div class="w-full border-t border-dashed border-outline-variant/30 h-0"></div>
+<div class="w-full border-t border-dashed border-outline-variant/30 h-0"></div>
+<div class="w-full border-t border-dashed border-outline-variant/30 h-0"></div>
+<div class="w-full border-t border-solid border-outline-variant/50 h-0"></div>
+</div>
+<!-- Bars -->
+<div class="flex-1 flex justify-around items-end h-full pl-8 z-10">
+<div class="w-full max-w-[40px] bg-primary/20 hover:bg-primary/40 rounded-t-sm h-[40%] relative group transition-all">
+<div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 bg-inverse-surface text-inverse-on-surface font-label-sm text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">4,000</div>
+<div class="absolute -bottom-6 left-1/2 -translate-x-1/2 text-on-surface-variant font-label-sm text-[10px] truncate w-full text-center">Aug 1</div>
+</div>
+<div class="w-full max-w-[40px] bg-primary/40 hover:bg-primary/60 rounded-t-sm h-[65%] relative group transition-all">
+<div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 bg-inverse-surface text-inverse-on-surface font-label-sm text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">6,500</div>
+<div class="absolute -bottom-6 left-1/2 -translate-x-1/2 text-on-surface-variant font-label-sm text-[10px] truncate w-full text-center">Aug 8</div>
+</div>
+<div class="w-full max-w-[40px] bg-primary hover:bg-primary/90 rounded-t-sm h-[90%] relative group transition-all">
+<div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 bg-inverse-surface text-inverse-on-surface font-label-sm text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">9,000</div>
+<div class="absolute -bottom-6 left-1/2 -translate-x-1/2 text-on-surface-variant font-label-sm text-[10px] truncate w-full text-center">Aug 15</div>
+</div>
+<div class="w-full max-w-[40px] bg-primary/60 hover:bg-primary/80 rounded-t-sm h-[75%] relative group transition-all">
+<div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 bg-inverse-surface text-inverse-on-surface font-label-sm text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">7,500</div>
+<div class="absolute -bottom-6 left-1/2 -translate-x-1/2 text-on-surface-variant font-label-sm text-[10px] truncate w-full text-center">Aug 22</div>
+</div>
+<div class="w-full max-w-[40px] bg-primary/30 hover:bg-primary/50 rounded-t-sm h-[50%] relative group transition-all">
+<div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 bg-inverse-surface text-inverse-on-surface font-label-sm text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">5,000</div>
+<div class="absolute -bottom-6 left-1/2 -translate-x-1/2 text-on-surface-variant font-label-sm text-[10px] truncate w-full text-center">Aug 29</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Guest List Sync Widget -->
+<aside class="lg:col-span-1 bg-surface-container-lowest rounded-xl shadow-[0px_4px_20px_rgba(15,23,42,0.08)] border border-surface-container p-6 flex flex-col">
+<div class="flex items-center gap-3 mb-6 pb-4 border-b border-surface-container">
+<div class="w-10 h-10 rounded-full bg-primary-fixed text-primary flex items-center justify-center">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">cloud_sync</span>
+</div>
+<div>
+<h3 class="font-headline-md text-[18px] text-on-background leading-tight">Guest List Sync</h3>
+<p class="text-on-surface-variant font-label-sm text-[11px]">Last run: 2 mins ago</p>
+</div>
+</div>
+<div class="space-y-4 flex-grow">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-secondary block"></span>
+<span class="font-body-md text-sm text-on-background">VIP_List_NYC.csv</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant bg-surface-container px-2 py-1 rounded">Completed</span>
+</div>
+<div class="bg-error-container/20 border border-error-container rounded-lg p-4">
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-error mt-0.5" style="font-variation-settings: 'FILL' 1;">error</span>
+<div>
+<h4 class="font-label-sm text-label-sm text-on-error-container">Sync Warnings</h4>
+<p class="font-body-md text-sm text-on-surface-variant mt-1 mb-2">3 duplicate entries found and skipped during import.</p>
+<button class="text-error font-label-sm text-label-sm hover:underline flex items-center gap-1">
+                                        View Error Log <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<button class="w-full mt-6 py-2.5 border border-outline-variant hover:border-primary text-on-surface hover:text-primary font-label-sm text-label-sm rounded-lg transition-colors flex items-center justify-center gap-2">
+<span class="material-symbols-outlined">upload_file</span>
+                        Manual Import
+                    </button>
+</aside>
+</div>
+<!-- Concert List Table -->
+<section class="bg-surface-container-lowest rounded-xl shadow-[0px_4px_20px_rgba(15,23,42,0.08)] border border-surface-container overflow-hidden">
+<div class="p-6 border-b border-surface-container flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+<h3 class="font-headline-md text-headline-md text-on-background">Recent Concerts</h3>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[20px]">search</span>
+<input class="pl-10 pr-4 py-2 border border-outline-variant rounded-lg bg-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary font-body-md text-sm w-full sm:w-64 transition-all" placeholder="Search events..." type="text"/>
+</div>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">
+<th class="p-4 font-semibold border-b border-surface-container">Event Name</th>
+<th class="p-4 font-semibold border-b border-surface-container">Status</th>
+<th class="p-4 font-semibold border-b border-surface-container">Date</th>
+<th class="p-4 font-semibold border-b border-surface-container text-right">Tickets Sold</th>
+<th class="p-4 font-semibold border-b border-surface-container text-center">Actions</th>
+</tr>
+</thead>
+<tbody class="font-body-md text-sm divide-y divide-surface-container">
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="p-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded bg-primary-container/20 flex-shrink-0 bg-cover bg-center" data-alt="A crowd at a concert illuminated by bright purple stage lights. Hands are raised in the air, creating silhouettes against the vibrant, high-energy lighting. The atmosphere is dynamic and exciting, representative of a live music event." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCN_eZtQcxBMCNY07lBpWVyl6Q6fIrgvEfDf3BInMqhCXeQRd_aGCdyH1Hx-kdRqt_YZpkHVuWbhWuhJCsDqTJRr3BYYihWnQsrZJObp3EeKCtRAgWABU6Oy7WYabdYB1mh5l2adlyHUdRxyJ3RTKTzEmmGBA5S_Y7bEDOAqOW5zlKBkNEQ9Y6fg_teMxYFKjb_L4jg14R4vXH2-ZmeaYq82-UmLVD9Ta_3WRdcX3Tkxk4CT8k4fLJft6lxEyWHfB5onwg5apD8dyWb');"></div>
+<div>
+<p class="font-semibold text-on-background">Neon Nights Festival</p>
+<p class="text-on-surface-variant text-[12px]">Brooklyn Mirage</p>
+</div>
+</div>
+</td>
+<td class="p-4">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full font-label-sm text-[11px] bg-tertiary-fixed text-tertiary">
+                                        On Sale
+                                    </span>
+</td>
+<td class="p-4 text-on-surface-variant">Oct 12, 2024</td>
+<td class="p-4 text-right">
+<div class="flex items-center justify-end gap-2">
+<div class="w-16 h-1.5 bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-primary w-[85%]"></div>
+</div>
+<span class="font-semibold">8,500</span>
+</div>
+</td>
+<td class="p-4">
+<div class="flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="p-1.5 text-on-surface-variant hover:text-primary hover:bg-primary-fixed rounded transition-colors" title="Edit">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+</button>
+<button class="p-1.5 text-on-surface-variant hover:text-secondary hover:bg-secondary-fixed rounded transition-colors" title="Report">
+<span class="material-symbols-outlined text-[18px]">analytics</span>
+</button>
+</div>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="p-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded bg-primary-container/20 flex-shrink-0 bg-cover bg-center" data-alt="A brightly lit outdoor stage during a daytime festival. Confetti is falling over the crowd. The scene is energetic, colorful, and full of life, capturing the peak moment of a live performance." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAvUVnkAK9yqovMI40Ld0p3AMzcZgc0PFhOAFmMO_2_sZiCM5xkvnmrcG636OjCsj7Uc0_qwVodwiNy5QvTP1L_Fsgb3b6JEsDxM7cMJv6t8ffdtHWkFR0RRbD7ASyQnj_UbyvuytOqp0H6FiBGdAWdW9Z_1vBF6lJV8Uv-Z72bPGQpUlJaDiAnPJ_3YmG42-3qCOuRPg2K6K0_2Erdb6SAx7TyDouGI2aHGSUJppOCNdt0g5_5sMzc0ghHYlM4o55p89dvb0ezIOUB');"></div>
+<div>
+<p class="font-semibold text-on-background">Summer Breeze Tour</p>
+<p class="text-on-surface-variant text-[12px]">Red Rocks Amphitheatre</p>
+</div>
+</div>
+</td>
+<td class="p-4">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full font-label-sm text-[11px] bg-surface-container-high text-on-surface">
+                                        Draft
+                                    </span>
+</td>
+<td class="p-4 text-on-surface-variant">Nov 05, 2024</td>
+<td class="p-4 text-right">
+<div class="flex items-center justify-end gap-2">
+<div class="w-16 h-1.5 bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-surface-dim w-[0%]"></div>
+</div>
+<span class="text-on-surface-variant">0</span>
+</div>
+</td>
+<td class="p-4">
+<div class="flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="p-1.5 text-on-surface-variant hover:text-primary hover:bg-primary-fixed rounded transition-colors" title="Edit">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+</button>
+<button class="p-1.5 text-on-surface-variant hover:text-secondary hover:bg-secondary-fixed rounded transition-colors" title="Report">
+<span class="material-symbols-outlined text-[18px]">analytics</span>
+</button>
+</div>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="p-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded bg-primary-container/20 flex-shrink-0 bg-cover bg-center" data-alt="A grand, classic concert hall interior. Rows of empty red velvet seats face a brightly lit stage set up with classical instruments. The lighting is warm and formal, conveying a sense of anticipation for a premium acoustic performance." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBqtX51mRgzNf98g5wCGKZ-p5lBaVUykUn1aAb-cjPYW9Lu-cB6ZhZzaPBtWf3pgwRx49txr1oCr42WTFYERBRVs2vB6Bsob-ODOClnkW6TKjY78hUDoheRuq1Metbpe4_caHgpaSVkcKTFVhuhA7rZovEZm83DQU3CBU2uglwka-CibY-p493bCdlW3bRKR5v98ejlSaUXJvO21S_JYLCFivWS3TaVQmItDSJJyf0yEOyZO8k3KEoMnCiD6kr9yHaPpI31sSOyuZTj');"></div>
+<div>
+<p class="font-semibold text-on-background">Symphony at Midnight</p>
+<p class="text-on-surface-variant text-[12px]">Walt Disney Concert Hall</p>
+</div>
+</div>
+</td>
+<td class="p-4">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full font-label-sm text-[11px] bg-secondary-fixed text-on-secondary-fixed-variant">
+                                        Sold Out
+                                    </span>
+</td>
+<td class="p-4 text-on-surface-variant">Sep 20, 2024</td>
+<td class="p-4 text-right">
+<div class="flex items-center justify-end gap-2">
+<div class="w-16 h-1.5 bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-secondary w-[100%]"></div>
+</div>
+<span class="font-semibold">2,200</span>
+</div>
+</td>
+<td class="p-4">
+<div class="flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="p-1.5 text-on-surface-variant hover:text-primary hover:bg-primary-fixed rounded transition-colors" title="Edit">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+</button>
+<button class="p-1.5 text-on-surface-variant hover:text-secondary hover:bg-secondary-fixed rounded transition-colors" title="Report">
+<span class="material-symbols-outlined text-[18px]">analytics</span>
+</button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+</div>
+</main>
+<!-- BottomNavBar for Mobile (from JSON) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center h-16 pb-safe px-4 shadow-[0px_-4px_20px_rgba(15,23,42,0.08)] bg-surface rounded-t-xl">
+<a class="flex flex-col items-center justify-center text-primary font-bold font-label-sm text-label-sm active:scale-90 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">home</span>
+            Home
+        </a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant font-label-sm text-label-sm active:bg-surface-container-low" href="#">
+<span class="material-symbols-outlined">confirmation_number</span>
+            My Tickets
+        </a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant font-label-sm text-label-sm active:bg-surface-container-low" href="#">
+<span class="material-symbols-outlined">qr_code_scanner</span>
+            Scanner
+        </a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant font-label-sm text-label-sm active:bg-surface-container-low" href="#">
+<span class="material-symbols-outlined">person</span>
+            Profile
+        </a>
+</nav>
+</body></html>
