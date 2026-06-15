@@ -7,7 +7,13 @@ import {
   CountdownTimer,
 } from "@/components/screens";
 
-export default function CheckoutPage() {
+export default async function CheckoutPage({
+  params,
+}: {
+  params: Promise<{ orderId: string }>;
+}) {
+  const { orderId } = await params;
+
   return (
     <section className="mx-auto w-full max-w-7xl px-4 pb-12 sm:px-6 lg:px-8">
       <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
@@ -18,6 +24,9 @@ export default function CheckoutPage() {
           <h1 className="mt-2 font-display text-4xl font-black tracking-tight text-on-surface">
             Complete your order
           </h1>
+          <p className="mt-2 text-sm text-on-surface-variant">
+            Reservation {orderId}
+          </p>
         </div>
         <CountdownTimer />
       </div>
@@ -26,7 +35,7 @@ export default function CheckoutPage() {
           <CustomerInfoForm />
           <PaymentMethodPicker />
           <div className="flex flex-wrap gap-3">
-            <Button href="/checkout/order-2048/processing">Pay now</Button>
+            <Button href={`/checkout/${orderId}/processing`}>Pay now</Button>
             <Button
               href="/"
               variant="ghost"
