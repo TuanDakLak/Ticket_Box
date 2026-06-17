@@ -13,7 +13,8 @@ const eslintConfig = defineConfig([
       "react/jsx-key": "off",
       "react/no-unescaped-entities": "off",
       "react-hooks/exhaustive-deps": "off",
-      "react-hooks/set-state-in-effect": "off"
+      "react-hooks/set-state-in-effect": "off",
+      "react-hooks/purity": "off"
     }
   },
   // Override default ignores of eslint-config-next.
