@@ -6,18 +6,18 @@ on:
       - develop
       - main
     paths:
-      - 'apps/web-app/**'
-      - 'package.json'
-      - 'package-lock.json'
-      - '.github/workflows/frontend-ci.yml'
+      - "apps/web-app/**"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/frontend-ci.yml"
   push:
     branches:
-      - '**'
+      - "**"
     paths:
-      - 'apps/web-app/**'
-      - 'package.json'
-      - 'package-lock.json'
-      - '.github/workflows/frontend-ci.yml'
+      - "apps/web-app/**"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/frontend-ci.yml"
   workflow_dispatch:
 
 concurrency:
@@ -51,7 +51,7 @@ jobs:
             ${{ runner.os }}-npm-
 
       - name: Install dependencies
-        run: npm install --prefer-offline --no-audit --fund=false
+        run: npm ci --prefer-offline --no-audit --fund=false
 
       - name: Code style verification (Prettier)
         working-directory: apps/web-app

@@ -39,7 +39,6 @@ export default async function ConcertDetailPage({
       </SiteShell>
     );
   }
-  //Testpussing
 
   return (
     <SiteShell active="/">

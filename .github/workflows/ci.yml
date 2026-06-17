@@ -6,28 +6,28 @@ on:
       - develop
       - main
     paths:
-      - 'apps/backend-api/**'
-      - 'prisma/**'
-      - 'package.json'
-      - 'package-lock.json'
-      - 'tsconfig.json'
-      - '.github/workflows/ci.yml'
-      - 'Dockerfile'
-      - '.dockerignore'
-      - 'eslint.config.mjs'
+      - "apps/backend-api/**"
+      - "prisma/**"
+      - "package.json"
+      - "package-lock.json"
+      - "tsconfig.json"
+      - ".github/workflows/ci.yml"
+      - "Dockerfile"
+      - ".dockerignore"
+      - "eslint.config.mjs"
   push:
     branches:
-      - '**'
+      - "**"
     paths:
-      - 'apps/backend-api/**'
-      - 'prisma/**'
-      - 'package.json'
-      - 'package-lock.json'
-      - 'tsconfig.json'
-      - '.github/workflows/ci.yml'
-      - 'Dockerfile'
-      - '.dockerignore'
-      - 'eslint.config.mjs'
+      - "apps/backend-api/**"
+      - "prisma/**"
+      - "package.json"
+      - "package-lock.json"
+      - "tsconfig.json"
+      - ".github/workflows/ci.yml"
+      - "Dockerfile"
+      - ".dockerignore"
+      - "eslint.config.mjs"
   workflow_dispatch:
 
 concurrency:
