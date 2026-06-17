@@ -14,8 +14,8 @@ const eslintConfig = defineConfig([
       "react/no-unescaped-entities": "off",
       "react-hooks/exhaustive-deps": "off",
       "react-hooks/set-state-in-effect": "off",
-      "react-hooks/purity": "off"
-    }
+      "react-hooks/purity": "off",
+    },
   },
   // Override default ignores of eslint-config-next.
   globalIgnores([

@@ -1,8 +1,5 @@
 import { Button, Card, SectionHeading, SiteShell } from "@/components/common";
-import {
-  SeatLegendCard,
-  VenueMap,
-} from "@/components/screens";
+import { SeatLegendCard, VenueMap } from "@/components/screens";
 
 export default function SeatsPage() {
   return (
