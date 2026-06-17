@@ -3,11 +3,13 @@
 ## 🚀 First Time Setup
 
 ### Step 1: Navigate to Web App Directory
+
 ```bash
 cd apps/web-app
 ```
 
 ### Step 2: Install Dependencies
+
 ```bash
 npm install
 # or
@@ -17,6 +19,7 @@ pnpm install
 ```
 
 ### Step 3: Configure Environment
+
 ```bash
 # Copy environment template
 copy .env.example .env.local          # Windows
@@ -27,6 +30,7 @@ copy .env.example .env.local          # Windows
 ```
 
 ### Step 4: Verify Setup
+
 ```bash
 npm run type-check    # Check TypeScript
 ```
@@ -36,6 +40,7 @@ npm run type-check    # Check TypeScript
 ## 📱 Running the Application
 
 ### Development Mode
+
 ```bash
 npm run dev
 
@@ -45,6 +50,7 @@ npm run dev
 ```
 
 ### Production Build
+
 ```bash
 npm run build        # Compile and build
 npm run start        # Start production server
@@ -57,6 +63,7 @@ npm run start        # Start production server
 ### Manual Test - Full Login Flow
 
 **1. Start Both Services (in separate terminals)**
+
 ```bash
 # Terminal 1: Backend
 npm run start:api
@@ -66,10 +73,12 @@ npm run start:web
 ```
 
 **2. Open Browser**
+
 - Navigate to: `http://localhost:3000`
 - You should see the TicketBox Home page
 
 **3. Test Login**
+
 - Click "Sign In" → Go to `/login`
 - Enter test credentials:
   ```
@@ -80,6 +89,7 @@ npm run start:web
 - Should redirect to `/dashboard` if credentials are valid
 
 **4. Verify JWT Injection**
+
 - Open DevTools (F12)
 - Go to Network tab
 - Make any request (or navigate to a page)
@@ -88,6 +98,7 @@ npm run start:web
 - Look for: `Authorization: Bearer eyJ0eXA...`
 
 **5. Test Logout**
+
 - On dashboard, click "Logout" button
 - Should redirect to home page
 - Navigation should show "Sign In" button again
@@ -97,6 +108,7 @@ npm run start:web
 ## 🔌 Available Commands
 
 ### Development
+
 ```bash
 npm run dev              # Start dev server with hot reload
 npm run build            # Build for production
@@ -104,6 +116,7 @@ npm run start            # Start production server
 ```
 
 ### Code Quality
+
 ```bash
 npm run lint             # Run ESLint and fix issues
 npm run type-check       # TypeScript type checking
@@ -158,25 +171,27 @@ src/
 6. **Future requests** → Interceptor adds Authorization header
 
 ### Token Storage
+
 ```javascript
 // Stored in localStorage as:
-access_token: "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9..."
-refresh_token: "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9..."
+access_token: "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...";
+refresh_token: "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...";
 ```
 
 ### Debugging in Console
+
 ```javascript
 // Check current token
-localStorage.getItem('access_token')
+localStorage.getItem("access_token");
 
 // Decode token
 function decodeToken(token) {
-  const parts = token.split('.');
+  const parts = token.split(".");
   return JSON.parse(atob(parts[1]));
 }
 
 // Clear all tokens
-localStorage.clear()
+localStorage.clear();
 ```
 
 ---
@@ -184,37 +199,43 @@ localStorage.clear()
 ## 🐛 Common Issues & Solutions
 
 ### Issue: CORS Error
+
 ```
-Access to XMLHttpRequest at 'http://localhost:3001/api/...' 
+Access to XMLHttpRequest at 'http://localhost:3001/api/...'
 from origin 'http://localhost:3000' has been blocked by CORS policy
 ```
 
 **Solution**:
+
 - Ensure backend is running
 - Check backend CORS settings
 - Verify API_BASE_URL matches backend port
 
 ### Issue: Token Not Injected in Headers
+
 ```
 Network tab shows request without Authorization header
 ```
 
 **Solution**:
+
 ```javascript
 // Check token in localStorage
-localStorage.getItem('access_token')  // Should return JWT string
+localStorage.getItem("access_token"); // Should return JWT string
 
 // Check if token is valid
-const token = localStorage.getItem('access_token');
+const token = localStorage.getItem("access_token");
 if (!token) console.log("No token found!");
 ```
 
 ### Issue: Infinite Redirect Loop
+
 ```
 Page keeps redirecting to /login
 ```
 
 **Solution**:
+
 ```javascript
 // Clear localStorage
 localStorage.clear()
@@ -225,11 +246,13 @@ npm run dev
 ```
 
 ### Issue: Page Blank After Login
+
 ```
 Redirected but nothing shows
 ```
 
 **Solution**:
+
 - Check browser console for errors (F12)
 - Check that backend API is running
 - Verify backend response format
@@ -262,12 +285,14 @@ npm run dev                 # Should start on port 3000
 ## 🌍 Environment Variables
 
 ### .env.local (Development)
+
 ```env
 NEXT_PUBLIC_API_BASE_URL=http://localhost:3001/api
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
 
 ### .env.production (Production)
+
 ```env
 NEXT_PUBLIC_API_BASE_URL=https://api.ticketbox.com/api
 NEXT_PUBLIC_APP_URL=https://ticketbox.com
@@ -306,6 +331,7 @@ GETTING_STARTED.md            # This file
 ## 💡 Tips & Tricks
 
 ### Quick Development Workflow
+
 ```bash
 # Terminal 1: Start backend
 npm run start:api
@@ -318,34 +344,35 @@ npm run dev
 ```
 
 ### Debugging API Requests
+
 ```javascript
 // In src/services/api.ts, log all requests:
 apiClient.interceptors.request.use((config) => {
-  console.log('Request:', config.url, config.method);
+  console.log("Request:", config.url, config.method);
   return config;
 });
 
 // Log all responses:
-apiClient.interceptors.response.use(
-  (response) => {
-    console.log('Response:', response.status, response.data);
-    return response;
-  }
-);
+apiClient.interceptors.response.use((response) => {
+  console.log("Response:", response.status, response.data);
+  return response;
+});
 ```
 
 ### ViewToken Details
+
 ```javascript
 // In browser console:
-const token = localStorage.getItem('access_token');
-const decoded = JSON.parse(atob(token.split('.')[1]));
-console.log(decoded);  // See user info, expiration, etc.
+const token = localStorage.getItem("access_token");
+const decoded = JSON.parse(atob(token.split(".")[1]));
+console.log(decoded); // See user info, expiration, etc.
 ```
 
 ### Simulate 401 Error
+
 ```javascript
 // In browser console - clear token to trigger 401:
-localStorage.removeItem('access_token');
+localStorage.removeItem("access_token");
 
 // Make any request - should trigger refresh flow
 // Check Network tab to see redirect to /login

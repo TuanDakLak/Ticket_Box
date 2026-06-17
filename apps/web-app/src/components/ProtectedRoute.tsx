@@ -9,7 +9,10 @@ interface ProtectedRouteProps {
   allowedRoles?: string[];
 }
 
-export function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) {
+export function ProtectedRoute({
+  children,
+  allowedRoles,
+}: ProtectedRouteProps) {
   const { user, isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
@@ -26,7 +29,7 @@ export function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) 
 
     if (allowedRoles && allowedRoles.length > 0) {
       // Check if user has required role
-      const hasRole = user?.roles?.some(role => allowedRoles.includes(role));
+      const hasRole = user?.roles?.some((role) => allowedRoles.includes(role));
       if (!hasRole) {
         // Logged in but missing role, redirect to access denied
         router.push("/access-denied");

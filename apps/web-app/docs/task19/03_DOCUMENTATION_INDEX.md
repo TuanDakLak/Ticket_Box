@@ -13,6 +13,7 @@ Completed: May 31, 2026
 ### Getting Started (Start Here)
 
 **👉 [00_TASK19_OVERVIEW.md](00_TASK19_OVERVIEW.md)** (15 min read)
+
 - Executive summary of what was built
 - Architecture highlights
 - All deliverables checklist
@@ -20,6 +21,7 @@ Completed: May 31, 2026
 - **Best for**: Quick overview of Task #19 scope
 
 **👉 [01_RUNNING_AND_TESTING.md](01_RUNNING_AND_TESTING.md)** (10 min read)
+
 - How to start the application
 - 8 manual test scenarios
 - Testing checklist
@@ -27,6 +29,7 @@ Completed: May 31, 2026
 - **Best for**: Learning how to run and test the app
 
 **👉 [02_WORK_SUMMARY.md](02_WORK_SUMMARY.md)** (15 min read)
+
 - Detailed work breakdown
 - What was accomplished
 - How to prepare for Task #20
@@ -40,6 +43,7 @@ Completed: May 31, 2026
 ### For Developers
 
 **📖 [README.md](../../apps/web-app/README.md)** (in apps/web-app)
+
 - Project overview
 - Setup instructions
 - API contract documentation
@@ -47,6 +51,7 @@ Completed: May 31, 2026
 - Troubleshooting guide
 
 **📖 [GETTING_STARTED.md](../../apps/web-app/GETTING_STARTED.md)** (in apps/web-app)
+
 - Step-by-step setup guide
 - Environment configuration
 - Common issues & solutions
@@ -54,6 +59,7 @@ Completed: May 31, 2026
 - Development workflow tips
 
 **📖 [ARCHITECTURE.md](../../apps/web-app/ARCHITECTURE.md)** (in apps/web-app)
+
 - System flow diagrams
 - Component hierarchy
 - Request/response lifecycle
@@ -62,6 +68,7 @@ Completed: May 31, 2026
 - Security architecture
 
 **📖 [USER_FLOWS.md](../../apps/web-app/USER_FLOWS.md)** (in apps/web-app)
+
 - Visual flowcharts
 - Login flow diagram
 - Protected route access
@@ -74,6 +81,7 @@ Completed: May 31, 2026
 ### For Testing
 
 **🧪 [INTEGRATION_TESTING.md](../../apps/web-app/INTEGRATION_TESTING.md)** (in apps/web-app)
+
 - 10 detailed test scenarios
 - Step-by-step test procedures
 - Expected results for each test
@@ -85,6 +93,7 @@ Completed: May 31, 2026
 ### For Implementation Details
 
 **📋 [TASK19_COMPLETION_CHECKLIST.md](../../apps/web-app/TASK19_COMPLETION_CHECKLIST.md)** (in apps/web-app)
+
 - Requirements verification
 - Implementation details
 - Performance notes
@@ -93,6 +102,7 @@ Completed: May 31, 2026
 - File creation summary
 
 **📋 [IMPLEMENTATION_COMPLETE.md](../../apps/web-app/IMPLEMENTATION_COMPLETE.md)** (in apps/web-app)
+
 - Complete implementation summary
 - File structure with sizes
 - API contract details
@@ -145,6 +155,7 @@ docs/task19/                           # Task documentation
 ## 🚀 Quick Start Commands
 
 ### Run Locally
+
 ```bash
 cd apps/web-app
 npm install
@@ -153,12 +164,14 @@ npm run dev
 ```
 
 ### Build for Production
+
 ```bash
 npm run build
 npm run start
 ```
 
 ### Development Tools
+
 ```bash
 npm run type-check     # TypeScript validation
 npm run lint           # ESLint fix
@@ -170,6 +183,7 @@ npm run dev            # Dev with hot-reload
 ## 🧪 Testing Quick Links
 
 **Popular Test Scenarios** (see INTEGRATION_TESTING.md):
+
 1. **JWT Injection**: Verify Authorization header
 2. **401 Handling**: Token refresh and redirect
 3. **401 Handling**: Login error messages
@@ -177,6 +191,7 @@ npm run dev            # Dev with hot-reload
 5. **Full Login Flow**: End-to-end test
 
 **Quick Manual Test**:
+
 ```bash
 1. npm run dev
 2. Go to http://localhost:3000/login
@@ -189,6 +204,7 @@ npm run dev            # Dev with hot-reload
 ## 🔐 Authentication at a Glance
 
 ### Flow
+
 ```
 User → Login Form → Backend → JWT Tokens → localStorage
                                     ↓
@@ -200,25 +216,27 @@ User → Login Form → Backend → JWT Tokens → localStorage
 ```
 
 ### Key Files
+
 - **API Client**: `src/services/api.ts`
 - **Auth Service**: `src/services/auth.service.ts`
 - **Auth Hook**: `src/hooks/useAuth.ts`
 - **Token Utils**: `src/utils/token.utils.ts`
 
 ### Key Functions
+
 ```typescript
 // Login
-await authService.login(email, password)
+await authService.login(email, password);
 
 // Check auth
-const { isAuthenticated, user } = useAuth()
+const { isAuthenticated, user } = useAuth();
 
 // Logout
-authService.logout()
+authService.logout();
 
 // Token management
-tokenStorage.getAccessToken()
-tokenStorage.setTokens(access, refresh)
+tokenStorage.getAccessToken();
+tokenStorage.setTokens(access, refresh);
 ```
 
 ---
@@ -262,6 +280,7 @@ tokenStorage.setTokens(access, refresh)
 ## ✅ What's Included
 
 **Automatic Features** ✅
+
 - JWT injection in all API requests
 - 401 error handling with token refresh
 - 403 error handling with redirect
@@ -270,6 +289,7 @@ tokenStorage.setTokens(access, refresh)
 - User role and permission support
 
 **Pages Ready to Use** ✅
+
 - Home page (public)
 - Login page (public)
 - Register page (public)
@@ -278,6 +298,7 @@ tokenStorage.setTokens(access, refresh)
 - Access denied page (error)
 
 **Configuration Ready** ✅
+
 - TypeScript strict mode
 - TailwindCSS for styling
 - ESLint for code quality
@@ -285,6 +306,7 @@ tokenStorage.setTokens(access, refresh)
 - Next.js optimized build
 
 **Documentation Ready** ✅
+
 - Setup guide
 - Testing guide
 - Architecture diagrams
@@ -297,23 +319,27 @@ tokenStorage.setTokens(access, refresh)
 ## 💡 Key Decisions
 
 **Why Local Storage?**
+
 - Simple setup for current phase
 - Good for single-device apps
 - Session-based features ready for upgrade
 
 **Why Interceptors?**
+
 - Global token management
 - Centralized error handling
 - Automatic 401 refresh mechanism
 - Clean separation of concerns
 
 **Why TailwindCSS?**
+
 - Fast development
 - Responsive by default
 - Utility-first approach
 - Easy theme customization
 
 **Why Next.js?**
+
 - Built-in SSR ready
 - File-based routing
 - Optimized performance
@@ -330,18 +356,20 @@ Your Task #19 is successful when:
 ✅ JWT injected: DevTools Network → Authorization header present  
 ✅ 401 handled: Clear token → Automatic redirect to login  
 ✅ Protected routes: No token → Auto redirect to login  
-✅ All docs accessible: Find answers in documentation  
+✅ All docs accessible: Find answers in documentation
 
 ---
 
 ## 🔗 Related Resources
 
 **Backend Integration** (Task #20 focus)
+
 - Ensure backend API running at http://localhost:3001
 - Check CORS headers allow frontend origin
 - Verify auth endpoints exist: /auth/login, /auth/register, /auth/refresh-token
 
 **Next Phase** (Task #20)
+
 - Implement catalog API integration
 - Build ticket booking workflow
 - Add payment gateway UI
@@ -351,23 +379,24 @@ Your Task #19 is successful when:
 
 ## 📊 Documentation Statistics
 
-| Document | Length | Focus |
-|----------|--------|-------|
-| 00_TASK19_OVERVIEW.md | ~400 lines | Executive summary |
-| 01_RUNNING_AND_TESTING.md | ~400 lines | Operations & testing |
-| 02_WORK_SUMMARY.md | ~350 lines | Work breakdown |
-| GETTING_STARTED.md | ~300 lines | Quick start |
-| README.md | ~300 lines | Project overview |
-| ARCHITECTURE.md | ~350 lines | Architecture details |
-| USER_FLOWS.md | ~250 lines | Visual workflows |
-| INTEGRATION_TESTING.md | ~400 lines | Test procedures |
-| **Total** | **~2,750 lines** | **Comprehensive** |
+| Document                  | Length           | Focus                |
+| ------------------------- | ---------------- | -------------------- |
+| 00_TASK19_OVERVIEW.md     | ~400 lines       | Executive summary    |
+| 01_RUNNING_AND_TESTING.md | ~400 lines       | Operations & testing |
+| 02_WORK_SUMMARY.md        | ~350 lines       | Work breakdown       |
+| GETTING_STARTED.md        | ~300 lines       | Quick start          |
+| README.md                 | ~300 lines       | Project overview     |
+| ARCHITECTURE.md           | ~350 lines       | Architecture details |
+| USER_FLOWS.md             | ~250 lines       | Visual workflows     |
+| INTEGRATION_TESTING.md    | ~400 lines       | Test procedures      |
+| **Total**                 | **~2,750 lines** | **Comprehensive**    |
 
 ---
 
 ## 🎉 You're Ready!
 
 Everything is set up and ready to:
+
 1. ✅ Run the frontend
 2. ✅ Test the authentication
 3. ✅ Understand the architecture

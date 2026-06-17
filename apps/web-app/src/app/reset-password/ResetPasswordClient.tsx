@@ -10,7 +10,10 @@ import { AlertCircle, CheckCircle2, Loader2, Lock } from "lucide-react";
 export default function ResetPasswordClient() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const urlToken = useMemo(() => searchParams?.get("token") ?? null, [searchParams]);
+  const urlToken = useMemo(
+    () => searchParams?.get("token") ?? null,
+    [searchParams],
+  );
 
   const [token, setToken] = useState<string | null>(null);
   const [newPassword, setNewPassword] = useState("");
@@ -30,7 +33,9 @@ export default function ResetPasswordClient() {
     setError(null);
 
     if (!token) {
-      setError("Missing recovery token. Please request a new password reset link.");
+      setError(
+        "Missing recovery token. Please request a new password reset link.",
+      );
       return;
     }
     if (newPassword !== confirmPassword) {
@@ -51,7 +56,11 @@ export default function ResetPasswordClient() {
         router.push("/login");
       }, 3000);
     } catch (err: any) {
-      setError(err?.response?.data?.message || err?.message || "Failed to reset password");
+      setError(
+        err?.response?.data?.message ||
+          err?.message ||
+          "Failed to reset password",
+      );
       setLoading(false);
     }
   };
@@ -70,7 +79,10 @@ export default function ResetPasswordClient() {
           <p className="text-muted-foreground">
             You will be redirected to the sign in page momentarily.
           </p>
-          <a href="/login" className="ticketbox-button-primary mt-4 w-full sm:w-auto">
+          <a
+            href="/login"
+            className="ticketbox-button-primary mt-4 w-full sm:w-auto"
+          >
             Go to sign in now
           </a>
         </div>
@@ -92,9 +104,11 @@ export default function ResetPasswordClient() {
             <p>{error}</p>
           </div>
         )}
-        
+
         <div className="space-y-1">
-          <label className="ticketbox-label" htmlFor="password">New password</label>
+          <label className="ticketbox-label" htmlFor="password">
+            New password
+          </label>
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <Lock className="h-5 w-5 text-muted-foreground" />
@@ -110,11 +124,15 @@ export default function ResetPasswordClient() {
               disabled={loading}
             />
           </div>
-          <p className="text-xs text-muted-foreground mt-1">Must be at least 8 characters.</p>
+          <p className="text-xs text-muted-foreground mt-1">
+            Must be at least 8 characters.
+          </p>
         </div>
-        
+
         <div className="space-y-1">
-          <label className="ticketbox-label" htmlFor="confirmPassword">Confirm password</label>
+          <label className="ticketbox-label" htmlFor="confirmPassword">
+            Confirm password
+          </label>
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <Lock className="h-5 w-5 text-muted-foreground" />
@@ -131,15 +149,18 @@ export default function ResetPasswordClient() {
             />
           </div>
         </div>
-        
-        <button className="ticketbox-button-primary w-full mt-4" disabled={loading}>
+
+        <button
+          className="ticketbox-button-primary w-full mt-4"
+          disabled={loading}
+        >
           {loading ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               Resetting password...
             </>
           ) : (
-            'Reset password'
+            "Reset password"
           )}
         </button>
       </form>

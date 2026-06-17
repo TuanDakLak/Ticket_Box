@@ -101,6 +101,7 @@
 ## Authentication Flow
 
 ### Login Flow
+
 ```
 User Input (email, password)
          │
@@ -130,6 +131,7 @@ User Input (email, password)
 ```
 
 ### Protected Route Access
+
 ```
 User navigates to /dashboard
          │
@@ -144,6 +146,7 @@ User navigates to /dashboard
 ```
 
 ### API Request with Token
+
 ```
 API Request (e.g., GET /concerts)
          │
@@ -170,6 +173,7 @@ API Request (e.g., GET /concerts)
 ```
 
 ### Logout Flow
+
 ```
 User clicks Logout
          │
@@ -246,6 +250,7 @@ HTTP Request
 ## State Management
 
 ### useAuth Hook State
+
 ```typescript
 {
   isAuthenticated: boolean,    // User has valid token
@@ -262,6 +267,7 @@ HTTP Request
 ```
 
 ### Token Storage
+
 ```
 localStorage:
 {
@@ -361,11 +367,13 @@ Frontend                          Backend
 ## Performance Optimization Notes
 
 ### Caching Strategy
+
 - Tokens cached in localStorage
 - Can add SWR/React Query for API response caching
 - User data cached in state
 
 ### Bundle Size
+
 - Current: ~200KB (gzipped)
 - Can reduce with:
   - Tree-shaking unused code
@@ -373,6 +381,7 @@ Frontend                          Backend
   - Image optimization
 
 ### Network
+
 - Timeout: 30s
 - Can implement retry logic for failed requests
 - Can add request debouncing for repeated queries
@@ -405,6 +414,7 @@ Edge Cases:
 ---
 
 This architecture ensures:
+
 - **Security**: Tokens properly injected and validated
 - **Reliability**: Error handling prevents cascading failures
 - **User Experience**: Automatic redirects and error messages

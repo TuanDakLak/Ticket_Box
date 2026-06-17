@@ -11,6 +11,7 @@
 ### Công việc đã hoàn thành
 
 **Task #19** yêu cầu xây dựng nền tảng frontend với:
+
 - ✅ Next.js 15 application với TypeScript
 - ✅ Axios HTTP client với interceptors tự động
 - ✅ JWT authentication (đăng nhập/đăng ký)
@@ -80,6 +81,7 @@ apps/web-app/                                          # Frontend Next.js app
 ## 🔐 CÁC TÍNH NĂNG CHÍNH
 
 ### 1. Xác thực người dùng (Authentication)
+
 ```
 ✅ JWT Token-based authentication
 ✅ Bearer token tự động injection vào mọi request
@@ -89,6 +91,7 @@ apps/web-app/                                          # Frontend Next.js app
 ```
 
 ### 2. HTTP Client (Axios Interceptors)
+
 ```
 REQUEST INTERCEPTOR:
   ✅ Tự động lấy JWT từ localStorage
@@ -103,6 +106,7 @@ RESPONSE INTERCEPTOR:
 ```
 
 ### 3. Protected Routes
+
 ```
 ✅ /dashboard (chỉ authenticated users)
 ✅ Tự động redirect nếu không có token
@@ -111,6 +115,7 @@ RESPONSE INTERCEPTOR:
 ```
 
 ### 4. Error Handling
+
 ```
 ✅ 401 Unauthorized → Refresh token hoặc redirect login
 ✅ 403 Forbidden → Redirect /access-denied
@@ -158,6 +163,7 @@ npm run dev
 ## 🧪 CÁC TEST CƠBẢN
 
 ### Test 1: Đăng nhập (2 phút)
+
 ```
 1. Vào http://localhost:3000/login
 2. Nhập: test@ticketbox.com / SecurePass123
@@ -166,6 +172,7 @@ npm run dev
 ```
 
 ### Test 2: Xác minh JWT (1 phút)
+
 ```
 1. Đăng nhập thành công
 2. F12 → Network tab
@@ -175,6 +182,7 @@ npm run dev
 ```
 
 ### Test 3: Error 401 Handling (2 phút)
+
 ```
 1. F12 → Console
 2. Chạy: localStorage.removeItem('access_token')
@@ -183,6 +191,7 @@ npm run dev
 ```
 
 ### Test 4: Protected Routes (1 phút)
+
 ```
 1. localStorage.clear()
 2. Vào http://localhost:3000/dashboard
@@ -203,6 +212,7 @@ docs/task19/
 ```
 
 **Ngoài ra còn trong `apps/web-app/`**:
+
 - README.md - Project overview
 - GETTING_STARTED.md - Quick start
 - INTEGRATION_TESTING.md - 10 test scenarios
@@ -214,17 +224,17 @@ docs/task19/
 
 ## 📊 CON SỐ THỐNG KÊ
 
-| Chỉ số | Giá trị |
-|--------|---------|
-| Tổng files | 32 |
-| TypeScript/React files | 14 |
-| Configuration files | 8 |
-| Documentation files | 8 |
-| Pages/Components | 8 |
-| Lines of code | 2,500+ |
-| Lines of documentation | 3,500+ |
-| TypeScript coverage | 100% |
-| Bundle size | ~200KB (gzipped) |
+| Chỉ số                 | Giá trị          |
+| ---------------------- | ---------------- |
+| Tổng files             | 32               |
+| TypeScript/React files | 14               |
+| Configuration files    | 8                |
+| Documentation files    | 8                |
+| Pages/Components       | 8                |
+| Lines of code          | 2,500+           |
+| Lines of documentation | 3,500+           |
+| TypeScript coverage    | 100%             |
+| Bundle size            | ~200KB (gzipped) |
 
 ---
 
@@ -301,7 +311,7 @@ SUCCESS = All checkboxes ☑
 ✅ **API client**: Axios configured with interceptors  
 ✅ **State management**: useAuth hook ready  
 ✅ **Documentation**: 8 comprehensive docs  
-✅ **Testing guide**: 10 test scenarios documented  
+✅ **Testing guide**: 10 test scenarios documented
 
 ### Task #20 nên tập trung vào
 
@@ -325,15 +335,15 @@ SUCCESS = All checkboxes ☑
 
 ### Tôi muốn...
 
-| Điều cần | Đọc file |
-|---------|----------|
-| Hiểu nhanh task | `00_TASK19_OVERVIEW.md` |
-| Chạy app | `01_RUNNING_AND_TESTING.md` |
-| Biết cái gì được build | `02_WORK_SUMMARY.md` |
-| Hiểu architecture | `ARCHITECTURE.md` (apps/web-app) |
-| Xem user flows | `USER_FLOWS.md` (apps/web-app) |
-| Xem test procedures | `INTEGRATION_TESTING.md` (apps/web-app) |
-| Chuẩn bị Task #20 | `02_WORK_SUMMARY.md` |
+| Điều cần               | Đọc file                                |
+| ---------------------- | --------------------------------------- |
+| Hiểu nhanh task        | `00_TASK19_OVERVIEW.md`                 |
+| Chạy app               | `01_RUNNING_AND_TESTING.md`             |
+| Biết cái gì được build | `02_WORK_SUMMARY.md`                    |
+| Hiểu architecture      | `ARCHITECTURE.md` (apps/web-app)        |
+| Xem user flows         | `USER_FLOWS.md` (apps/web-app)          |
+| Xem test procedures    | `INTEGRATION_TESTING.md` (apps/web-app) |
+| Chuẩn bị Task #20      | `02_WORK_SUMMARY.md`                    |
 
 ---
 
@@ -342,7 +352,7 @@ SUCCESS = All checkboxes ☑
 **Frontend Code**: `apps/web-app/`  
 **Documentation**: `docs/task19/`  
 **Development**: `npm run dev` → http://localhost:3000  
-**Backend Required**: http://localhost:3001  
+**Backend Required**: http://localhost:3001
 
 **Start Reading**: `docs/task19/README.md`
 
@@ -351,6 +361,7 @@ SUCCESS = All checkboxes ☑
 ## ✨ HIGHLIGHTS
 
 ### Authentication Flow
+
 ```
 User Input (email, password)
     ↓
@@ -366,6 +377,7 @@ If 401 → Refresh token or redirect login
 ```
 
 ### Protected Route Flow
+
 ```
 User accesses /dashboard
     ↓
@@ -377,6 +389,7 @@ Token expired? → Refresh automatically
 ```
 
 ### Error Handling
+
 ```
 API Response
     ↓
@@ -396,6 +409,7 @@ Component receives data
 **Task #19 Status**: ✅ **COMPLETE**
 
 **Deliverables**:
+
 - ✅ 32 files created and configured
 - ✅ ~2,500 lines of production code
 - ✅ ~3,500 lines of comprehensive documentation
@@ -404,6 +418,7 @@ Component receives data
 - ✅ Production-ready architecture
 
 **Ready For**:
+
 - ✅ Code review
 - ✅ PR to develop branch
 - ✅ Team collaboration
@@ -415,6 +430,7 @@ Component receives data
 ## 📞 SUPPORT
 
 **Có thắc mắc?** Xem trong `docs/task19/` folder:
+
 - Tóm tắt nhanh → `README.md`
 - Cách chạy app → `01_RUNNING_AND_TESTING.md`
 - Chi tiết công việc → `02_WORK_SUMMARY.md`

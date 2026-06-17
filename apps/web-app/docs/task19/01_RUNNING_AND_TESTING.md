@@ -3,17 +3,20 @@
 ## 🚀 Quick Start (5 Minutes)
 
 ### Prerequisites
+
 - Node.js 18+
 - Backend API running at `http://localhost:3001`
 - Git
 
 ### Step 1: Install Dependencies
+
 ```bash
 cd apps/web-app
 npm install
 ```
 
 ### Step 2: Configure Environment (Optional)
+
 ```bash
 # Linux/Mac
 cp .env.example .env.local
@@ -26,11 +29,13 @@ copy .env.example .env.local
 ```
 
 ### Step 3: Start Development Server
+
 ```bash
 npm run dev
 ```
 
 Expected output:
+
 ```
 > web-app@0.1.0 dev
 > next dev
@@ -41,6 +46,7 @@ Expected output:
 ```
 
 ### Step 4: Open in Browser
+
 - Navigate to: `http://localhost:3000`
 - You should see the TicketBox home page
 
@@ -53,6 +59,7 @@ Expected output:
 **Objective**: Verify login flow and token storage
 
 **Steps**:
+
 1. On home page, click "Sign In" button
 2. Navigate to `/login` (you should see login form)
 3. Enter test credentials:
@@ -64,15 +71,17 @@ Expected output:
 5. Should redirect to dashboard
 
 **Verify Success**:
+
 - ✅ No error message appears
 - ✅ Redirected to `/dashboard`
 - ✅ User email displayed on dashboard
 - ✅ "Logout" button visible
 
 **Check localStorage**:
+
 ```javascript
 // Open DevTools Console and run:
-localStorage.getItem('access_token')
+localStorage.getItem("access_token");
 // Should return a JWT string starting with: eyJ0eXAi...
 ```
 
@@ -83,6 +92,7 @@ localStorage.getItem('access_token')
 **Objective**: Confirm Authorization header is automatically added
 
 **Steps**:
+
 1. Login successfully (see Test 1)
 2. Open DevTools with F12
 3. Go to Network tab
@@ -92,11 +102,13 @@ localStorage.getItem('access_token')
 7. Go to "Headers" section
 
 **Verify Success**:
+
 - ✅ Request shows header: `Authorization: Bearer eyJ0eXA...`
 - ✅ Token value is present and correct
 - ✅ All requests include this header
 
 **Screenshot Example**:
+
 ```
 Request Headers:
   Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...
@@ -111,16 +123,18 @@ Request Headers:
 **Objective**: Verify automatic redirect when token is invalid
 
 **Steps**:
+
 1. Login successfully
 2. Open DevTools Console (F12 → Console tab)
 3. Clear the access token:
    ```javascript
-   localStorage.removeItem('access_token');
+   localStorage.removeItem("access_token");
    ```
 4. Refresh the page (F5)
 5. Try to navigate to dashboard
 
 **Verify Success**:
+
 - ✅ Page briefly shows "Loading..."
 - ✅ Automatically redirects to `/login`
 - ✅ No error message in console
@@ -133,6 +147,7 @@ Request Headers:
 **Objective**: Verify unauthenticated users can't access protected pages
 
 **Steps**:
+
 1. Clear all storage:
    ```javascript
    localStorage.clear();
@@ -142,6 +157,7 @@ Request Headers:
 4. Observe behavior
 
 **Verify Success**:
+
 - ✅ Brief loading state appears
 - ✅ Redirected to login page
 - ✅ Login form displayed
@@ -154,6 +170,7 @@ Request Headers:
 **Objective**: Verify new user can register
 
 **Steps**:
+
 1. On home page, click "Register" button
 2. Fill in registration form:
    ```
@@ -166,6 +183,7 @@ Request Headers:
 4. Observe redirect
 
 **Verify Success**:
+
 - ✅ Form validates password confirmation match
 - ✅ Minimum 8 character requirement checked
 - ✅ Redirected to dashboard after successful registration
@@ -178,18 +196,20 @@ Request Headers:
 **Objective**: Verify logout clears tokens and redirects
 
 **Steps**:
+
 1. Login successfully
 2. On dashboard, click "Logout" button
 3. Observe redirect behavior
 
 **Verify Success**:
+
 - ✅ Redirected to home page
 - ✅ Navigation shows "Sign In" and "Register" buttons
 - ✅ localStorage is cleared:
-   ```javascript
-   localStorage.getItem('access_token')        // Returns null
-   localStorage.getItem('refresh_token')       // Returns null
-   ```
+  ```javascript
+  localStorage.getItem("access_token"); // Returns null
+  localStorage.getItem("refresh_token"); // Returns null
+  ```
 
 ---
 
@@ -198,16 +218,21 @@ Request Headers:
 **Objective**: Verify queue mechanism during token refresh
 
 **Steps**:
+
 1. Modify `src/services/api.ts` to add logging:
    ```typescript
    // Add to response interceptor
-   console.log('Response interceptor triggered for status:', error.response?.status);
+   console.log(
+     "Response interceptor triggered for status:",
+     error.response?.status,
+   );
    ```
 2. Open DevTools Console
 3. Login and navigate quickly to multiple pages
 4. Trigger 401 error by clearing token mid-request
 
 **Verify Success**:
+
 - ✅ Single token refresh attempt (not multiple)
 - ✅ All requests queued during refresh
 - ✅ All requests retried after refresh
@@ -222,6 +247,7 @@ Request Headers:
 **Tests**:
 
 **A. Invalid Login**:
+
 1. Go to `/login`
 2. Enter incorrect credentials
 3. Click "Sign In"
@@ -229,6 +255,7 @@ Request Headers:
 Expected: Error message appears
 
 **B. Registration - Mismatched Passwords**:
+
 1. Go to `/register`
 2. Password: `Test123456`
 3. Confirm: `Different123`
@@ -237,6 +264,7 @@ Expected: Error message appears
 Expected: Error message: "Passwords do not match"
 
 **C. Registration - Short Password**:
+
 1. Go to `/register`
 2. Password: `Test123`
 3. Confirm: `Test123`
@@ -320,28 +348,32 @@ npm run lint
 ### In Browser DevTools
 
 **View Current Token**:
+
 ```javascript
 // Console
-localStorage.getItem('access_token')
+localStorage.getItem("access_token");
 ```
 
 **Decode Token to See Content**:
+
 ```javascript
 function decodeToken(token) {
-  const parts = token.split('.');
+  const parts = token.split(".");
   return JSON.parse(atob(parts[1]));
 }
-const decoded = decodeToken(localStorage.getItem('access_token'));
+const decoded = decodeToken(localStorage.getItem("access_token"));
 console.log(decoded);
 ```
 
 **Simulate 401 Error**:
+
 ```javascript
-localStorage.removeItem('access_token');
+localStorage.removeItem("access_token");
 // Next request will get 401
 ```
 
 **Check All Requests**:
+
 1. Open DevTools → Network tab
 2. Check the "Authorization" header in request headers
 3. Should show: `Authorization: Bearer eyJ...`
@@ -360,12 +392,14 @@ npm run start:api
 ### CORS Error?
 
 **Error Message**:
+
 ```
-Access to XMLHttpRequest at 'http://localhost:3001/api/...' 
+Access to XMLHttpRequest at 'http://localhost:3001/api/...'
 from origin 'http://localhost:3000' has been blocked by CORS policy
 ```
 
 **Solution**:
+
 - Verify backend is running
 - Check backend allows `http://localhost:3000` in CORS config
 - Try adding to backend: `@UseCors()`
@@ -377,6 +411,7 @@ from origin 'http://localhost:3000' has been blocked by CORS policy
 ### Full Setup (Both Frontend + Backend)
 
 **Terminal 1: Backend**
+
 ```bash
 cd apps/backend-api
 npm run start:api
@@ -384,6 +419,7 @@ npm run start:api
 ```
 
 **Terminal 2: Frontend**
+
 ```bash
 cd apps/web-app
 npm install
@@ -392,6 +428,7 @@ npm run dev
 ```
 
 **Terminal 3: Testing**
+
 ```bash
 # Run manual tests from previous section
 # Or open browser to http://localhost:3000
@@ -404,6 +441,7 @@ npm run dev
 For detailed test scenarios, see: `INTEGRATION_TESTING.md`
 
 These include:
+
 1. JWT Token Injection verification
 2. 401 Unauthorized handling
 3. 403 Forbidden handling
@@ -448,23 +486,27 @@ find src -type f -name "*.ts*" | wc -l  # Should show 14 files
 ### Expected Behaviors
 
 **Login Success**:
+
 - No error message
 - Redirect to `/dashboard`
 - User info displayed
 - localStorage has tokens
 
 **Login Failure**:
+
 - Red error message shown
 - Form remains on page
 - Can retry login
 - No tokens stored
 
 **Protected Route Access**:
+
 - User with valid token → See dashboard
 - User without token → Redirect to `/login`
 - User with expired token → Auto-refresh or redirect
 
 **API Requests**:
+
 - All requests include Authorization header
 - Token format: `Bearer <JWT_TOKEN>`
 - Failed requests properly handled
@@ -486,7 +528,7 @@ find src -type f -name "*.ts*" | wc -l  # Should show 14 files
 
 - `00_TASK19_OVERVIEW.md` - Task summary
 - `INTEGRATION_TESTING.md` - 10 detailed test scenarios
-- `GETTING_STARTED.md` - Setup guide  
+- `GETTING_STARTED.md` - Setup guide
 - `ARCHITECTURE.md` - Architecture details
 - `README.md` (in apps/web-app) - Project README
 
@@ -494,15 +536,15 @@ find src -type f -name "*.ts*" | wc -l  # Should show 14 files
 
 ## 💬 Quick Troubleshooting
 
-| Issue | Solution |
-|-------|----------|
-| Port 3000 already in use | `lsof -i :3000` then kill process |
-| Dependencies error | Delete node_modules, run `npm install` |
-| TypeScript errors | Run `npm run type-check` to see details |
-| API 404 errors | Ensure backend running at http://localhost:3001 |
-| Token not injecting | Check browser console for errors, verify token in localStorage |
-| Blank page after login | Check browser console (F12) for errors |
-| Build fails | Run `npm run type-check` to identify issues |
+| Issue                    | Solution                                                       |
+| ------------------------ | -------------------------------------------------------------- |
+| Port 3000 already in use | `lsof -i :3000` then kill process                              |
+| Dependencies error       | Delete node_modules, run `npm install`                         |
+| TypeScript errors        | Run `npm run type-check` to see details                        |
+| API 404 errors           | Ensure backend running at http://localhost:3001                |
+| Token not injecting      | Check browser console for errors, verify token in localStorage |
+| Blank page after login   | Check browser console (F12) for errors                         |
+| Build fails              | Run `npm run type-check` to identify issues                    |
 
 ---
 

@@ -27,7 +27,11 @@ export default function AccountSecurityPage() {
       setNewPassword("");
       setConfirmPassword("");
     } catch (err: any) {
-      alert(err?.response?.data?.message || err?.message || "Failed to change password");
+      alert(
+        err?.response?.data?.message ||
+          err?.message ||
+          "Failed to change password",
+      );
     } finally {
       setLoading(false);
     }
@@ -49,7 +53,9 @@ export default function AccountSecurityPage() {
       >
         <div className="space-y-6">
           <section className="rounded-[28px] border border-slate-200 bg-white p-6">
-            <h2 className="text-xl font-black text-slate-900">Change password</h2>
+            <h2 className="text-xl font-black text-slate-900">
+              Change password
+            </h2>
             <div className="mt-5 space-y-4">
               <input
                 className="ticketbox-input"
@@ -86,7 +92,11 @@ export default function AccountSecurityPage() {
           <section className="rounded-[28px] border border-slate-200 bg-[#f8fafc] p-6">
             <h2 className="text-xl font-black text-slate-900">Sessions</h2>
             <div className="mt-5 flex flex-wrap gap-3">
-              <button type="button" className="ticketbox-button-secondary" onClick={onLogout}>
+              <button
+                type="button"
+                className="ticketbox-button-secondary"
+                onClick={onLogout}
+              >
                 Logout
               </button>
             </div>

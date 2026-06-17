@@ -37,7 +37,7 @@ const processQueue = (error: unknown, token: string | null = null): void => {
 export async function fetchClient<T>(
   endpoint: string,
   options: RequestInit = {},
-  _retry = false
+  _retry = false,
 ): Promise<T> {
   const url = `${API_BASE_URL}${endpoint}`;
   const token = tokenStorage.getAccessToken();
@@ -95,7 +95,10 @@ export async function fetchClient<T>(
 
             if (refreshResp.ok) {
               const refreshData = await refreshResp.json();
-              tokenStorage.setTokens(refreshData.accessToken, refreshData.refreshToken);
+              tokenStorage.setTokens(
+                refreshData.accessToken,
+                refreshData.refreshToken,
+              );
               processQueue(null, refreshData.accessToken);
             } else {
               throw new Error("Invalid refresh response");
@@ -114,14 +117,21 @@ export async function fetchClient<T>(
 
         // Wait for the token refresh to complete
         return new Promise<T>((resolve, reject) => {
-          failedQueue.push({ resolve: resolve as (value?: unknown) => void, reject });
+          failedQueue.push({
+            resolve: resolve as (value?: unknown) => void,
+            reject,
+          });
         })
           .then((newToken) => {
             const t = newToken as string | null;
             if (t) {
               const newHeaders = new Headers(config.headers);
               newHeaders.set("Authorization", `Bearer ${t}`);
-              return fetchClient<T>(endpoint, { ...config, headers: newHeaders }, true);
+              return fetchClient<T>(
+                endpoint,
+                { ...config, headers: newHeaders },
+                true,
+              );
             }
             throw new FetchError("Unauthorized", response, errorData);
           })
@@ -139,19 +149,23 @@ export async function fetchClient<T>(
         throw new FetchError("Forbidden", response, errorData);
       }
 
-      throw new FetchError(errorData.message || "Fetch failed", response, errorData);
+      throw new FetchError(
+        errorData.message || "Fetch failed",
+        response,
+        errorData,
+      );
     }
 
     // Return parsed JSON if successful
     if (response.status === 204) {
       return {} as T;
     }
-    
+
     const text = await response.text();
     if (!text) {
       return {} as T;
     }
-    
+
     try {
       return JSON.parse(text) as T;
     } catch {

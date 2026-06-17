@@ -156,10 +156,12 @@ export async function getConcerts(query: ConcertQuery = {}) {
     params.set("search", query.search.trim());
   }
 
-  const isServer = typeof window === 'undefined';
+  const isServer = typeof window === "undefined";
   const baseUrl = isServer
-    ? (process.env.REMOTE_API_URL || 'https://api.ticketbox.retrobit.io.vn').replace(/\/+$/, '')
-    : '/api/proxy';
+    ? (
+        process.env.REMOTE_API_URL || "https://api.ticketbox.retrobit.io.vn"
+      ).replace(/\/+$/, "")
+    : "/api/proxy";
   const url = `${baseUrl}/concerts?${params.toString()}`;
 
   const response = await fetch(url);
@@ -186,10 +188,12 @@ export async function getConcerts(query: ConcertQuery = {}) {
 }
 
 export async function getConcertById(id: string) {
-  const isServer = typeof window === 'undefined';
+  const isServer = typeof window === "undefined";
   const baseUrl = isServer
-    ? (process.env.REMOTE_API_URL || 'https://api.ticketbox.retrobit.io.vn').replace(/\/+$/, '')
-    : '/api/proxy';
+    ? (
+        process.env.REMOTE_API_URL || "https://api.ticketbox.retrobit.io.vn"
+      ).replace(/\/+$/, "")
+    : "/api/proxy";
   const url = `${baseUrl}/concerts/${id}`;
 
   const response = await fetch(url);
@@ -236,7 +240,10 @@ export async function createConcert(body: CreateConcertDto) {
   return apiClient.post<any>("/concerts", body);
 }
 
-export async function updateConcert(id: string, body: Partial<CreateConcertDto>) {
+export async function updateConcert(
+  id: string,
+  body: Partial<CreateConcertDto>,
+) {
   return apiClient.patch<any>(`/concerts/${id}`, body);
 }
 

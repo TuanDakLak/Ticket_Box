@@ -330,7 +330,7 @@ function EventForm() {
                     <div className="mt-4 flex text-sm leading-6 text-muted-foreground justify-center">
                       <label className="relative cursor-pointer rounded-md font-semibold text-primary focus-within:outline-none hover:text-primary/80">
                         <span>Upload a file</span>
-                        <input className="sr-only" type="file"  />
+                        <input className="sr-only" type="file" />
                       </label>
                       <p className="pl-1">or drag and drop</p>
                     </div>

@@ -99,8 +99,8 @@ export function HeroCarousel() {
   const description = loading
     ? "We are loading the latest concert from the database."
     : featuredConcert?.aiBio ||
-    featuredConcert?.description ||
-    "No featured concert is available right now.";
+      featuredConcert?.description ||
+      "No featured concert is available right now.";
   const ticketTier = featuredConcert?.ticketTiers?.[0];
   const priceLabel = ticketTier
     ? `${ticketTier.name} • ${formatConcertCurrency(ticketTier.price)}`
@@ -126,9 +126,7 @@ export function HeroCarousel() {
           <div className="flex flex-wrap gap-3">
             <Button
               href={
-                featuredConcert
-                  ? `/concerts/${featuredConcert.id}`
-                  : "/catalog"
+                featuredConcert ? `/concerts/${featuredConcert.id}` : "/catalog"
               }
               variant="secondary"
             >
@@ -259,7 +257,13 @@ export function ConcertCard({
 
 export function SeatMapSvg({ className = "" }: { className?: string }) {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" width="100%" height="100%" className={className}>
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 800 400"
+      width="100%"
+      height="100%"
+      className={className}
+    >
       <style>{`
         .zone {
           cursor: pointer;
@@ -275,24 +279,110 @@ export function SeatMapSvg({ className = "" }: { className?: string }) {
       `}</style>
 
       <rect x="250" y="20" width="300" height="40" fill="#333333" rx="5" />
-      <text x="400" y="45" fill="#ffffff" fontFamily="Arial" fontSize="16" fontWeight="bold" textAnchor="middle">STAGE</text>
+      <text
+        x="400"
+        y="45"
+        fill="#ffffff"
+        fontFamily="Arial"
+        fontSize="16"
+        fontWeight="bold"
+        textAnchor="middle"
+      >
+        STAGE
+      </text>
 
-      <rect id="zone-svip-01" className="zone" x="250" y="90" width="300" height="80" fill="#ff007f" rx="8" />
-      <text x="400" y="135" fill="#ffffff" fontFamily="Arial" fontSize="18" fontWeight="bold" textAnchor="middle" pointerEvents="none">SUPER VIP (SVIP)</text>
+      <rect
+        id="zone-svip-01"
+        className="zone"
+        x="250"
+        y="90"
+        width="300"
+        height="80"
+        fill="#ff007f"
+        rx="8"
+      />
+      <text
+        x="400"
+        y="135"
+        fill="#ffffff"
+        fontFamily="Arial"
+        fontSize="18"
+        fontWeight="bold"
+        textAnchor="middle"
+        pointerEvents="none"
+      >
+        SUPER VIP (SVIP)
+      </text>
 
-      <polygon id="zone-vip-left" className="zone" points="80,190 230,190 230,290 120,290" fill="#ffaa00" />
-      <text x="160" y="245" fill="#ffffff" fontFamily="Arial" fontSize="16" fontWeight="bold" textAnchor="middle" pointerEvents="none">VIP LEFT</text>
+      <polygon
+        id="zone-vip-left"
+        className="zone"
+        points="80,190 230,190 230,290 120,290"
+        fill="#ffaa00"
+      />
+      <text
+        x="160"
+        y="245"
+        fill="#ffffff"
+        fontFamily="Arial"
+        fontSize="16"
+        fontWeight="bold"
+        textAnchor="middle"
+        pointerEvents="none"
+      >
+        VIP LEFT
+      </text>
 
-      <polygon id="zone-vip-right" className="zone" points="570,190 720,190 680,290 570,290" fill="#ffaa00" />
-      <text x="640" y="245" fill="#ffffff" fontFamily="Arial" fontSize="16" fontWeight="bold" textAnchor="middle" pointerEvents="none">VIP RIGHT</text>
+      <polygon
+        id="zone-vip-right"
+        className="zone"
+        points="570,190 720,190 680,290 570,290"
+        fill="#ffaa00"
+      />
+      <text
+        x="640"
+        y="245"
+        fill="#ffffff"
+        fontFamily="Arial"
+        fontSize="16"
+        fontWeight="bold"
+        textAnchor="middle"
+        pointerEvents="none"
+      >
+        VIP RIGHT
+      </text>
 
-      <rect id="zone-ga-01" className="zone" x="250" y="190" width="300" height="100" fill="#007bff" rx="8" />
-      <text x="400" y="245" fill="#ffffff" fontFamily="Arial" fontSize="18" fontWeight="bold" textAnchor="middle" pointerEvents="none">STANDARD (GA)</text>
+      <rect
+        id="zone-ga-01"
+        className="zone"
+        x="250"
+        y="190"
+        width="300"
+        height="100"
+        fill="#007bff"
+        rx="8"
+      />
+      <text
+        x="400"
+        y="245"
+        fill="#ffffff"
+        fontFamily="Arial"
+        fontSize="18"
+        fontWeight="bold"
+        textAnchor="middle"
+        pointerEvents="none"
+      >
+        STANDARD (GA)
+      </text>
     </svg>
   );
 }
 
-export function InteractiveTicketSelector({ concert }: { concert: ConcertDetailItem }) {
+export function InteractiveTicketSelector({
+  concert,
+}: {
+  concert: ConcertDetailItem;
+}) {
   const router = useRouter();
   const [selectedIdx, setSelectedIdx] = useState(0);
   const [quantity, setQuantity] = useState(1);
@@ -354,7 +444,7 @@ export function InteractiveTicketSelector({ concert }: { concert: ConcertDetailI
       setError(
         error instanceof Error
           ? error.message
-          : "Unable to reserve tickets right now."
+          : "Unable to reserve tickets right now.",
       );
     } finally {
       setIsReserving(false);
@@ -390,7 +480,8 @@ export function InteractiveTicketSelector({ concert }: { concert: ConcertDetailI
                         {tier.name}
                       </p>
                       <p className="text-xs leading-6 text-on-surface-variant">
-                        Max: {tier.max_per_user} tickets per user • Total capacity: {tier.total_quantity} seats
+                        Max: {tier.max_per_user} tickets per user • Total
+                        capacity: {tier.total_quantity} seats
                       </p>
                     </div>
                     <div className="text-right">
@@ -416,7 +507,9 @@ export function InteractiveTicketSelector({ concert }: { concert: ConcertDetailI
           <div className="mt-8 border-t border-gray-100 pt-6 space-y-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-semibold text-gray-900">Select Quantity</p>
+                <p className="text-sm font-semibold text-gray-900">
+                  Select Quantity
+                </p>
                 <p className="text-xs text-gray-500 mt-1">
                   {maxQty > 0
                     ? `Limit: ${maxQty} tickets per user`
@@ -427,7 +520,7 @@ export function InteractiveTicketSelector({ concert }: { concert: ConcertDetailI
                 <button
                   type="button"
                   disabled={quantity <= 1}
-                  onClick={() => setQuantity(q => Math.max(1, q - 1))}
+                  onClick={() => setQuantity((q) => Math.max(1, q - 1))}
                   className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-white text-lg font-bold text-gray-700 disabled:opacity-30 disabled:pointer-events-none transition-colors"
                 >
                   −
@@ -438,7 +531,7 @@ export function InteractiveTicketSelector({ concert }: { concert: ConcertDetailI
                 <button
                   type="button"
                   disabled={maxQty < 1 || quantity >= maxQty}
-                  onClick={() => setQuantity(q => Math.min(maxQty, q + 1))}
+                  onClick={() => setQuantity((q) => Math.min(maxQty, q + 1))}
                   className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-white text-lg font-bold text-gray-700 disabled:opacity-30 disabled:pointer-events-none transition-colors"
                 >
                   +
@@ -448,12 +541,19 @@ export function InteractiveTicketSelector({ concert }: { concert: ConcertDetailI
 
             <div className="rounded-2xl bg-gray-50 p-4 border border-gray-100">
               <div className="flex items-center justify-between text-sm text-gray-600 mb-2">
-                <span>Subtotal ({quantity} x {formatConcertCurrency(selectedTier.price)})</span>
-                <span className="font-semibold">{formatConcertCurrency(selectedTier.price * quantity)}</span>
+                <span>
+                  Subtotal ({quantity} x{" "}
+                  {formatConcertCurrency(selectedTier.price)})
+                </span>
+                <span className="font-semibold">
+                  {formatConcertCurrency(selectedTier.price * quantity)}
+                </span>
               </div>
               <div className="flex items-center justify-between border-t border-gray-200 pt-2 text-base font-bold text-gray-900">
                 <span>Estimated Total</span>
-                <span>{formatConcertCurrency(selectedTier.price * quantity)}</span>
+                <span>
+                  {formatConcertCurrency(selectedTier.price * quantity)}
+                </span>
               </div>
             </div>
 
@@ -464,9 +564,7 @@ export function InteractiveTicketSelector({ concert }: { concert: ConcertDetailI
             >
               {isReserving ? "Reserving seats..." : "Confirm and Checkout"}
             </button>
-            {error ? (
-              <p className="text-xs text-rose-600">{error}</p>
-            ) : null}
+            {error ? <p className="text-xs text-rose-600">{error}</p> : null}
           </div>
         )}
       </div>
@@ -492,7 +590,8 @@ export function ConcertDetailHero({ concert }: { concert: ConcertDetailItem }) {
           </p>
           <div className="flex flex-wrap gap-3 text-sm text-on-surface-variant">
             <span className="rounded-full bg-surface-low px-4 py-2">
-              {date}{time ? ` · ${time}` : ""}
+              {date}
+              {time ? ` · ${time}` : ""}
             </span>
             <span className="rounded-full bg-surface-low px-4 py-2">
               {concert.venue}
@@ -531,7 +630,9 @@ export function TicketTierCard({
   href?: string;
 }) {
   const cardContent = (
-    <Card className={`p-5 card-lift transition-all duration-200 ${href ? "cursor-pointer hover:border-primary/50" : ""} ${highlight ? "border-primary bg-primary/5" : ""}`}>
+    <Card
+      className={`p-5 card-lift transition-all duration-200 ${href ? "cursor-pointer hover:border-primary/50" : ""} ${highlight ? "border-primary bg-primary/5" : ""}`}
+    >
       <div className="flex items-start justify-between gap-4">
         <div className="space-y-2">
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-on-surface-variant">
@@ -645,7 +746,6 @@ export function SeatLegendCard() {
     </Card>
   );
 }
-
 
 export function CustomerInfoForm() {
   return (
@@ -783,12 +883,21 @@ export function OrderSummaryCard() {
     setCheckoutState(null);
   }, [searchParams]);
 
-  const title = checkoutState?.concertTitle || searchParams.get("title") || orderSummary.event;
+  const title =
+    checkoutState?.concertTitle ||
+    searchParams.get("title") ||
+    orderSummary.event;
   const tierName = checkoutState?.tierName || searchParams.get("tierName");
-  const price = checkoutState ? String(checkoutState.price) : searchParams.get("price");
-  const qty = checkoutState ? String(checkoutState.quantity) : searchParams.get("qty");
-  const date = checkoutState?.date || searchParams.get("date") || orderSummary.date;
-  const venue = checkoutState?.venue || searchParams.get("venue") || orderSummary.venue;
+  const price = checkoutState
+    ? String(checkoutState.price)
+    : searchParams.get("price");
+  const qty = checkoutState
+    ? String(checkoutState.quantity)
+    : searchParams.get("qty");
+  const date =
+    checkoutState?.date || searchParams.get("date") || orderSummary.date;
+  const venue =
+    checkoutState?.venue || searchParams.get("venue") || orderSummary.venue;
 
   let subtotal: string = orderSummary.subtotal;
   let total: string = orderSummary.total;

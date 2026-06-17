@@ -36,5 +36,7 @@ export async function reserveTickets(body: ReserveTicketRequest) {
 }
 
 export async function getTicketInventory(categoryId: string) {
-  return apiClient.get<TicketInventoryState>(`/tickets/inventory/${categoryId}`);
+  return apiClient.get<TicketInventoryState>(
+    `/tickets/inventory/${categoryId}`,
+  );
 }

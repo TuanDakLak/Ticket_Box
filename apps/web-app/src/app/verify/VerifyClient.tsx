@@ -8,7 +8,10 @@ import { SecurityIllustration } from "@/components/ticketbox-illustrations";
 
 export default function VerifyClient() {
   const searchParams = useSearchParams();
-  const token = useMemo(() => searchParams?.get("token") ?? null, [searchParams]);
+  const token = useMemo(
+    () => searchParams?.get("token") ?? null,
+    [searchParams],
+  );
   const [status, setStatus] = useState<"idle" | "redirecting">("idle");
 
   useEffect(() => {
@@ -28,7 +31,9 @@ export default function VerifyClient() {
 
   return (
     <TicketBoxAuthShell
-      title={status === "redirecting" ? "Verifying your account" : "Account verified"}
+      title={
+        status === "redirecting" ? "Verifying your account" : "Account verified"
+      }
       description={
         status === "redirecting"
           ? "Redirecting to complete verification…"

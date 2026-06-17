@@ -73,6 +73,7 @@
 ## ✅ Implementation Details
 
 ### Axios Client (`src/services/api.ts`)
+
 - [x] Instance creation with config
 - [x] Request interceptor with JWT injection
 - [x] Response interceptor with error handling
@@ -80,6 +81,7 @@
 - [x] Redirect loop prevention
 
 ### Authentication Service (`src/services/auth.service.ts`)
+
 - [x] Login endpoint integration
 - [x] Register endpoint integration
 - [x] Logout functionality
@@ -87,6 +89,7 @@
 - [x] Token verification
 
 ### Token Management (`src/utils/token.utils.ts`)
+
 - [x] Get/set token operations
 - [x] Clear tokens functionality
 - [x] Token decoding
@@ -94,6 +97,7 @@
 - [x] localStorage operations with SSR safety
 
 ### Auth Hook (`src/hooks/useAuth.ts`)
+
 - [x] Authentication state management
 - [x] User information from decoded token
 - [x] Permission checking
@@ -101,12 +105,14 @@
 - [x] Logout functionality
 
 ### Protected Routes (`src/components/ProtectedRoute.tsx`)
+
 - [x] Automatic redirect for unauthenticated users
 - [x] Loading state during auth check
 - [x] Optional permission-based access
 - [x] No page flash on redirect
 
 ### Pages
+
 - [x] Home (`/page.tsx`)
 - [x] Login (`/login/page.tsx`)
 - [x] Register (`/register/page.tsx`)
@@ -115,6 +121,7 @@
 - [x] Access Denied (`/access-denied/page.tsx`)
 
 ### Configuration
+
 - [x] TypeScript (`tsconfig.json`)
 - [x] Next.js (`next.config.ts`)
 - [x] Tailwind CSS (`tailwind.config.ts`)
@@ -123,6 +130,7 @@
 - [x] Environment template (`.env.example`)
 
 ### Documentation
+
 - [x] README.md - Project overview
 - [x] INTEGRATION_TESTING.md - Testing guide
 - [x] IMPLEMENTATION_COMPLETE.md - Completion summary
@@ -146,25 +154,27 @@
 
 ## ✅ Error Handling
 
-| Error Type | Status | Handling | Result |
-|-----------|--------|----------|--------|
-| Invalid credentials | 401 (login) | Display error message | User stays on login |
-| Expired token | 401 | Refresh token, retry request | Transparent to user |
-| Insufficient permissions | 403 | Redirect to access-denied | User sees error page |
-| Network error | N/A | Display error message | User can retry |
-| Server error | 5xx | Display error message | User can retry |
+| Error Type               | Status      | Handling                     | Result               |
+| ------------------------ | ----------- | ---------------------------- | -------------------- |
+| Invalid credentials      | 401 (login) | Display error message        | User stays on login  |
+| Expired token            | 401         | Refresh token, retry request | Transparent to user  |
+| Insufficient permissions | 403         | Redirect to access-denied    | User sees error page |
+| Network error            | N/A         | Display error message        | User can retry       |
+| Server error             | 5xx         | Display error message        | User can retry       |
 
 ---
 
 ## ✅ Testing Coverage
 
 ### Unit Test Scenarios (Provided)
+
 - [x] JWT decoding
 - [x] Token expiration checking
 - [x] localStorage operations
 - [x] Error message extraction
 
 ### Integration Test Scenarios (10 included)
+
 - [x] JWT token injection in headers
 - [x] 401 unauthorized handling
 - [x] 403 forbidden handling
@@ -177,6 +187,7 @@
 - [x] Logout flow
 
 ### E2E Test Checklist
+
 - [x] Manual testing procedures for each scenario
 - [x] DevTools inspection guide
 - [x] Browser console debugging tips
@@ -217,11 +228,13 @@ Response: { access_token: JWT, ... }
 ## ✅ Notes & Tech Stack Adaptability
 
 ### ✅ Storage & Security
+
 - [x] Token resolution is secure and robust
 - [x] Handles generic 401 without redirect loops via queue mechanism
 - [x] Graceful degradation on token refresh failure
 
 ### ✅ Tech Stack Adaptability
+
 - [x] Frontend can be adapted (UI kit replaceable)
 - [x] Meta-framework can be changed (supports Vite, CRA)
 - [x] Architectural contract maintained
@@ -250,6 +263,7 @@ npm run start:web:prod      # Start frontend production
 ## Files Created (Summary)
 
 ### Configuration Files (6)
+
 ```
 ✓ package.json
 ✓ tsconfig.json
@@ -262,6 +276,7 @@ npm run start:web:prod      # Start frontend production
 ```
 
 ### Source Files (13)
+
 ```
 Utilities:
 ✓ src/utils/token.utils.ts
@@ -294,6 +309,7 @@ Styles:
 ```
 
 ### Documentation Files (5)
+
 ```
 ✓ README.md
 ✓ INTEGRATION_TESTING.md
@@ -309,12 +325,14 @@ Styles:
 ## Known Limitations & Future Improvements
 
 ### Current Limitations
+
 - Token refresh endpoint needs backend implementation
 - No real-time notifications yet
 - No offline mode support
 - No advanced caching strategy
 
 ### Planned for Phase 2
+
 - Actual page components for features
 - Real API integration for catalog
 - Payment flow components
@@ -323,6 +341,7 @@ Styles:
 - Advanced error boundaries
 
 ### Planned for Phase 3+
+
 - State management library
 - E2E testing framework
 - Unit test framework setup

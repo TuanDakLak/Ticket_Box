@@ -20,7 +20,11 @@ export default function ForgotPasswordPage() {
       await authService.forgotPassword(email);
       setSuccess(true);
     } catch (err: any) {
-      setError(err?.response?.data?.message || err?.message || 'Failed to send reset link');
+      setError(
+        err?.response?.data?.message ||
+          err?.message ||
+          "Failed to send reset link",
+      );
     } finally {
       setLoading(false);
     }
@@ -51,9 +55,7 @@ export default function ForgotPasswordPage() {
       title="Reset password"
       description="Enter your email address and we'll send you a link to reset your password."
       sidebar={<ConcertHeroIllustration />}
-      footerLinks={[
-        { label: "Return to sign in", href: "/login" },
-      ]}
+      footerLinks={[{ label: "Return to sign in", href: "/login" }]}
     >
       <form className="space-y-5" onSubmit={onSubmit}>
         {error && (
@@ -62,34 +64,39 @@ export default function ForgotPasswordPage() {
             <p>{error}</p>
           </div>
         )}
-        
+
         <div className="space-y-1">
-          <label className="ticketbox-label" htmlFor="email">Email address</label>
+          <label className="ticketbox-label" htmlFor="email">
+            Email address
+          </label>
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <KeyRound className="h-5 w-5 text-muted-foreground" />
             </div>
-            <input 
-              id="email" 
-              value={email} 
-              onChange={(e) => setEmail(e.target.value)} 
-              type="email" 
-              className="ticketbox-input pl-10" 
-              placeholder="name@example.com" 
+            <input
+              id="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              type="email"
+              className="ticketbox-input pl-10"
+              placeholder="name@example.com"
               required
               disabled={loading}
             />
           </div>
         </div>
-        
-        <button className="ticketbox-button-primary w-full mt-4" disabled={loading || !email}>
+
+        <button
+          className="ticketbox-button-primary w-full mt-4"
+          disabled={loading || !email}
+        >
           {loading ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               Sending reset link...
             </>
           ) : (
-            'Send reset link'
+            "Send reset link"
           )}
         </button>
       </form>
