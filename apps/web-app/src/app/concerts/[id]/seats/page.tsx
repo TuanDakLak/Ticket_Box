@@ -1,6 +1,5 @@
 import { Button, Card, SectionHeading, SiteShell } from "@/components/common";
 import {
-  FloatingCheckoutBar,
   SeatLegendCard,
   VenueMap,
 } from "@/components/screens";
@@ -53,7 +52,6 @@ export default function SeatsPage() {
           </Card>
         </div>
       </section>
-      <FloatingCheckoutBar />
     </SiteShell>
   );
 }
