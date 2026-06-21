@@ -3,7 +3,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { siteNavigation, siteName } from "@/lib/constants";
-import { Search, LayoutDashboard } from "lucide-react";
+import { LayoutDashboard } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 
 type ButtonProps = {
@@ -220,7 +220,11 @@ export function SiteShell({
 }) {
   const { user, isAuthenticated } = useAuth();
   const isAdmin =
-    user?.roles?.includes("Admin") || (user as any)?.role === "Admin";
+    user?.roles?.includes("Admin") ||
+    (typeof user === "object" &&
+      user !== null &&
+      "role" in user &&
+      (user as { role?: string }).role === "Admin");
 
   return (
     <div className="flex min-h-screen flex-col">

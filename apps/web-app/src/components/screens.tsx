@@ -5,7 +5,6 @@ import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   activityTimeline,
-  checkoutPayments,
   concerts,
   orderConfirmed,
   orderSummary,
@@ -15,7 +14,6 @@ import {
   supportCategories,
   supportContacts,
   ticketTabs,
-  ticketTiers,
   tickets,
 } from "@/lib/mock-data";
 import { Badge, Button, Card, SectionHeading, Tabs } from "@/components/common";
@@ -99,8 +97,8 @@ export function HeroCarousel() {
   const description = loading
     ? "We are loading the latest concert from the database."
     : featuredConcert?.aiBio ||
-    featuredConcert?.description ||
-    "No featured concert is available right now.";
+      featuredConcert?.description ||
+      "No featured concert is available right now.";
   const ticketTier = featuredConcert?.ticketTiers?.[0];
   const priceLabel = ticketTier
     ? `${ticketTier.name} • ${formatConcertCurrency(ticketTier.price)}`
@@ -393,20 +391,6 @@ export function InteractiveTicketSelector({
   const selectedTier = tiers[selectedIdx];
   const maxQty = selectedTier ? selectedTier.max_per_user : 0;
 
-  useEffect(() => {
-    setQuantity(1);
-    setError(null);
-  }, [selectedIdx]);
-
-  useEffect(() => {
-    setQuantity((current) => {
-      if (maxQty <= 0) {
-        return 1;
-      }
-      return Math.min(current, maxQty);
-    });
-  }, [maxQty]);
-
   const handleConfirm = async () => {
     if (!selectedTier || isReserving || maxQty < 1) return;
 
@@ -472,7 +456,11 @@ export function InteractiveTicketSelector({
               return (
                 <div
                   key={tier.id || tier.name}
-                  onClick={() => setSelectedIdx(index)}
+                  onClick={() => {
+                    setSelectedIdx(index);
+                    setQuantity(1);
+                    setError(null);
+                  }}
                   className={`p-5 cursor-pointer rounded-[20px] border-2 transition-all duration-200 ${
                     isSelected
                       ? "border-primary bg-primary/5 shadow-sm scale-[1.01]"
@@ -885,14 +873,10 @@ export function PaymentMethodPicker() {
 
 export function OrderSummaryCard() {
   const searchParams = useSearchParams();
-  const [checkoutState, setCheckoutState] =
-    useState<CheckoutReservationState | null>(null);
-
-  useEffect(() => {
+  const [checkoutState] = useState<CheckoutReservationState | null>(() => {
     const storedState = getCheckoutReservationState();
     if (storedState) {
-      setCheckoutState(storedState);
-      return;
+      return storedState;
     }
 
     const tierName = searchParams.get("tierName");
@@ -900,7 +884,7 @@ export function OrderSummaryCard() {
     const qty = searchParams.get("qty");
 
     if (tierName && price && qty) {
-      setCheckoutState({
+      return {
         orderId: searchParams.get("orderId") || orderSummary.orderId,
         concertId: "",
         concertTitle: searchParams.get("title") || orderSummary.event,
@@ -913,12 +897,11 @@ export function OrderSummaryCard() {
         remaining: 0,
         reservedAt: new Date().toISOString(),
         expiresAt: new Date(Date.now() + 10 * 60 * 1000).toISOString(),
-      });
-      return;
+      };
     }
 
-    setCheckoutState(null);
-  }, [searchParams]);
+    return null;
+  });
 
   const title =
     checkoutState?.concertTitle ||
@@ -1003,6 +986,26 @@ export function OrderSummaryCard() {
   );
 }
 
+export function FloatingCheckoutBar() {
+  return (
+    <div className="fixed inset-x-0 bottom-0 z-40 border-t border-outline-variant/60 bg-background/95 px-4 py-3 backdrop-blur md:hidden">
+      <div className="mx-auto flex w-full max-w-7xl items-center gap-3">
+        <div className="min-w-0 flex-1">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-on-surface-variant">
+            Selected seats
+          </p>
+          <p className="truncate text-sm font-semibold text-on-surface">
+            2 seats · VIP Lounge · $316.00
+          </p>
+        </div>
+        <Button href="/checkout/order-2048" className="shrink-0">
+          Checkout
+        </Button>
+      </div>
+    </div>
+  );
+}
+
 /** Small inline timer badge used inside OrderSummaryCard. */
 function TimerFootnote({ orderId }: { orderId?: string }) {
   const { formattedTime } = useReservationTimer(orderId);
@@ -1035,12 +1038,7 @@ export function CountdownTimer({ orderId }: { orderId?: string }) {
               Thời gian giữ chỗ của bạn đã kết thúc. Các vé đã được phân bổ lại
               phục hồi pool.
             </p>
-            <Button
-              className="w-full justify-center"
-              onClick={() => {
-                router.push("/catalog");
-              }}
-            >
+            <Button className="w-full justify-center" href="/catalog">
               Xác nhận
             </Button>
           </Card>
