@@ -12,7 +12,7 @@
         "setup:hooks": "git config core.hooksPath .githooks",
         "verify:push": "npm run lint && npm run typecheck:api && npm run test:api:unit",
         "lint": "eslint \"apps/backend-api/src/**/*.ts\" \"prisma/**/*.ts\" \"prisma/seed.ts\" --cache --cache-location .cache/eslint",
-        "typecheck:api": "tsc -p apps/backend-api/tsconfig.json --noEmit",
+        "typecheck:api": "npm run prisma:generate && tsc -p apps/backend-api/tsconfig.json --noEmit",
         "test:api:unit": "node --test --import tsx apps/backend-api/tests/**/*.unit.ts",
         "build:api": "tsc -p apps/backend-api/tsconfig.json",
         "build:web": "cd apps/web-app && npm run build",
