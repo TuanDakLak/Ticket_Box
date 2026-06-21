@@ -1040,9 +1040,7 @@ export function CountdownTimer({ orderId }: { orderId?: string }) {
             </p>
             <Button
               className="w-full justify-center"
-              onClick={() => {
-                router.push("/catalog");
-              }}
+              href="/catalog"
             >
               Xác nhận
             </Button>
