@@ -1038,10 +1038,7 @@ export function CountdownTimer({ orderId }: { orderId?: string }) {
               Thời gian giữ chỗ của bạn đã kết thúc. Các vé đã được phân bổ lại
               phục hồi pool.
             </p>
-            <Button
-              className="w-full justify-center"
-              href="/catalog"
-            >
+            <Button className="w-full justify-center" href="/catalog">
               Xác nhận
             </Button>
           </Card>
